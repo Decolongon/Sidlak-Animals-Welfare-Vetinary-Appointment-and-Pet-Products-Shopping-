@@ -75,7 +75,10 @@ class ProductReviewsResource extends Resource
                     FileUpload::make('image_review')
                         ->label('Image Review')
                         ->image()
+                        ->multiple()
                         ->nullable()
+                        //check if state is array kng array na nga daan return as it is else convert json to array
+                        ->formatStateUsing(fn ($state) => is_array($state) ? $state : json_decode($state, true))
                         ->imageEditor()
                         ->imageEditorAspectRatios([
                             null,
@@ -113,6 +116,7 @@ class ProductReviewsResource extends Resource
                 ImageColumn::make('image_review')
                 ->circular()
                 ->height(50)
+                ->limit(1)
                 ->width(50)
                 ->label('Image Review'),
 
