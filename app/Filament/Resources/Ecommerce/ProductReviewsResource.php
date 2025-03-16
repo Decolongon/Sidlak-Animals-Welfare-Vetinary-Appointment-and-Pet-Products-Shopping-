@@ -93,11 +93,13 @@ class ProductReviewsResource extends Resource
             ->columns([
                 TextColumn::make('user.name')
                 ->label('Customer Name')
+                ->searchable()
                 ->sortable()
                 ->searchable(),
 
                 TextColumn::make('product.prod_name')
                 ->sortable()
+                ->searchable()
                 ->label('Product Name')
                 ->searchable(),
 
