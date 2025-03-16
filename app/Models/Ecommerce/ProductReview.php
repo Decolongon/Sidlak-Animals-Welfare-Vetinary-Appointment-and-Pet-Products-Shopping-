@@ -18,6 +18,13 @@ class ProductReview extends Model
         'review',
     ];
 
+     /**
+     * @var array<string, string>
+     */
+    protected $casts = [
+        'image_review' => 'array',
+    ];
+
     public function product(): BelongsTo
     {
         return $this->belongsTo(Product::class);
