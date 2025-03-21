@@ -6,6 +6,7 @@ use App\Livewire\Pages\BlogPage;
 use App\Livewire\Pages\HomePage;
 use App\Livewire\Ecommerce\GetCart;
 use App\Livewire\Pages\ContactPage;
+use App\Livewire\Ecommerce\Checkout;
 use App\Livewire\Pages\DonationPage;
 use App\Livewire\Pages\Announcements;
 use App\Livewire\Pages\DogSinglePage;
@@ -13,8 +14,8 @@ use App\Livewire\Pages\VolunteerPage;
 use Illuminate\Support\Facades\Route;
 use App\Livewire\Ecommerce\SingleProd;
 use App\Livewire\Adoption\AdoptionCart;
-use App\Livewire\Pages\ApplicationForm;
 
+use App\Livewire\Pages\ApplicationForm;
 use App\Livewire\Pages\SingleBlogPostPage;
 use App\Livewire\Ecommerce\ProductReviewsForm;
 use App\Livewire\Pages\AnnouncementSinglePage;
@@ -25,15 +26,20 @@ Route::middleware([
     config('jetstream.auth_session'),
     'verified',
 ])->group(function () {
+
+    
     Route::get('/adopt/application-form', ApplicationForm::class)->name('page.app-form');
     Route::get('/dashboard', function () {
         return view('dashboard');
     })->name('dashboard');
+    Route::get('/checkout', Checkout::class)->name('checkout'); // ecommerce checkout page
+    Route::get('/review', ProductReviewsForm::class)->name('page.review');
+
 });
 
 
 Route::get('/singleProd/{prod_slug}',SingleProd::class)->name('page.singleProd'); // para sa long description and reviews of specific product
-Route::get('/review', ProductReviewsForm::class)->name('page.review');
+
 Route::get('/shop', Shop::class)->name('page.shop');
 Route::get('/cart', GetCart::class)->name('page.get-cart'); // ecommerce cart
 

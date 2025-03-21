@@ -75,28 +75,61 @@
         </div>
 
         @else
-        <p class="text-center text-gray-500">{{ __('No images available for this product.') }}</p>
+        {{-- <p class="text-center text-gray-500">{{ __('No images available for this product.') }}</p> --}}
         @endif
         <!-- End Slider -->
 
         <!-- Tabs Section -->
-        <div class="mt-6 border-t border-gray-400 dark:border-gray-700 pt-4">
+        <div class="mt-6 border-t border-gray-400 dark:border-gray-700 pt-4" >
             <div class="flex space-x-6 text-black dark:text-white font-medium">
-                <a href="#" class="border-b-2 border-black dark:border-white pb-2">Description</a>
-                <a href="#" class="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300">Reviews (0)</a>
+                {{-- <a href="#" class="border-b-2 border-black dark:border-white pb-2">Description</a>
+                <a href="{{route('page.review')}}" class="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300">Reviews (0)</a> --}}
+                <a href="#" wire:click.prevent="$set('activeTab', 'description') "   wire:loading.attr="disabled"
+                    class="{{ $activeTab === 'description' ? 'border-b-2 border-black dark:border-white pb-2' : 'text-gray-500 dark:text-gray-400' }}">
+                     Description
+                 </a>
+                 
+          
+                <a href="#" wire:click.prevent="$set('activeTab', 'reviews')" 
+                    class="{{ $activeTab === 'reviews' ? 'border-b-2 border-black dark:border-white pb-2' : 'text-gray-500 dark:text-gray-400' }}">
+                    Reviews (<span >{{ $count_reviews }}</span>)
+                </a>
+         
+
+            @if (Auth::check())
+                <a href="#" wire:click.prevent="$set('activeTab', 'post_reviews')" wire:loading.attr="disabled"
+                    class="{{ $activeTab === 'post_reviews' ? 'border-b-2 border-black dark:border-white pb-2' : 'text-gray-500 dark:text-gray-400' }}">
+                    Post Reviews Here 
+                </a>
+            @endif
+             
             </div>
 
             <!-- Expandable Description -->
-            <p class="text-black dark:text-white mt-4">
-                {{ Str::limit($product->prod_description, 100) }} 
+            {{-- <p class="text-black dark:text-white mt-4">
+                {!! Str::limit($product->prod_description, 100) !!} 
                 <span x-data="{ expanded: false }">
-                    <span x-show="expanded" x-cloak>{{ substr($product->prod_description, 100) }}</span>
+                    <span x-show="expanded" x-cloak class="text-black dark:text-white>{!! substr($product->prod_description, 100) !!}</span>
                     <button @click="expanded = !expanded" class="ml-2 text-blue-600 dark:text-blue-400 hover:underline">
                         <span x-show="!expanded">View More</span>
                         <span x-show="expanded" x-cloak>View Less</span>
                     </button>
                 </span>
-            </p>
+            </p> --}}
+
+            @if ($activeTab == 'description')
+                <p class="text-black dark:text-black mt-4"> {!! $product->prod_description !!} </p>
+            @endif
+           
+            @if ($activeTab == 'reviews')
+            {{-- @livewire('ecommerce.product-reviews-form', ['product_id' => $product->id]) --}}
+             @livewire('ecommerce.get-prod-reviews', ['product_id' => $product->id])
+         
+            @endif
+
+            @if ($activeTab == 'post_reviews')
+                @livewire('ecommerce.product-reviews-form', ['product_id' => $product->id])
+            @endif
         </div>
     </div>
 

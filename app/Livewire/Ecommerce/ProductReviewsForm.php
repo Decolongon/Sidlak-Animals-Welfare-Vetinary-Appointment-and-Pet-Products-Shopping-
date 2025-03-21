@@ -7,20 +7,31 @@ use Livewire\Attributes\Title;
 use Livewire\Attributes\Layout;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Ecommerce\ProductReview;
-
+use Livewire\WithFileUploads;
+use Jantinnerezo\LivewireAlert\LivewireAlert;
 class ProductReviewsForm extends Component
 {
+    use LivewireAlert;
+    use WithFileUploads;
 
     public $review;
-    public $rating;
-    public $image_review;
+    public $rating = null;
+    public $image_review = [];
     public $product_id;
+    public $prod_review;
+   
 
     protected $rules = [
         'review' => 'required|string|max:500',
-        'image_review' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
-        'rating' => 'required|integer|min:1|max:5',
+        // 'image_review' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+        'image_review.*' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+        'rating' => 'required',
     ];
+
+    public function mount(){
+        //$this->submitReview();
+        // $this->getProdReviews();
+    }
 
     //sanitize input
     protected function sanitizeInput(array $data): array
@@ -29,34 +40,74 @@ class ProductReviewsForm extends Component
             return is_array($value) ? $this->sanitizeInput($value) : strip_tags($value);
         }, $data);
     }
+
+    //only authenticated user ang maka submit reviews
     public function submitReview(){
 
-        $this->validate();
+        if(!Auth::check()){
+            $this->alert('warning', '',[
+                'position' => 'top-end',
+                'timer' => 5000,
+                'toast' => true,
+                'text' => 'You must login first'
+    
+            ]);
+            return redirect()->route('login');
+        }
 
-        $img_path = $this->image_review ? $this->image_review->store('public') : null;
+        $this->validate();
+       
+        //dd($this->image_review);
+        $img_path = [];
+      
+        if(!empty($this->image_review)){
+            foreach($this->image_review as $img){
+
+                
+                $path = $img->store('','public');
+                $img_path[] = str_replace('public/', '', $path); // Remove "public/" from the path
+                
+               
+             
+            }
+
+        }
 
         $data = $this->sanitizeInput([
             'review' => $this->review,
             'rating' => $this->rating,
             'product_id' => $this->product_id,
-        ]);
-
-        ProductReview::create([
-            'review' => $data['review'],
-            'rating' => $data['rating'],
-            'image_review' => $img_path,
-            'product_id' => $data['product_id'],
+            'image_review' => is_array($img_path) ? $img_path : json_decode($img_path, true),
             'user_id' => Auth::id(),
         ]);
 
+       
+        ProductReview::create($data);
+
+        $this->alert('success', '',[
+            'position' => 'top-end',
+            'timer' => 3000,
+            'toast' => true,
+            'text' => 'Review submitted successfully!'
+
+        ]);
+        $this->reset(['review', 'rating', 'image_review']);
+        $this->dispatch('reviewAdded', $this->product_id);
+       
         // session()->flash('success', 'Review submitted successfully!');
     }
 
+    // public function getProdReviews(){
+    //    $this->prod_review = ProductReview::where('product_id', $this->product_id)->get(['id', 'product_id', 'user_id', 'review', 'rating']);
+    // }
+
 
     #[Layout('layouts.app')]
-    #[Title('Product Reviews')]
+    #[Title('Product Reviews Form')]
     public function render()
     {
-        return view('livewire.ecommerce.product-reviews-form');
+        return view('livewire.ecommerce.product-reviews-form',[
+            // 'prod_reviews' => $this->prod_review
+        ]);
     }
 }
