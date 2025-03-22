@@ -35,7 +35,7 @@
          
             @error('image_review.*') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
               
-            <x-button type="submit" >
+            <x-button type="submit" wire:target="image_review"  wire:loading.attr="disabled">
                 <span wire:loading.flex wire:target="submitReview"  class="items-center">
                     <svg class="animate-spin h-4 w-4 mr-2 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                         <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
@@ -45,6 +45,7 @@
                 </span>
                 Submit Review
             </x-button>
+            
         
         </form>
     </div>
