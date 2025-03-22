@@ -19,8 +19,8 @@ class ProductReviewsForm extends Component
     public $image_review = [];
     public $product_id;
     public $prod_review;
-   
 
+      
     protected $rules = [
         'review' => 'required|string|max:500',
         // 'image_review' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
@@ -31,6 +31,7 @@ class ProductReviewsForm extends Component
     public function mount(){
         //$this->submitReview();
         // $this->getProdReviews();
+        
     }
 
     //sanitize input
@@ -82,7 +83,14 @@ class ProductReviewsForm extends Component
         ]);
 
        
-        ProductReview::create($data);
+       ProductReview::create($data);
+
+        //delete image review sa temporary folder tapos insert sa database and sa public storage 
+        if($this->image_review){
+            foreach($this->image_review as $img){
+                $img->delete();
+            }
+        }
 
         $this->alert('success', '',[
             'position' => 'top-end',
@@ -101,6 +109,36 @@ class ProductReviewsForm extends Component
     //    $this->prod_review = ProductReview::where('product_id', $this->product_id)->get(['id', 'product_id', 'user_id', 'review', 'rating']);
     // }
 
+   
+
+    public function updatedImageReview()
+    {
+        
+        if (!empty($this->image_review)) {
+            $this->dispatch('imageUploaded'); // Send event to Alpine
+        }
+    }
+
+    public function removeImage($index)
+    {
+
+        if(isset($this->image_review[$index])){
+            $this->image_review[$index]->delete();
+            unset($this->image_review[$index]);  // Remove image from array
+            $this->image_review = array_values($this->image_review); // Reindex array
+        }
+       
+    }
+
+    public function cancelUpload(){
+
+        if(isset($this->image_review)){
+            foreach($this->image_review as $img){
+                $img->delete();
+            }
+        }
+        return back();
+    }
 
     #[Layout('layouts.app')]
     #[Title('Product Reviews Form')]

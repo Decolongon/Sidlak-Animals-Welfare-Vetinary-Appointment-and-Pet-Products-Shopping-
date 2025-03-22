@@ -29,13 +29,35 @@
             <textarea wire:model.defer="review" placeholder="Write your review here..." class="w-full p-2 border rounded-md dark:bg-neutral-800 dark:text-white"></textarea>
             @error('review') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
 
-
-          <input type="file" wire:model="image_review" multiple>
-          <div wire:loading wire:target="image_review">Uploading...</div>
-         
+        <div x-data="{ uploading: false}" x-init="
+            Livewire.hook('upload:start', () => uploading = true);
+            Livewire.hook('upload:finish', () => uploading = false);
+            Livewire.hook('upload:error', () => uploading = false);
+            Livewire.on('imageUploaded', () => uploading = false); 
+        ">
+          <input type="file" wire:model="image_review" multiple @change="uploading = true">
+          <div   x-show="uploading">Uploading...</div>
+         {{-- wire:loading wire:target="image_review" --}}
             @error('image_review.*') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
               
-            <x-button type="submit" wire:target="image_review"  wire:loading.attr="disabled">
+            @if ($image_review)
+                <div class="flex space x-25 overflow-x-auto mt-2 mb-2">
+                @foreach ($image_review as $index => $image)
+                    <div class="relative w-16 h-16">  
+                        <!-- Remove Button -->
+                        <button type="button" class="absolute -top-2 -right-2 bg-red-500 text-white rounded-full px-2 py-1 text-xs shadow-lg"
+                            wire:click="removeImage({{ $index }})">
+                            X
+                        </button>
+        
+                        <!-- Image Preview -->
+                        <img class="rounded-md w-16 h-16 object-cover border" src="{{ $image->temporaryUrl() }}" alt="image">
+                    </div>
+                @endforeach
+            </div>
+            @endif
+           
+            <x-button type="submit"  class="mt-2"  wire:loading.attr="disabled">
                 <span wire:loading.flex wire:target="submitReview"  class="items-center">
                     <svg class="animate-spin h-4 w-4 mr-2 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                         <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
@@ -45,8 +67,8 @@
                 </span>
                 Submit Review
             </x-button>
-            
-        
+           
+        </div>
         </form>
     </div>
     {{--end form}}
@@ -55,4 +77,5 @@
        
      
 </div> 
+
 {{-- close --}}
