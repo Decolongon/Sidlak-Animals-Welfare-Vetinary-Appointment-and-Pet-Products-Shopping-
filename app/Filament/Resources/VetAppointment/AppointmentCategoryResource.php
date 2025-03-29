@@ -44,6 +44,7 @@ class AppointmentCategoryResource extends Resource
                 ->required()
                 ->label('Appointment Category Name')
                 ->maxLength(255)
+                ->live(onBlur: true)
                 ->afterStateUpdated(fn (Set $set, ?string $state) => $set('appoint_cat_slug', Str::slug($state)))
                 ->unique(AppointmentCategory::class, 'appoint_cat_name', ignoreRecord: true)
                 ->columnSpan(1),
@@ -99,7 +100,8 @@ class AppointmentCategoryResource extends Resource
                 Tables\Actions\CreateAction::make()
                 ->icon('heroicon-m-plus')
                 ->label(__('Create Appointment Category')),
-            ]);
+            ])->emptyStateIcon('heroicon-m-folder')
+            ->emptyStateHeading('No Appointment Categories');
     }
 
     public static function getRelations(): array
