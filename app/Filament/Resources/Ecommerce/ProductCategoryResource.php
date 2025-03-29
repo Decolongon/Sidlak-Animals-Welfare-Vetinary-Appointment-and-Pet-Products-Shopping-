@@ -93,7 +93,7 @@ class ProductCategoryResource extends Resource
                 ->label('Description')
                 ->sortable()
                 ->searchable()
-                ->formatStateUsing(fn ($state) => ucfirst(Str::limit($state, 50, '...'))),
+                ->formatStateUsing(fn ($state) => ucfirst(Str::limit(strip_tags($state), 50, '...'))),
             ])
             ->filters([
                 //
@@ -150,6 +150,7 @@ class ProductCategoryResource extends Resource
                         TextEntry::make('prod_cat_description')
                             ->label('')
                             ->size(TextEntry\TextEntrySize::Large)
+                            ->formatStateUsing(fn ($state) => strip_tags($state))
                             ->weight(FontWeight::ExtraBold),
                         
                     ]),

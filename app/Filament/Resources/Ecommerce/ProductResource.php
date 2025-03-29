@@ -37,6 +37,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Filament\Forms\Components\MultiSelect;
 use Filament\Forms\Components\ToggleButtons;
 use Filament\Infolists\Components\TextEntry;
+use Filament\Forms\Components\Actions\Action;
 use Filament\Forms\Components\MarkdownEditor;
 use Filament\Infolists\Components\ImageEntry;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
@@ -162,7 +163,7 @@ class ProductResource extends Resource
                                     ->hidden(fn ($get) => $get('prod_unit') !== 'kg'), // Show only when unit is kg
                         
                                 TextInput::make('prod_quantity')
-                                    ->label('Product Quantity')
+                                    ->label('Product Quantity (pcs/kg)')
                                     ->required()
                                     ->numeric()
                                     ->default(1),
@@ -193,10 +194,10 @@ class ProductResource extends Resource
                                                 false => 'heroicon-m-x-circle',  
                                                 true => 'heroicon-m-check-circle', 
                                             ])
-                                            ->default(false),
+                                            ->default(true),
                                 
                                         ToggleButtons::make('is_visible_to_market')
-                                            ->label('Want to make this product visible to market?')
+                                            ->label('Want to make this product available to market?')
                                             ->boolean()
                                             ->grouped()
                                             ->dehydrated()
@@ -314,7 +315,6 @@ class ProductResource extends Resource
                         FileUpload::make('url')
                         ->label('Image Upload')
                         ->image()
-                       
                         ->imageEditor()
                         ->imageEditorAspectRatios([
                             null,
@@ -322,7 +322,6 @@ class ProductResource extends Resource
                             '4:3',
                         ])->maxSize(2048)
                         ->required()
-                       
                         ->afterStateUpdated(fn ($state, $set) => 
                             $set('alt_text', $state ? pathinfo($state, PATHINFO_FILENAME) : '')
                         ),
@@ -388,8 +387,10 @@ class ProductResource extends Resource
                         'lg' => 2,
                         'default' => 2
                     ])
-                    ->addable(true)  // Allows users to add more images
-                    ->deletable(true),// Allows users to remove images
+                   ->addActionLabel('Add Product Images')  // Allows users to add more images       
+                   ->deletable(fn ($get) => count($get('images')) > 1) // Allows users to remove images
+                   ->reorderable(),
+                  
                 
                 ])
                 
@@ -426,7 +427,7 @@ class ProductResource extends Resource
                         ->height(200)
                         ->width(200)
                         ->limit(1)
-                        ->getStateUsing(fn ($record) => $record->images()->where('is_primary', true)->value('url')   ?? $record->images()->orderBy('created_at')->value('url'))
+                        ->getStateUsing(fn ($record) => $record->images()->where('is_primary', true)?->value('url')   ?? $record->images()->orderBy('created_at')->value('url'))
                         ->extraAttributes(['class' => 'rounded-lg']),
                 
                 TextColumn::make('prod_name')
@@ -529,23 +530,24 @@ class ProductResource extends Resource
             Tables\Actions\BulkActionGroup::make([
                 Tables\Actions\DeleteBulkAction::make(),
                 Tables\Actions\BulkAction::make('prod_requires_shipping')
-                ->label('Require Shipping')
+                ->label('Free Shipping')
                 ->icon('heroicon-o-truck')
                 ->action(function (Collection $records): void {
                     $records->each(function ($record) {
                         $record->update([
-                            'prod_requires_shipping' => !$record->prod_requires_shipping,
+                            'prod_requires_shipping' => false,
                         ]);
                     });
                 })
                 ->deselectRecordsAfterCompletion()
                 ->requiresConfirmation()
                 ->modalIcon('heroicon-o-truck')
-                ->modalHeading('This action will make the selected product(s) require shipping or not.')
-                ->modalDescription('Are you sure you want to make the selected product(s) require shipping?')
+                ->modalHeading('This action will make the selected product(s) free shipping.')
+                ->modalDescription('Are you sure you want to make the selected product(s) free shipping?')
                 ->modalSubmitActionLabel('Yes')
-                ->color('success'),
+                ->color('warning'),
 
+               
 
                 Tables\Actions\BulkAction::make('is_visible_to_market')
                 ->label('Visible to Market')
@@ -632,14 +634,14 @@ class ProductResource extends Resource
                         ->markdown()
                         ->weight(FontWeight::Bold)
                         ->label('Short Description: ')
-                        ->formatStateUsing(fn (string $state) : string => ucfirst($state) )
+                        ->formatStateUsing(fn (string $state) : string => ucfirst(strip_tags($state) ))
                         ->columnSpan(2),
 
                         TextEntry::make('prod_description')
                         ->markdown()
                         ->weight(FontWeight::Bold)
                         ->label('Long Description:')
-                        ->formatStateUsing(fn (string $state) : string => ucfirst($state) )
+                        ->formatStateUsing(fn (string $state) : string => ucfirst(strip_tags($state) ))
                         ->columnSpan(2),
 
                         // ComponentsGroup::make()
