@@ -23,6 +23,11 @@ enum PaymentStatusEnum: string implements HasColor, HasLabel, HasIcon
         };
     }
 
+    public static function toArray(): array
+    {
+        return array_column(self::cases(), 'value', 'value');
+    }
+
     public function getLabel(): string
     {
         return match ($this) {

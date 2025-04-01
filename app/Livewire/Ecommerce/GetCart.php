@@ -9,6 +9,7 @@ use Livewire\Attributes\Layout;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Session;
 use Jantinnerezo\LivewireAlert\LivewireAlert;
+
 class GetCart extends Component
 {
     use LivewireAlert;
@@ -24,6 +25,13 @@ class GetCart extends Component
     public function mount()
     {
         $this->getCarts();
+    }
+
+
+    public function updatedSelectedItems()
+    {
+       
+        $this->dispatch('updateCheckoutItems', items: $this->selectedItems);
     }
 
     //kwa sng add to cart guest or logged in user
@@ -42,12 +50,10 @@ class GetCart extends Component
 
         if ($cart && $cart->product && $cart->quantity < $cart->product->prod_quantity) {
             $increase = $cart->product->prod_unit == 'kg' ? $cart->product->prod_weight : 1;
-            $cart->quantity += $increase;
-            $cart->save();
-
-            // Update only the modified cart item
-            // $this->carts = $this->carts->map(fn ($c) => $c->id === $cart->id ? $cart : $c);
-
+            //$cart->quantity += $increase;
+            $cart->update(['quantity' =>  $cart->quantity += $increase]);
+            //$cart->save()
+            
             $this->getCarts();
             //$this->dispatch('cartUpdated');
             // $this->dispatch('refreshCartItem', $cart->id);
@@ -58,9 +64,10 @@ class GetCart extends Component
             'timer' => 3000,
             'toast' => true,
             'text' => 'Not enough stock available!',
-        ]);
+            ]);
         }
-        $this->getCarts();
+       $this->getCarts();
+    //    $this->dispatch('cartUpdated');
     }
 
     public function decreaseQuantity($cart_id)
@@ -69,13 +76,13 @@ class GetCart extends Component
 
         if ($cart && $cart->quantity > 1) {
             $decrease = $cart->product->prod_unit == 'kg' ? $cart->product->prod_weight : 1;
-            $cart->quantity -= $decrease;
-            $cart->save();
+            //$cart->quantity -= $decrease;
+            $cart->update(['quantity' => $cart->quantity -= $decrease]);
+            // $cart->save();
 
             $this->getCarts();
-          // $this->dispatch('cartUpdated');
-            // Update only the modified cart item
-            // $this->carts = $this->carts->map(fn ($c) => $c->id === $cart->id ? $cart : $c);
+          //$this->dispatch('cartUpdated');
+            
             // $this->dispatch('refreshCartItem', $cart->id);
         } else {
             $cart->delete();
@@ -87,9 +94,10 @@ class GetCart extends Component
                 'text' => 'Product removed from cart',
             ]);
             $this->dispatch('cartUpdated');
-            // $this->carts = $this->carts->reject(fn ($c) => $c->id === $cart->id);
+            
         }
         $this->getCarts();
+       // $this->dispatch('cartUpdated');
     }
 
     public function toggleSelectAll()
@@ -99,6 +107,8 @@ class GetCart extends Component
         } else {
             $this->selectedItems = [];
         }
+
+        $this->updatedSelectedItems();
     }
 
     public function removeSelected()

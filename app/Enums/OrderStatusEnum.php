@@ -24,6 +24,11 @@ enum OrderStatusEnum: string implements HasColor, HasIcon, HasLabel
         };
     }
 
+    public static function toArray(): array
+    {
+        return array_column(self::cases(), 'value', 'value');
+    }
+
     public function getIcon(): ?string
     {
         return match ($this) {

@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Models;
+namespace App\Models\Ecommerce;
 
 use App\Models\Ecommerce\Order;
 use App\Models\Ecommerce\Product;
@@ -16,6 +16,8 @@ class OrderItem extends Model
         'price',
         'total',
     ];
+
+    
 
     public function order(): BelongsTo
     {

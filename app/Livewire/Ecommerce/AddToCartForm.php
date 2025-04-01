@@ -41,6 +41,8 @@ class AddToCartForm extends Component
         }
         $this->session_id = Session::getId(); // get session id for guest user
         $this->user_id = Auth::id(); // Kwa id sa Authenticated user
+       
+
         $this->getCartItems(); // Load cart items
     }
 
@@ -66,11 +68,17 @@ class AddToCartForm extends Component
         $user_id = $this->user_id; //kwa user id ara sa mount function
 
 
-        //if user naka login store store sa account ya ang cart item
-        if ($user_id) {
+         //if user naka login store store sa account ya ang cart item
+         if ($user_id) {
             Cart::where('session_id', $session_id)
-                ->update(['user_id' => $user_id, 'session_id' => null]);
+            ->update(['user_id' => $user_id, 'session_id' => null]);
         }
+
+        // //if user naka login store store sa account ya ang cart item
+        // if ($user_id) {
+        //     Cart::where('session_id', $session_id)
+        //         ->update(['user_id' => $user_id, 'session_id' => null]);
+        // }
         // Check if the product is already in the cart
         $cart = Cart::where('product_id', $product->id)
             ->where(function ($query) use ($user_id, $session_id) {
@@ -119,7 +127,10 @@ class AddToCartForm extends Component
                 'session_id' => $user_id ? null : $session_id, // if si user naka login null ang value da session id else session_id
                 'quantity' => $quantityAdd,
             ]);
+             
         }
+
+       
 
         
         $this->dispatch('cartUpdated');

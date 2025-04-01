@@ -2,7 +2,7 @@
 
 namespace App\Models\Ecommerce;
 
-use App\Models\OrderItem;
+use App\Models\Ecommerce\OrderItem;
 use App\Models\Ecommerce\ProductImage;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Storage;

@@ -12,12 +12,13 @@
         "filament/filament": "^3.2.134",
         "flowframe/laravel-trend": "^0.3.0",
         "hasnayeen/blade-eva-icons": "^2.0",
+        "ibrahimbougaoua/filament-rating-star": "^1.0",
         "jantinnerezo/livewire-alert": "^3.0",
         "laravel/framework": "^11.31",
         "laravel/jetstream": "^5.3",
         "laravel/sanctum": "^4.0",
         "laravel/tinker": "^2.9",
-        "livewire/livewire": "^3.0",
+        "livewire/livewire": "^3.6",
         "luigel/laravel-paymongo": "^2.5"
     },
     "require-dev": {
