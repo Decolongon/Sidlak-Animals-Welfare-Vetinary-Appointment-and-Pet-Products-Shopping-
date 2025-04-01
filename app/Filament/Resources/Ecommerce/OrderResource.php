@@ -5,13 +5,14 @@ namespace App\Filament\Resources\Ecommerce;
 use Filament\Forms;
 use Filament\Tables;
 use Filament\Forms\Form;
+use Filament\Pages\Page;
 use Filament\Tables\Table;
 use App\Enums\OrderStatusEnum;
 use App\Models\Ecommerce\Order;
 use App\Enums\PaymentStatusEnum;
 use Filament\Resources\Resource;
-use App\Models\Ecommerce\Product;
 // use Filament\Resources\Pages\Page;
+use App\Models\Ecommerce\Product;
 use App\Ecommerce\Models\OrderItem;
 use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\Select;
@@ -21,13 +22,13 @@ use Filament\Forms\Components\Repeater;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Forms\Components\TextInput;
 use Filament\Tables\Columns\ImageColumn;
+use Filament\Tables\Filters\SelectFilter;
 use Illuminate\Database\Eloquent\Builder;
 use Filament\Forms\Components\ToggleButtons;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
-use App\Filament\Resources\UserResource\Pages\CreateUser;
 use App\Filament\Resources\UserResource\Pages\EditUser;
-use Filament\Pages\Page;
 use App\Filament\Resources\Ecommerce\OrderResource\Pages;
+use App\Filament\Resources\UserResource\Pages\CreateUser;
 use App\Filament\Resources\Ecommerce\OrderResource\RelationManagers;
 
 
@@ -282,8 +283,31 @@ class OrderResource extends Resource
 
                
             ])
+            // case Pending = 'pending';
+            // case Completed = 'completed';
+            // case Failed = 'failed';
+            // case Refunded = 'refunded';
             ->filters([
-                //
+               SelectFilter::make('order_status')
+                    ->label('Order Status')
+                    ->options([
+                        'new' => 'New',
+                        'processing' => 'Processing',
+                        'shipped' =>'Shipped',
+                        'delivered' => 'delivered',
+                        'cancelled' => 'Cancelled',
+                    ]),
+                    
+                SelectFilter::make('payment_status')
+                    ->label('Payment Status')
+                    ->options([
+                        'pending' => 'Pending',
+                        'completed' => 'Completed',
+                        'failed' => 'Failed',
+                        'refunded' => 'Refunded',
+                    ]),
+
+                   
             ])
             ->actions([
                 Tables\Actions\ViewAction::make(),

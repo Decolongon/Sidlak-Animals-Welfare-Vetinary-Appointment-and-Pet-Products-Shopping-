@@ -7,6 +7,7 @@ use Filament\Tables;
 use Filament\Forms\Form;
 use Filament\Tables\Table;
 use Filament\Resources\Resource;
+use App\Models\Ecommerce\Product;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Section;
 use App\Models\Ecommerce\ProductReview;
@@ -15,14 +16,15 @@ use Filament\Tables\Columns\TextColumn;
 use App\Models\Ecommerce\ProductReviews;
 use Filament\Tables\Columns\ImageColumn;
 use Filament\Forms\Components\FileUpload;
+use Filament\Tables\Filters\SelectFilter;
 use Illuminate\Database\Eloquent\Builder;
+// use IbrahimBougaoua\FilamentRatingStar\Columns\Components\RatingStar;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use App\Filament\Resources\Ecommerce\ProductReviewsResource\Pages;
-// use IbrahimBougaoua\FilamentRatingStar\Columns\Components\RatingStar;
-use IbrahimBougaoua\FilamentRatingStar\Columns\Components\RatingStar as TableRatingStar;
-use IbrahimBougaoua\FilamentRatingStar\Entries\Components\RatingStar as InfolistRatingStar;
 use IbrahimBougaoua\FilamentRatingStar\Forms\Components\RatingStar;
 use App\Filament\Resources\Ecommerce\ProductReviewsResource\RelationManagers;
+use IbrahimBougaoua\FilamentRatingStar\Columns\Components\RatingStar as TableRatingStar;
+use IbrahimBougaoua\FilamentRatingStar\Entries\Components\RatingStar as InfolistRatingStar;
 
 class ProductReviewsResource extends Resource
 {
@@ -126,7 +128,13 @@ class ProductReviewsResource extends Resource
                 ->dateTime(),
             ])
             ->filters([
-               
+                SelectFilter::make('product.prod_name')
+                    ->relationship('product', 'prod_name')
+                    ->label('Product')
+                    ->options(Product::query()->pluck('prod_name', 'id'))
+                    ->searchable()
+                    ->preload()
+                    ->multiple()
             ])
             ->actions([
                 Tables\Actions\ViewAction::make(),

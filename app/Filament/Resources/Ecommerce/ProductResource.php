@@ -48,6 +48,7 @@ use App\Filament\Resources\Ecommerce\ProductResource\Pages;
 use Filament\Infolists\Components\Group as ComponentsGroup;
 use Filament\Infolists\Components\Section as ComponentsSection;
 use App\Filament\Resources\Ecommerce\ProductResource\RelationManagers;
+use Filament\Tables\Filters\SelectFilter;
 
 class ProductResource extends Resource
 {
@@ -515,7 +516,13 @@ class ProductResource extends Resource
             'all',
         ])
         ->filters([
-            //
+            SelectFilter::make('productCategories.prod_cat_name')
+                ->relationship('productCategories', 'prod_cat_name')
+                ->label('Product Category')
+                ->options(ProductCategory::query()->pluck('prod_cat_name', 'id'))
+                ->searchable()
+                ->preload()
+                ->multiple()
         ])
         ->actions([
             //Tables\Actions\ViewAction::make()->icon('heroicon-m-eye')->label(''),
