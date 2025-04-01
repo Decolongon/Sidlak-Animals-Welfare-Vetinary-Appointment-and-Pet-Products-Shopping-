@@ -297,8 +297,8 @@ class OrderResource extends Resource
                         'delivered' => 'delivered',
                         'cancelled' => 'Cancelled',
                     ]),
-                    
-                SelectFilter::make('payment_status')
+
+                    SelectFilter::make('payment_status')
                     ->label('Payment Status')
                     ->options([
                         'pending' => 'Pending',

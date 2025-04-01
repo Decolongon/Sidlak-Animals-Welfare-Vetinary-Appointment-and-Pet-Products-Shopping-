@@ -135,6 +135,7 @@ class ProductReviewsResource extends Resource
                     ->searchable()
                     ->preload()
                     ->multiple()
+                    
             ])
             ->actions([
                 Tables\Actions\ViewAction::make(),

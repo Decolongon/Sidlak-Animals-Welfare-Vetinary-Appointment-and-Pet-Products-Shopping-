@@ -523,6 +523,7 @@ class ProductResource extends Resource
                 ->searchable()
                 ->preload()
                 ->multiple()
+         
         ])
         ->actions([
             //Tables\Actions\ViewAction::make()->icon('heroicon-m-eye')->label(''),
