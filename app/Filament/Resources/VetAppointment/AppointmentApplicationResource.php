@@ -173,13 +173,12 @@ class AppointmentApplicationResource extends Resource
 
                 Tables\Columns\TextColumn::make('categories.appoint_cat_name')
                 ->searchable()
-                ->sortable()
                 ->label('Service')
                 ->formatStateUsing(fn ($state) => ucwords($state)),
 
                 Tables\Columns\TextColumn::make('pet_name')
-                ->searchable()
                 ->sortable()
+                ->searchable()
                 ->label('Pet Name')
                 ->formatStateUsing(fn ($state) => ucfirst($state)),
 
@@ -188,13 +187,18 @@ class AppointmentApplicationResource extends Resource
                 ->label('Appointment Status')
                 ->formatStateUsing(fn ($state) => AppointmentStatusEnum::tryFrom($state)?->getLabel() ?? 'Unknown') // display label halin sa AppointmentStatusEnum
                 ->color(fn ($state) => AppointmentStatusEnum::tryFrom($state)?->getColor() ?? 'gray') 
-                ->icon(fn ($state) => AppointmentStatusEnum::tryFrom($state)?->getIcon() ?? null)
-                ->sortable(),
+                ->icon(fn ($state) => AppointmentStatusEnum::tryFrom($state)?->getIcon() ?? null),
 
             ])
             ->filters([
 
-                
+                SelectFilter::make('appointment_status')
+                ->label('Appointment Status')
+                ->options([
+                    'pending' => 'Pending',
+                    'approved' => 'Approved',
+                    'rejected' => 'Rejected',
+                ])
               
 
             ])
@@ -213,7 +217,7 @@ class AppointmentApplicationResource extends Resource
                 Tables\Actions\CreateAction::make()
                 ->icon('heroicon-m-plus')
                 ->label(__('Create new Application')),
-            ])->emptyStateIcon('')
+            ])->emptyStateIcon('heroicon-o-rectangle-stack')
             ->emptyStateHeading('No Appointments');
     }
 
