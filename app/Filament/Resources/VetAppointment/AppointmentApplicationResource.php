@@ -19,6 +19,7 @@ use App\Models\Appointment\Appointment;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Forms\Components\TextInput;
 use Filament\Pages\SubNavigationPosition;
+use Filament\Tables\Filters\SelectFilter;
 use Illuminate\Database\Eloquent\Builder;
 use Filament\Forms\Components\ToggleButtons;
 use Filament\Infolists\Components\TextEntry;
@@ -192,7 +193,16 @@ class AppointmentApplicationResource extends Resource
 
             ])
             ->filters([
-                //
+                
+                SelectFilter::make('appointment_status')
+                ->label('Appointment Status')
+                ->options([
+                    'pending' => 'Pending',
+                    'approved' => 'Approved',
+                    'rejected' => 'Rejected',
+                ])
+              
+
             ])
             ->actions([
                 Tables\Actions\ViewAction::make(),

@@ -294,7 +294,7 @@ class OrderResource extends Resource
                         'new' => 'New',
                         'processing' => 'Processing',
                         'shipped' =>'Shipped',
-                        'delivered' => 'delivered',
+                        'delivered' => 'Delivered',
                         'cancelled' => 'Cancelled',
                     ]),
 
