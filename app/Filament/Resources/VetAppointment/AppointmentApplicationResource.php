@@ -193,14 +193,8 @@ class AppointmentApplicationResource extends Resource
 
             ])
             ->filters([
+
                 
-                SelectFilter::make('appointment_status')
-                ->label('Appointment Status')
-                ->options([
-                    'pending' => 'Pending',
-                    'approved' => 'Approved',
-                    'rejected' => 'Rejected',
-                ])
               
 
             ])
