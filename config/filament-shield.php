@@ -84,6 +84,12 @@ return [
             'Blog/BlogPostResource',
             'Blog/CategoryResource',
             'Contact/InquiryResource',
+            'Ecommerce/OrderResource',
+            'Ecommerce/ProductResource',
+            'Ecommerce/ProductReviewsResource',
+            'Ecommerce/ProductCategoryResource',
+            'VetAppointment/AppointmentCategoryResource',
+            'VetAppointment/AppointmentApplicationResource',
         ],
     ],
 

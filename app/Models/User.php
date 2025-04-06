@@ -28,8 +28,9 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
-class User extends Authenticatable implements FilamentUser
+class User extends Authenticatable 
 {
+   // implements FilamentUser
     use HasApiTokens;
 
     /** @use HasFactory<\Database\Factories\UserFactory> */
