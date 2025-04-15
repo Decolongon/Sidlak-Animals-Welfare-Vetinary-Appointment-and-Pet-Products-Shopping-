@@ -28,7 +28,7 @@
      
 
       {{-- <div class="flex flex-col gap-4"> --}}
-        <div class="flex flex-col gap-4 max-h-[70vh] overflow-y-auto pr-2">
+        <div class="flex flex-col gap-4 max-h-[70vh] overflow-y-auto pr-2 pb-28">
           @forelse ($carts as $cart)
           <div class="p-4 border rounded-lg shadow dark:border-neutral-700 dark:shadow-gray-900">
               <div class="flex items-center justify-between">
