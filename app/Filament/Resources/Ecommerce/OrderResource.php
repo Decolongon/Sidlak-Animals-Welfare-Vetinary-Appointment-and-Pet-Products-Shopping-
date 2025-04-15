@@ -191,10 +191,10 @@ class OrderResource extends Resource
                             TextInput::make('price')
                                 ->numeric()
                                 ->required()
+                                ->disabled()
                                 ->dehydrated()
                                 ->required()
-                                ->label('Price')
-                                ->disabled(),
+                                ->label('Price'),
                                
 
                             TextInput::make('quantity')
@@ -213,10 +213,10 @@ class OrderResource extends Resource
                             TextInput::make('total')
                                 ->numeric()
                                 ->required()
+                                ->disabled()
                                 ->dehydrated()
                                 ->minValue(0)
-                                ->label('Total')
-                                ->disabled(), 
+                                ->label('Total'), 
                               
                                 
                         ])->columns(2)

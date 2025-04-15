@@ -25,4 +25,9 @@ class AppointmentCategory extends Model
     {
         return $this->belongsToMany(Appointment::class, 'appointment_appointment_category', 'appointment_category_id', 'appointment_id')->withTimestamps();
     }
+
+    public function getRouteKeyName(): string
+    {
+         return 'appoint_cat_slug';
+    }
 }

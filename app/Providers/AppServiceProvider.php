@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Providers;
+
 use App\Models\User;
 use App\Models\Animal\Dog;
 use App\Models\Animal\Breed;
@@ -61,6 +62,7 @@ class AppServiceProvider extends ServiceProvider
         Announcement::observe(AnnouncementObserver::class);
 
         $this->registerPolicies();
+
         
     }
 
@@ -94,11 +96,13 @@ class AppServiceProvider extends ServiceProvider
            Order::class => OrderPolicy::class,
            Volunteer::class => VolunteerPolicy::class,
            Announcement::class => AnnouncementPolicy::class,
-           User::class => UserPolicy::class,
-          
+        //    User::class => UserPolicy::class,
+           
        ];
 
        $this->inBulkPolicies($policies);
    }
+
+  
 
 }

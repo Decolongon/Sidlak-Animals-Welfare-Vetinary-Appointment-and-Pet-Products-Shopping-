@@ -36,4 +36,9 @@ class Category extends Model
         return $this->hasMany(Announcement::class);
     }
 
+    public function getRouteKeyName(): string
+    {
+         return 'category_slug';
+    }
+
 }

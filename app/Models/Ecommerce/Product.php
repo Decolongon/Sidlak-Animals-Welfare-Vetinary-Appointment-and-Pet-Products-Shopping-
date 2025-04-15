@@ -4,6 +4,7 @@ namespace App\Models\Ecommerce;
 
 use App\Models\Ecommerce\OrderItem;
 use App\Models\Ecommerce\ProductImage;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -12,6 +13,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class Product extends Model
 {
+    use HasFactory;
     protected $table = 'products';
 
     protected $fillable = [
@@ -27,6 +29,7 @@ class Product extends Model
         'prod_short_description',
         'prod_old_price',
         'is_visible_to_market',
+        'shipping_cost',
     ];
 
     
@@ -73,5 +76,10 @@ class Product extends Model
     public function orderItems(): HasMany
     {
         return $this->hasMany(OrderItem::class);
+    }
+
+    public function getRouteKeyName(): string
+    {
+         return 'prod_slug';
     }
 }

@@ -57,4 +57,9 @@ class BlogPost extends Model
         return $this->hasMany(Announcement::class);
     }
 
+    public function getRouteKeyName(): string
+    {
+         return 'post_slug';
+    }
+
 }

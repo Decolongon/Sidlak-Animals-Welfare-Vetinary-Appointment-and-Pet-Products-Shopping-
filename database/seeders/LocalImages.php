@@ -9,6 +9,7 @@ class LocalImages
 {
     public const DOGS = 'dogs';
     public const POSTS = 'posts';
+    public const PRODUCTS = 'products';
     /**
      * Get all image files for dogs.
      *
@@ -27,5 +28,15 @@ class LocalImages
     public static function getFeaturedImage(?string $posts = LocalImages::POSTS): array
     {
         return File::files(database_path('seeders/local_images/' . $posts));
+    }
+
+     /**
+     * Get all image files for dogs.
+     *
+     * @return array
+     */
+    public static function getProductsImage(?string $products = LocalImages::PRODUCTS): array
+    {
+        return File::files(database_path('seeders/local_images/' . $products));
     }
 }

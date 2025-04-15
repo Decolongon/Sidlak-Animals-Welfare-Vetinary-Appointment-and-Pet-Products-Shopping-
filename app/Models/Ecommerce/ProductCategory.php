@@ -26,6 +26,10 @@ class ProductCategory extends Model
         return $this->belongsToMany(Product::class,
         'product_prod_categories','product_category_id','product_id')->withTimestamps();
     }
-
+    
+    public function getRouteKeyName(): string
+    {
+         return 'prod_cat_slug';
+    }
 
 }

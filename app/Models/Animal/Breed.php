@@ -20,4 +20,9 @@ class Breed extends Model
     {
         return $this->hasMany(Dog::class);
     }
+
+    public function getRouteKeyName(): string
+    {
+         return 'breed_slug';
+    }
 }

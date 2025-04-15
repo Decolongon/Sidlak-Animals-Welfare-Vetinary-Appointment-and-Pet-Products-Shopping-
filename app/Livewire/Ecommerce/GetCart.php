@@ -132,6 +132,34 @@ class GetCart extends Component
         }
     }
 
+
+    //checkout btn
+    public function checkout(){
+       
+        if(!Auth::check()){
+            $this->alert('warning','', [
+                'position' => 'top-end',
+                'timer' => 3000,
+                'toast' => true,
+                'text' => 'You must login first',
+            ]);
+            return redirect()->route('login');
+        }
+        //    dd($this->selectedItems);
+        if(empty($this->selectedItems)){
+            $this->alert('warning','', [
+                'position' => 'top-end',
+                'timer' => 3000,
+                'toast' => true,
+                'text' => 'No selected items!',
+            ]);
+            return;
+        }
+        session()->put('selected_checkout_items', $this->selectedItems);
+    
+            return redirect()->route('checkout');
+        }
+
     
     #[Layout('layouts.app')]
     #[Title('Cart')]

@@ -2,9 +2,10 @@
 
 namespace Database\Seeders;
 
-use Database\Seeders\Ecommerce\ProdCatSeeder;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Storage;
+use Database\Seeders\Ecommerce\ProdCatSeeder;
+use Database\Seeders\Ecommerce\ProductSeeder;
 
 class DatabaseSeeder extends Seeder
 {
@@ -26,6 +27,7 @@ class DatabaseSeeder extends Seeder
             BlogPostCategorySeeder::class,
             CommentSeeder::class,
             ProdCatSeeder::class,
+            ProductSeeder::class,
             // VolunteerSeeder::class
         ]);
     }

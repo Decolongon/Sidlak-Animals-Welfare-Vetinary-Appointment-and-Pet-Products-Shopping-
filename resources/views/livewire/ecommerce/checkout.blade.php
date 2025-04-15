@@ -16,25 +16,25 @@
                                      <th scope="col" class="px-6 py-3 text-xs font-medium text-gray-500 uppercase text-start dark:text-neutral-500">Product Image</th>
                                      <th scope="col" class="px-6 py-3 text-xs font-medium text-gray-500 uppercase text-start dark:text-neutral-500">Product Name</th>
                                      <th scope="col" class="px-6 py-3 text-xs font-medium text-gray-500 uppercase text-start dark:text-neutral-500">Quantity</th>
-                                     <th scope="col" class="px-6 py-3 text-xs font-medium text-gray-500 uppercase text-end dark:text-neutral-500"></th>
+                                     <th scope="col" class="px-6 py-3 text-xs font-medium text-gray-500 uppercase text-end dark:text-neutral-500">Total</th>
                                    </tr>
                                  </thead>
                                  <tbody class="divide-y divide-gray-200 dark:divide-neutral-700">
-                                     @forelse ($selectedItems as $order)
+                                     @forelse ($checkoutItems as $order)
                                      <tr>
                                          <td class="px-6 py-4 text-sm text-gray-800 whitespace-nowrap dark:text-neutral-200">
                                              <div class="flex-shrink-0 relative overflow-hidden h-[70px] sm:w-[70px] sm:h-[70px] w-full rounded-full">
-                                                 {{-- <img class="absolute top-0 object-cover size-full start-0" src="{{ Storage::url($adoptionCart->dog->dog_image[0]['dog_image']) }}" alt="{{ $adoptionCart->dog->dog_name }}"> --}}
+                                                 <img class="absolute top-0 object-cover size-full start-0" src="{{ Storage::url($order->product->images[0]->url) }}" alt="{{ $order->product->prod_slug }}">
                                              </div>
                                          </td>
                                          <td class="px-6 py-4 text-sm font-medium text-gray-800 whitespace-nowrap dark:text-neutral-200">
                                              <div class="flex flex-col">
                                                  <h5 class="font-bold"></h5>
-                                                 <span class="text-xs italic text-gray-500"> {{$order->prod_name}}</span>
+                                                 <span class="text-xs italic text-gray-500"> {{$order->product->prod_name}}</span>
                                              </div>
                                          </td>
                                          <td class="px-6 py-4 text-sm text-gray-800 whitespace-nowrap dark:text-neutral-200">{{$order->quantity}}</td>
-                                         <td class="px-6 py-4 text-sm text-gray-800 whitespace-nowrap dark:text-neutral-200"></td>
+                                         <td class="px-6 py-4 text-sm text-gray-800 whitespace-nowrap dark:text-neutral-200">{{$order->product->prod_price * $order->quantity}}</td>
                                      </tr>
                                      @empty
                                      <tr>
@@ -61,10 +61,10 @@
             <form>
                 <div class="max-w-full space-y-4">
                     <label for="input-username" class="sr-only">Username</label>
-                    <input type="text" id="input-username" class="py-2.5 sm:py-3 px-4 block w-full border-gray-200 rounded-lg sm:text-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-neutral-900 dark:border-neutral-700 dark:text-neutral-400 dark:placeholder-neutral-500" placeholder="Username" readonly>
+                    <input type="text" id="input-username" value="{{ auth()->user()->name }}" class="py-2.5 sm:py-3 px-4 block w-full border-gray-200 rounded-lg sm:text-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-neutral-900 dark:border-neutral-700 dark:text-neutral-400 dark:placeholder-neutral-500" placeholder="Username" readonly>
                     {{-- himuon readonly ang email and username and display the login username and password --}}
                     <label for="input-email" class="sr-only">Email</label>
-                    <input type="email" id="input-email" class="py-2.5 sm:py-3 px-4 block w-full border-gray-200 rounded-lg sm:text-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-neutral-900 dark:border-neutral-700 dark:text-neutral-400 dark:placeholder-neutral-500" placeholder="you@site.com" readonly>
+                    <input type="email" id="input-email" value="{{ auth()->user()->email }}" class="py-2.5 sm:py-3 px-4 block w-full border-gray-200 rounded-lg sm:text-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-neutral-900 dark:border-neutral-700 dark:text-neutral-400 dark:placeholder-neutral-500" placeholder="you@site.com" readonly>
                 </div>
 
 
