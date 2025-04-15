@@ -27,7 +27,8 @@
        @endif
      
 
-      <div class="flex flex-col gap-4">
+      {{-- <div class="flex flex-col gap-4"> --}}
+        <div class="flex flex-col gap-4 max-h-[70vh] overflow-y-auto pr-2">
           @forelse ($carts as $cart)
           <div class="p-4 border rounded-lg shadow dark:border-neutral-700 dark:shadow-gray-900">
               <div class="flex items-center justify-between">
@@ -79,10 +80,12 @@
       </div>
 
       @if(count($carts) > 0)
+      <div class="sticky bottom-0 left-0 bg-white dark:bg-neutral-800 p-4 border-t dark:border-neutral-700">
         <div class="mt-4 flex gap-3">
             <button wire:click="removeSelected" class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700">Remove Selected</button>
             <x-button wire:click="checkout">Checkout</x-button>
         </div>
+      </div>
       @endif
   </div>
 </div>
