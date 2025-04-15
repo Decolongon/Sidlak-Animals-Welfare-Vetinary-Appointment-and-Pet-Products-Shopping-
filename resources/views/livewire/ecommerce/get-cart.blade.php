@@ -80,12 +80,12 @@
       </div>
 
       @if(count($carts) > 0)
-      <div class="sticky bottom-0 left-0 bg-white dark:bg-neutral-800 p-4 border-t dark:border-neutral-700">
-        <div class="mt-4 flex gap-3">
-            <button wire:click="removeSelected" class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700">Remove Selected</button>
-            <x-button wire:click="checkout">Checkout</x-button>
+        <div class="sticky bottom-0 left-0 bg-white dark:bg-neutral-800 p-4 border-t dark:border-neutral-700">
+            <div class="mt-4 flex gap-3">
+                <button wire:click="removeSelected" class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700">Remove Item</button>
+                <x-button wire:click="checkout">Checkout</x-button>
+            </div>
         </div>
-      </div>
       @endif
   </div>
 </div>
