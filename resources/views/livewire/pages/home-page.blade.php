@@ -1,18 +1,19 @@
 <div>
 
-    <!-- Slider -->
+  <!-- Slider -->
 <div class="px-4 sm:px-6 lg:px-8 py-10">
     <div data-hs-carousel='{
         "loadingClasses": "opacity-0"
       }' class="relative">
-      <div class="hs-carousel relative overflow-hidden w-full h-120 md:h-[calc(100vh-106px)]  bg-gray-100 rounded-2xl dark:bg-neutral-800">
+      <div class="hs-carousel relative overflow-hidden w-full h-[500px] sm:h-[600px] md:h-[calc(100vh-106px)] bg-gray-100 rounded-2xl dark:bg-neutral-800">
         <div class="hs-carousel-body absolute top-0 bottom-0 start-0 flex flex-nowrap transition-transform duration-700 opacity-0">
           <!-- Item -->
-          <div class="hs-carousel-slide">
-            <div class="h-120 md:h-[calc(100vh-106px)]  flex flex-col bg-[url('https://images.unsplash.com/photo-1734655154254-69d1d67f6a4e?q=80&w=2098&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D')] bg-cover bg-center bg-no-repeat">
-              <div class="mt-auto w-2/3 md:max-w-lg ps-5 pb-5 md:ps-10 md:pb-10">
-                <span class="block text-white">Dog Food</span>
-                <span class="block text-white text-xl md:text-3xl">Redefining pet care for millions of beloved companions.</span>
+          <div class="hs-carousel-slide w-full flex-shrink-0">
+            <div class="relative w-full h-full flex flex-col">
+              <img src="https://images.unsplash.com/photo-1734655154254-69d1d67f6a4e?q=80&w=2098&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" class="absolute inset-0 w-full h-full object-cover rounded-2xl" alt="Dog Food">
+              <div class="relative mt-auto w-full sm:w-2/3 md:max-w-lg ps-5 pb-5 md:ps-10 md:pb-10">
+                <span class="block text-white text-sm sm:text-base">Dog Food</span>
+                <span class="block text-white text-lg sm:text-xl md:text-3xl leading-tight">Redefining pet care for millions of beloved companions.</span>
                 <div class="mt-5">
                   <a class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-xl bg-white border border-transparent text-black hover:bg-gray-100 focus:outline-hidden focus:bg-gray-100 disabled:opacity-50 disabled:pointer-events-none" href="{{ route('page.shop') }}">
                     Shop Now
@@ -24,11 +25,12 @@
           <!-- End Item -->
   
           <!-- Item -->
-          <div class="hs-carousel-slide">
-            <div class="h-120 md:h-[calc(100vh-106px)]  flex flex-col bg-[url('https://images.pexels.com/photos/3981763/pexels-photo-3981763.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2')] bg-cover bg-center bg-no-repeat">
-              <div class="mt-auto w-2/3 md:max-w-lg ps-5 pb-5 md:ps-10 md:pb-10">
-                <span class="block text-white"></span>
-                <span class="block text-white text-xl md:text-3xl">Transforming pet products for happier, healthier companions.</span>
+          <div class="hs-carousel-slide w-full flex-shrink-0">
+            <div class="relative w-full h-full flex flex-col">
+              <img src="https://images.pexels.com/photos/3981763/pexels-photo-3981763.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2" class="absolute inset-0 w-full h-full object-cover rounded-2xl" alt="Pet Products">
+              <div class="relative mt-auto w-full sm:w-2/3 md:max-w-lg ps-5 pb-5 md:ps-10 md:pb-10">
+                <span class="block text-white text-sm sm:text-base"></span>
+                <span class="block text-white text-lg sm:text-xl md:text-3xl leading-tight">Transforming pet products for happier, healthier companions.</span>
                 <div class="mt-5">
                   <a class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-xl bg-white border border-transparent text-black hover:bg-gray-100 focus:outline-hidden focus:bg-gray-100 disabled:opacity-50 disabled:pointer-events-none" href="{{ route('page.shop') }}">
                     Shop Now
@@ -40,11 +42,12 @@
           <!-- End Item -->
   
           <!-- Item -->
-          <div class="hs-carousel-slide">
-            <div class="h-120 md:h-[calc(100vh-106px)]  flex flex-col bg-[url('https://plus.unsplash.com/premium_photo-1683134247309-7c1dae6ee150?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D')] bg-cover bg-center bg-no-repeat">
-              <div class="mt-auto w-2/3 md:max-w-lg ps-5 pb-5 md:ps-10 md:pb-10">
-                <span class="block text-white"></span>
-                <span class="block text-white text-xl md:text-3xl">Setting a new standard for pets and the people who love them.</span>
+          <div class="hs-carousel-slide w-full flex-shrink-0">
+            <div class="relative w-full h-full flex flex-col">
+              <img src="https://plus.unsplash.com/premium_photo-1683134247309-7c1dae6ee150?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" class="absolute inset-0 w-full h-full object-cover rounded-2xl" alt="Pet Care">
+              <div class="relative mt-auto w-full sm:w-2/3 md:max-w-lg ps-5 pb-5 md:ps-10 md:pb-10">
+                <span class="block text-white text-sm sm:text-base"></span>
+                <span class="block text-white text-lg sm:text-xl md:text-3xl leading-tight">Setting a new standard for pets and the people who love them.</span>
                 <div class="mt-5">
                   <a class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-xl bg-white border border-transparent text-black hover:bg-gray-100 focus:outline-hidden focus:bg-gray-100 disabled:opacity-50 disabled:pointer-events-none" href="{{ route('page.shop') }}">
                     Shop Now
@@ -79,6 +82,7 @@
     </div>
   </div>
   <!-- End Slider -->
+  
 
     <!-- Hero -->
     <div class="px-4 mx-auto max-w-7xl sm:px-6 lg:px-8">

@@ -10,12 +10,19 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Session;
 Use Livewire\Attributes\Title;
 use Jantinnerezo\LivewireAlert\LivewireAlert;
+use Livewire\Attributes\Locked;
+
 class AddToCartForm extends Component
 {
     use LivewireAlert;
 
+    #[Locked]
     public $product_id;
+
+    #[Locked]
     public $session_id;
+
+    #[Locked]
     public $quantity;
     public $user_id;
     public $cartItems;
