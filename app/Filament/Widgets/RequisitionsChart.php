@@ -2,13 +2,16 @@
 
 namespace App\Filament\Widgets;
 
+use Carbon\Carbon;
 use App\Models\Adoption\Adoption;
 use Filament\Widgets\ChartWidget;
 use Illuminate\Support\Facades\DB;
-use Carbon\Carbon;
+use BezhanSalleh\FilamentShield\Traits\HasWidgetShield;
 
 class RequisitionsChart extends ChartWidget
+
 {
+    use HasWidgetShield;
     protected static ?string $heading = 'Requisitions Overview';
 
     protected static ?int $sort = 3;

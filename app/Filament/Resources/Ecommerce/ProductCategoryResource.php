@@ -177,8 +177,5 @@ class ProductCategoryResource extends Resource
         ];
     }
 
-
    
-
-
 }

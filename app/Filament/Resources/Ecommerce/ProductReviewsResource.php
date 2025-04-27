@@ -8,6 +8,8 @@ use Filament\Forms\Form;
 use Filament\Tables\Table;
 use Filament\Resources\Resource;
 use App\Models\Ecommerce\Product;
+use Filament\Forms\Components\Grid;
+use Filament\Forms\Components\Group;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Section;
 use App\Models\Ecommerce\ProductReview;
@@ -16,9 +18,9 @@ use Filament\Tables\Columns\TextColumn;
 use App\Models\Ecommerce\ProductReviews;
 use Filament\Tables\Columns\ImageColumn;
 use Filament\Forms\Components\FileUpload;
+// use IbrahimBougaoua\FilamentRatingStar\Columns\Components\RatingStar;
 use Filament\Tables\Filters\SelectFilter;
 use Illuminate\Database\Eloquent\Builder;
-// use IbrahimBougaoua\FilamentRatingStar\Columns\Components\RatingStar;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use App\Filament\Resources\Ecommerce\ProductReviewsResource\Pages;
 use IbrahimBougaoua\FilamentRatingStar\Forms\Components\RatingStar;
@@ -40,56 +42,64 @@ class ProductReviewsResource extends Resource
     public static function form(Form $form): Form
     {
         return $form
-            ->schema([
-                Section::make('Product Review Information')
+        ->schema([
+            Section::make('Product Review Information')
                 ->schema([
-                    Select::make('user_id')
-                        ->relationship('user', 'name')
-                        ->required()
-                        ->searchable()
-                        ->optionsLimit(5)
-                        ->preload()
-                        ->getOptionLabelFromRecordUsing(fn ($record) => ucwords($record->name)),
-
-                    Select::make('product_id')
-                        ->relationship('product', 'prod_name')
-                        ->required()
-                        ->searchable()
-                        ->optionsLimit(5)
-                        ->preload()
-                        ->getOptionLabelFromRecordUsing(fn ($record) => ucwords($record->prod_name)),
-
-                        // 'product_id',
-                        // 'user_id',
-                        // 'rating',
-                        // 'image_review',
-                        // 'review',
-                   RatingStar::make('rating')
-                        ->required()
-                        ->label('Rating'),
-
-                    Textarea::make('review')
-                        ->required()
-                        ->maxLength(255)
-                        ->columnSpan('full')
-                        ->label('Review'),
-
-                    FileUpload::make('image_review')
-                        ->label('Image Review')
-                        ->image()
-                        ->multiple()
-                        ->nullable()
-                        //check if state is array kng array na nga daan return as it is else convert json to array
-                        ->formatStateUsing(fn ($state) => is_array($state) ? $state : json_decode($state, true))
-                        ->imageEditor()
-                        ->imageEditorAspectRatios([
-                            null,
-                            '16:9',
-                            '4:3',
-                    ])->maxSize(2048),
-
+                    Grid::make()
+                        ->schema([
+                            // Left column fields
+                            Group::make()
+                                ->schema([
+                                    Select::make('user_id')
+                                        ->relationship('user', 'name')
+                                        ->required()
+                                        ->searchable()
+                                        ->optionsLimit(5)
+                                        ->preload()
+                                        ->getOptionLabelFromRecordUsing(fn ($record) => ucwords($record->name)),
+    
+                                    Select::make('product_id')
+                                        ->relationship('product', 'prod_name')
+                                        ->required()
+                                        ->searchable()
+                                        ->optionsLimit(5)
+                                        ->preload()
+                                        ->getOptionLabelFromRecordUsing(fn ($record) => ucwords($record->prod_name)),
+    
+                                    RatingStar::make('rating')
+                                        ->required()
+                                        ->label('Rating'),
+    
+                                    Textarea::make('review')
+                                        ->required()
+                                        ->maxLength(255)
+                                        ->label('Review'),
+                                ])
+                                ->columnSpan(1), // Left side
+    
+                            // Right column field (File Upload only)
+                            Group::make()
+                                ->schema([
+                                    FileUpload::make('image_review')
+                                        ->label('Image Review')
+                                        ->image()
+                                        ->multiple()
+                                        ->nullable()
+                                        ->formatStateUsing(fn ($state) => is_array($state) ? $state : json_decode($state, true))
+                                        ->imageEditor()
+                                        ->imageEditorAspectRatios([
+                                            null,
+                                            '16:9',
+                                            '4:3',
+                                        ])
+                                        ->maxSize(2048),
+                                ])
+                                ->columnSpan(1), // Right side
+                        ])
+                        ->columns(2), // Two equal columns
                 ])
-            ]);
+        ]);
+    
     }
 
     public static function table(Table $table): Table

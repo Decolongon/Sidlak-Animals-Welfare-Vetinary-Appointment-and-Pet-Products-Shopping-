@@ -224,12 +224,12 @@ class AdoptionResource extends Resource
         ];
     }
 
-    public static function getWidgets(): array
-    {
-        return [
-            AdoptionStatsOverview::class
-        ];
-    }
+    // public static function getWidgets(): array
+    // {
+    //     return [
+    //         AdoptionStatsOverview::class
+    //     ];
+    // }
 
 
     public static function infolist(Infolist $infolist): Infolist

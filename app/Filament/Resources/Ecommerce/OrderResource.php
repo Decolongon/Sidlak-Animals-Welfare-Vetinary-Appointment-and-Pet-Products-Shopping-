@@ -30,6 +30,7 @@ use App\Filament\Resources\UserResource\Pages\EditUser;
 use App\Filament\Resources\Ecommerce\OrderResource\Pages;
 use App\Filament\Resources\UserResource\Pages\CreateUser;
 use App\Filament\Resources\Ecommerce\OrderResource\RelationManagers;
+use App\Filament\Resources\Ecommerce\OrderResource\Widgets\OrderStatsOverview;
 
 
 class OrderResource extends Resource
@@ -117,7 +118,7 @@ class OrderResource extends Resource
                         ->required()
                         ->label('Payment Status'),
 
-
+                
                    
                 ])
                 ->columns(1),
@@ -128,7 +129,7 @@ class OrderResource extends Resource
                         ->label('Shipping Address')
                         ->relationship(name: 'shippingAddress', titleAttribute: 'full_address')
                         ->preload()
-                        ->required()
+                        // ->required()
                         ->optionsLimit(5)
                         ->searchable()
                         ->createOptionForm([
@@ -143,7 +144,7 @@ class OrderResource extends Resource
                         ->label('Billing Address')
                         ->relationship(name: 'billingAddress', titleAttribute: 'full_address')
                         ->preload()
-                        ->required()
+                        //->required()
                         ->dehydrated()
                         ->optionsLimit(5)
                         ->searchable()
@@ -161,6 +162,19 @@ class OrderResource extends Resource
                         ->afterStateUpdated(fn ($state, $set, $get) => 
                             $state ? $set('billing_address_id', $get('shipping_address_id')) : null
                         ),
+                    
+                    Select::make('shipping_method')
+                        ->label('Shipping Method')
+                        ->options([
+                            'COD' => 'Cash on Delivery',
+                            'gcash' => 'gcash',
+                            'paymaya' => 'paymaya',
+                            'card' => 'card',
+                            'grab_pay' => 'grab_pay',
+                        ])
+                        ->default('COD')
+                        ->required(),
+                   
                 ])
                 ->columns(2),       
 
@@ -169,6 +183,8 @@ class OrderResource extends Resource
     
             Section::make('Order Items')
                 ->schema([
+
+                   
                     Repeater::make('orderItems')
                         ->label('')
                         ->relationship('orderItems') 
@@ -182,10 +198,32 @@ class OrderResource extends Resource
                                 ->searchable()
                                 ->required()
                                 ->reactive()
-                                ->afterStateUpdated(fn ($state, $set) => 
-                                    $set('price', Product::find($state)?->prod_price)
+                                ->afterStateUpdated(function ($state, $set, $get) {
+                                        $product = Product::find($state);
+                                        $set('price', $product?->prod_price ?? 0);
+                
+                                        // Compute item shipping
+                                        $shippingCost = ($product?->prod_requires_shipping) ? ($product->shipping_cost ?? 0) : 0;
+                                        $set('shipping_cost', $shippingCost);
+                
+                                        $quantity = $get('quantity') ?? 1;
+                                        $set('total', ($product?->prod_price ?? 0) * $quantity + $shippingCost);
+                
+                                        // Recalculate entire form totals
+                                        $items = $get('../../orderItems') ?? [];
+                                        $total = 0;
+                                        $shipping = 0;
+                                        foreach ($items as $item) {
+                                            $total += $item['total'] ?? 0;
+                                            $shipping += $item['shipping_cost'] ?? 0;
+                                        }
+                                        $set('../../shipping_price', $shipping);
+                                        $set('../../total', $total);
+                                })
+                                // ->afterStateUpdated(fn ($state, $set) => 
+                                //     $set('price', Product::find($state)?->prod_price)
                                    
-                                 )
+                                //  )
                                   ->getOptionLabelFromRecordUsing(fn ($record) => ucwords($record->prod_name)),
                             
                             TextInput::make('price')
@@ -196,40 +234,130 @@ class OrderResource extends Resource
                                 ->required()
                                 ->label('Price'),
                                
+                           
 
                             TextInput::make('quantity')
                                 ->numeric()
                                 ->minValue(1)
+                                ->default(1)
                                 ->required()
                                 ->maxValue(fn ($get) => Product::find($get('product_id'))?->prod_quantity ?? 1)
                                 ->reactive()
-                                ->afterStateUpdated(fn ($state, $set, $get) => 
-                                    $set('total', ($get('price')) * ($state))
-                                )
+                                // ->afterStateUpdated(fn ($state, $set, $get) => 
+                                //     $set('total', ($get('price')) * ($state) + ($get('shipping_price')))
+                                // )
+                                ->afterStateUpdated(function ($state, $set, $get) {
+                                        $price = $get('price') ?? 0;
+                                        $shipping = $get('shipping_cost') ?? 0;
+                                        $set('total', ($price * $state) + $shipping);
+                
+                                        $items = $get('../../orderItems') ?? [];
+                                        $total = 0;
+                                        $shipping = 0;
+                                        foreach ($items as $item) {
+                                            $total += $item['total'] ?? 0;
+                                            $shipping += $item['shipping_cost'] ?? 0;
+                                        }
+                                        $set('../../shipping_price', $shipping);
+                                        $set('../../total', $total);
+                                })
+                                ->afterStateHydrated(function ($state, $set, $get) {
+                                    // Ensure quantity is in valid format based on unit
+                                    $product = Product::find($get('product_id'));
+                                    if ($product) {
+                                        if ($product->prod_unit === 'pcs') {
+                                            $set('quantity', intval($state)); // force whole number
+                                        }
+                                    }
+                                })
+                                ->rule(function ($get) {
+                                    $product = Product::find($get('product_id'));
+                            
+                                    if (!$product) return [];
+                            
+                                    if ($product->prod_unit === 'pcs') {
+                                        return ['integer'];
+                                    }
+                            
+                                    if ($product->prod_unit === 'kg') {
+                                        $weight = $product->prod_weight;
+                                        return function ($attribute, $value, $fail) use ($weight) {
+                                            if ($weight <= 0) return;
+                            
+                                            // Check if value is a multiple of prod_weight (e.g. 1.2, 2.4, etc.)
+                                            if (fmod($value, $weight) !== 0.0) {
+                                                $fail("Quantity must be a multiple of {$weight} kg.");
+                                            }
+                                        };
+                                    }
+                            
+                                    return [];
+                                })
+                                ->hint(function ($get) {
+                                    $product = Product::find($get('product_id'));
+                                    if (!$product) return null;
+                            
+                                    return $product->prod_unit === 'pcs'
+                                        ? 'Input whole number only.'
+                                        : "Input based on product weight. Example: 1.30, multiples of {$product->prod_weight} kg.";
+                                })
+                                ->hintColor('warning')
                                 ->label('Quantity'),
     
                           
     
-                            TextInput::make('total')
-                                ->numeric()
-                                ->required()
-                                ->disabled()
-                                ->dehydrated()
-                                ->minValue(0)
-                                ->label('Total'), 
+                            // TextInput::make('total')
+                            //     ->numeric()
+                            //     ->required()
+                            //     ->disabled()
+                            //     ->dehydrated()
+                            //     ->minValue(0)
+                            //     ->label('Total'), 
                               
                                 
                         ])->columns(2)
                           //->addable(false)
-                          ->addActionLabel('Add Item')      
+                          ->addActionLabel('Add Item') 
                           ->deletable(fn ($get) => count($get('orderItems')) > 1) 
-                          ->reorderable(),
+                          ->reorderable()
+                          ->collapsible()
+                          ->reactive()
+                          ->afterStateUpdated(function ($state, $set, $get) {
+                                $items = $get('orderItems') ?? [];
+                                $total = 0;
+                                $shipping = 0;
+                                foreach ($items as $item) {
+                                    $total += $item['total'] ?? 0;
+                                    $shipping += $item['shipping_cost'] ?? 0;
+                                }
+                                $set('shipping_price', $shipping);
+                                $set('total', $total);
+                        }),
+                          
+                        TextInput::make('shipping_price')
+                        ->label('Shipping Cost')
+                        ->numeric()
+                        ->required()
+                        ->disabled()
+                        ->dehydrated()
+                        ->reactive(),
+                        
+                          TextInput::make('total')
+                          ->numeric()
+                          ->required()
+                          ->disabled()
+                          ->dehydrated()
+                          ->minValue(0)
+                          ->label('Total'), 
+
                  ]),
         ]);
     
             
            
     }
+
+
 
     public static function table(Table $table): Table
     {
@@ -244,6 +372,7 @@ class OrderResource extends Resource
                 TextColumn::make('orderItems.product.prod_name')
                     ->label('Product Ordered')
                     ->sortable()
+                    ->limit(20)
                     ->searchable()
                     ->formatStateUsing(fn (string $state) : string => ucwords($state)),
 
@@ -273,6 +402,15 @@ class OrderResource extends Resource
                     ->color(fn ($state) => OrderStatusEnum::tryFrom($state)?->getColor() ?? 'gray') 
                     ->icon(fn ($state) => OrderStatusEnum::tryFrom($state)?->getIcon() ?? null)
                     ->sortable(),
+                
+                    TextColumn::make('shipping_price')
+                        ->label('Shipping Cost')
+                        ->sortable()
+                        ->formatStateUsing(function ($state) {
+                            return $state == 0 ? 'Free Shipping' : number_format($state, 2);
+                        })
+                        ->badge()
+                        ->color(fn ($record) => $record->shipping_price == 0 ? 'success' : 'gray'),
 
                  TextColumn::make('payment_status')
                     ->label('Payment Status')
@@ -281,23 +419,25 @@ class OrderResource extends Resource
                     ->icon(fn ($state) => PaymentStatusEnum::tryFrom($state)?->getIcon() ?? null)
                     ->sortable(),
 
+                TextColumn::make('shipping_method')
+                    ->label('Shipping Method')
+                    ->badge()
+                    ->formatStateUsing(fn (string $state) : string =>
+                    ($state == 'gcash' || $state == 'paymaya' || $state == 'grab_pay' || $state == 'card') ? 'E-Wallet/' . strtoupper($state) :
+                    strtoupper($state))
+                    ->color(fn ($state) => $state == 'gcash' || $state == 'paymaya' || $state == 'grab_pay' || $state == 'card' ? 'success' : 'primary'),
+                   
+                 
+
+                TextColumn::make('total')
+                    ->label('Total')
+                    ->sortable(),
+
                
             ])
-            // case Pending = 'pending';
-            // case Completed = 'completed';
-            // case Failed = 'failed';
-            // case Refunded = 'refunded';
+           
             ->filters([
-               SelectFilter::make('order_status')
-                    ->label('Order Status')
-                    ->options([
-                        'new' => 'New',
-                        'processing' => 'Processing',
-                        'shipped' =>'Shipped',
-                        'delivered' => 'Delivered',
-                        'cancelled' => 'Cancelled',
-                    ]),
-
+        
                     SelectFilter::make('payment_status')
                     ->label('Payment Status')
                     ->options([
@@ -344,4 +484,26 @@ class OrderResource extends Resource
             'edit' => Pages\EditOrder::route('/{record}/edit'),
         ];
     }
+
+    public function formatShippingMethod($state)
+    {
+        // Check if the value is "e-wallet"
+        if (strpos($state, 'e-wallet') !== false) {
+            // Split the value into "e-wallet" and the specific wallet type (e.g., gcash, paymaya)
+            $parts = explode('/', $state);
+            // Return the formatted string
+            return 'e-wallet/' . ucfirst($parts[1]);
+        }
+
+        // If it's not "e-wallet", just return the value (e.g., "COD")
+        return $state;
+    }
+
+    // public static function getWidgets(): array
+    // {
+    //     return [
+    //        OrderStatsOverview::class
+    //     ];
+    // }
+
 }

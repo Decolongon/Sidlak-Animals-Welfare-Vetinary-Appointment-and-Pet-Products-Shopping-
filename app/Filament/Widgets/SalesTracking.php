@@ -4,25 +4,36 @@ namespace App\Filament\Widgets;
 
 use Filament\Widgets\ChartWidget;
 use Illuminate\Support\Facades\DB;
+use BezhanSalleh\FilamentShield\Traits\HasWidgetShield;
 
 class SalesTracking extends ChartWidget
 {
-    protected static ?string $heading = 'Sales';
+    use HasWidgetShield;
+    protected static ?string $heading = 'Sales Tracking';
     protected static ?int $sort = 5;
+
+    // public ?string $filter = 'monthly'; // default
+
+    // protected function getFilters(): ?array
+    // {
+    //     return [
+    //         'monthly' => 'Monthly',
+    //         'quarterly' => 'Quarterly',
+    //     ];
+    // }
 
     protected function getData(): array
     {
         return [
-            'datasets' =>[
+            'datasets' => [
                 [
                     'label' => 'Sales',
                     'data' => $this->getSalesData(),
                     'borderColor' => '#4CAF50',
                     'fill' => false,
                 ],
-
             ],
-            'labels' => $this->getLabel(),
+            'labels' => $this->getLabels(),
         ];
     }
 
@@ -30,37 +41,49 @@ class SalesTracking extends ChartWidget
     {
         return 'line';
     }
-
+    
+    // public function getColumnSpan(): array|string|int
+    // {
+    //     return 'full';
+    // }
     protected function getSalesData(): array
     {
-         DB::table('orders')
-            ->selectRaw('MONTH(created_at) as month, SUM(total) as total_sales')
-            ->whereYear('created_at', now()->year)
-            ->groupBy('month')
-            ->orderBy('month')
-            ->pluck('total_sales')
-            ->toArray();
-            $allMonths = range(1, 12);
-            $salesData = array_map(fn($month) => $sales[$month] ?? 0, $allMonths);
+        
+            $sales = DB::table('order_items')
+                ->join('orders', 'order_items.order_id', '=', 'orders.id')
+                ->selectRaw('MONTH(orders.created_at) as month, SUM(orders.total) as total_sales')
+                ->whereYear('orders.created_at', now()->year)
+                ->where('orders.payment_status', 'completed')
+                ->where('orders.order_status', 'delivered')
+                ->groupBy('month')
+                ->orderBy('month')
+                ->pluck('total_sales', 'month')
+                ->toArray();
 
-            return $salesData;
+            $months = range(1, 12);
+            return array_map(fn($m) => $sales[$m] ?? 0, $months);
+       
     }
 
-    protected function getLabel(): array
-    {
-        return [
-            'May',
-            'Jun',
-            'Jul',
-            'Aug',
-            'Sep',
-            'Oct',
-            'Nov',
-            'Dec',
-            'Jan',
-            'Feb',
-            'Mar',
-            'Apr',
-        ];
+
+
+    protected function getLabels(): array
+    {   
+        //output label quarterly
+        // if ($this->filter === 'quarterly') {
+        //     return [
+        //         'Jan – Mar',
+        //         'Apr – Jun',
+        //         'Jul – Sep',
+        //         'Oct – Dec',
+        //     ];
+        // } 
+            return [
+                'Jan', 'Feb', 'Mar',
+                'Apr', 'May', 'Jun',
+                'Jul', 'Aug', 'Sep',
+                'Oct', 'Nov', 'Dec',
+            ];
+        
     }
 }

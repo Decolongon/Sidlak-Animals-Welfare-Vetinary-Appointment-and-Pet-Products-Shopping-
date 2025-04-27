@@ -23,6 +23,7 @@ return new class extends Migration
             $table->text('prod_short_description')->nullable();
             $table->boolean('prod_requires_shipping')->nullable()->default(false);                // ang shop is naga baligya per kilo na mga dog food
             $table->longText('prod_description')->nullable();
+            $table->decimal('shipping_cost')->nullable();
             $table->boolean('is_visible_to_market')->nullable()->default(false);
             $table->string('prod_unit')->default('pcs');
             //$table->decimal('price_per_kg')->nullable();

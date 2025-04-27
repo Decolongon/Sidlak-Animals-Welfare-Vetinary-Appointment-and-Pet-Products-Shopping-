@@ -5,6 +5,7 @@
     
         @forelse($prod_reviews as $review)
             <div class="mb-4 p-4 border rounded-lg bg-white dark:bg-neutral-900">
+                
                 <div class="flex items-center gap-x-3">
                     <img class="w-10 h-10 rounded-full" src="{{ $review->user->profile_photo_url ?? 'https://via.placeholder.com/40' }}" alt="User Avatar">
                     <div>
@@ -22,17 +23,38 @@
                         <p class="text-sm text-gray-500">{{ $review->created_at->diffForHumans() }}</p>
                     </div>
                 </div>
-                <p class="mt-2 text-gray-800 dark:text-white">{{ $review->review }}</p>
+                {{-- <p class="mt-2 text-gray-800 dark:text-white">{{ $review->review }}</p> --}}
+                <div x-data="{
+                    expanded: false,
+                    fullText: @js($review->review),
+                    shortText: @js(Str::limit($review->review, 100, ''))
+                }" class="mt-2 text-gray-800 dark:text-white">
+                
+                <p>
+                    <span x-text="expanded ? fullText : shortText"></span>
+                    <template x-if="fullText.length > 100">
+                        <button 
+                            class="text-blue-500 underline ml-2"
+                            @click="expanded = !expanded">
+                            <span x-text="expanded ? 'Show Less' : 'Show More'"></span>
+                        </button>
+                    </template>
+                </p>
+            </div>
+            
                 @if (!empty($review->image_review))
-                <div class="flex flex-row space-x-4">
+                <div class="flex flex-wrap gap-2">
                     @foreach($review->image_review as $img)
-                        <img src="{{ asset(Storage::url($img)) }}" alt="Review Image" class="w-32 h-32 object-cover rounded-lg">
+                        <img src="{{ asset(Storage::url($img)) }}" 
+                             alt="Review Image" 
+                             class="w-24 h-24 object-cover rounded-md md:w-26 md:h-26 lg:w-30 lg:h-30" />
                     @endforeach
                 </div>
                    
                 @endif
             </div>
         @empty
+        
             <p class="text-gray-500">No reviews yet.</p>
         @endforelse
     </div>

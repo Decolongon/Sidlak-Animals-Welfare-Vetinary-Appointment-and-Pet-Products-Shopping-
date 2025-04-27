@@ -17,6 +17,7 @@ use Illuminate\Support\Facades\Auth;
 use Laravel\Jetstream\HasProfilePhoto;
 use Spatie\Permission\Traits\HasRoles;
 use App\Models\Appointment\Appointment;
+use App\Models\Appointment\VetSchedule;
 use App\Models\Ecommerce\ProductReview;
 use Illuminate\Notifications\Notifiable;
 use Filament\Models\Contracts\FilamentUser;
@@ -165,5 +166,10 @@ class User extends Authenticatable
     public function carts(): HasMany
     {
         return $this->hasMany(Cart::class);
+    }
+
+    public function vetschedules(): HasMany
+    {
+        return $this->hasMany(VetSchedule::class);
     }
 }

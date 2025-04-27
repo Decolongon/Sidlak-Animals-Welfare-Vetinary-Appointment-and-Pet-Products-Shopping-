@@ -20,6 +20,7 @@ class Appointment extends Model
         'pet_weight',
         'pet_age',
         'isPetVaccinated',
+        'advance_payment_method',
         'appointment_status',
     ];
 

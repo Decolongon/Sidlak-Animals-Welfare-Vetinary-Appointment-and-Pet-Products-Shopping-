@@ -29,6 +29,7 @@ use App\Models\Ecommerce\ProductReview;
 use App\Observers\AnnouncementObserver;
 use App\Policies\Contact\InquiryPolicy;
 use App\Policies\Ecommerce\OrderPolicy;
+use Illuminate\Support\Facades\Session;
 use Illuminate\Support\ServiceProvider;
 use App\Models\Ecommerce\ProductCategory;
 use App\Policies\Adoption\AdoptionPolicy;
@@ -39,8 +40,10 @@ use App\Models\Appointment\AppointmentCategory;
 use App\Policies\Appointment\AppointmentPolicy;
 use App\Policies\Ecommerce\ProductReviewPolicy;
 use App\Policies\Ecommerce\ProductCategoryPolicy;
+// use Filament\Http\Responses\Auth\Contracts\LogoutResponse as LogoutResponseContract;
 use App\Policies\Appointment\AppointmentCategoryPolicy;
-use Filament\Http\Responses\Auth\Contracts\LogoutResponse as LogoutResponseContract;
+use Filament\Http\Responses\Auth\LoginResponse as AuthLoginResponse;
+use Filament\Http\Responses\Auth\Contracts\LogoutResponse as LogoutContractResponse;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -62,7 +65,10 @@ class AppServiceProvider extends ServiceProvider
         Announcement::observe(AnnouncementObserver::class);
 
         $this->registerPolicies();
+       
+       
 
+       
         
     }
 

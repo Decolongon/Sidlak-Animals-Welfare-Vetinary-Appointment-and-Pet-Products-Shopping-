@@ -24,7 +24,7 @@ trait CanCreateProductImage
         $filename = $productImages[$productName] ?? null;
 
         if (!$filename) {
-            // If the breed image is not found, return null or handle it accordingly
+         
             return null;
         }
 

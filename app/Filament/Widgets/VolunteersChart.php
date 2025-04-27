@@ -2,13 +2,15 @@
 
 namespace App\Filament\Widgets;
 
-use App\Models\Volunteer\Volunteer;
+use Carbon\Carbon;
 use Filament\Widgets\ChartWidget;
 use Illuminate\Support\Facades\DB;
-use Carbon\Carbon;
+use App\Models\Volunteer\Volunteer;
+use BezhanSalleh\FilamentShield\Traits\HasWidgetShield;
 
 class VolunteersChart extends ChartWidget
 {
+    use HasWidgetShield;
     protected static ?string $heading = 'Volunteer Analytics';
 
     protected static ?int $sort = 4;

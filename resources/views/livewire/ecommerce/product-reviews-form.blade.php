@@ -35,8 +35,17 @@
             Livewire.hook('upload:error', () => uploading = false);
             Livewire.on('imageUploaded', () => uploading = false); 
         ">
-          <input type="file" wire:model="image_review" multiple @change="uploading = true">
-          <div   x-show="uploading">Uploading...</div>
+          {{-- <input type="file" wire:model="image_review" multiple @change="uploading = true"> --}}
+          <label for="image_review" class="cursor-pointer inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition duration-300">
+            <svg class="mr-2 w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                <polyline points="17 8 12 3 7 8"></polyline>
+                <line x1="12" x2="12" y1="3" y2="15"></line>
+            </svg>
+            Choose Image(s)
+            <input type="file" wire:model="image_review" multiple id="image_review" class="hidden" @change="uploading = true">
+        </label>
+          <div class="mt-2 text-black-500 dark:text-white"  x-show="uploading">Uploading...</div>
          {{-- wire:loading wire:target="image_review" --}}
             @error('image_review.*') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
               
@@ -57,7 +66,7 @@
             </div>
             @endif
            
-            <x-button type="submit"  class="mt-2"  wire:loading.attr="disabled">
+            <x-button type="submit" wire:target="image_review" class="mt-2"  wire:loading.attr="disabled">
                 <span wire:loading.flex wire:target="submitReview"  class="items-center">
                     <svg class="animate-spin h-4 w-4 mr-2 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                         <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>

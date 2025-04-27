@@ -157,7 +157,15 @@ class AppointmentApplicationResource extends Resource
                         true => 'heroicon-m-check-circle', 
                     ])
                     ->default(false),
-                ])
+
+                // TextInput::make('advance_payment_method')
+                //     ->label('Advance Payment'),
+                    
+                ])->columns([
+                    'sm' => 1,
+                    'md' => 2,
+                    'lg' => 2,
+                ]),
             ]);
     }
 
@@ -192,13 +200,13 @@ class AppointmentApplicationResource extends Resource
             ])
             ->filters([
 
-                SelectFilter::make('appointment_status')
-                ->label('Appointment Status')
-                ->options([
-                    'pending' => 'Pending',
-                    'approved' => 'Approved',
-                    'rejected' => 'Rejected',
-                ])
+                // SelectFilter::make('appointment_status')
+                // ->label('Appointment Status')
+                // ->options([
+                //     'pending' => 'Pending',
+                //     'approved' => 'Approved',
+                //     'rejected' => 'Rejected',
+                // ])
               
 
             ])

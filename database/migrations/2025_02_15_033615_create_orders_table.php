@@ -27,7 +27,7 @@ return new class extends Migration
             $table->boolean('is_billing_same_as_shipping')->default(false);
             $table->decimal('shipping_price')->nullable();
             $table->string('shipping_method')->nullable();
-
+            //notes kinanlan pa change ang shipping address
             $table->timestamps();
         });
     }

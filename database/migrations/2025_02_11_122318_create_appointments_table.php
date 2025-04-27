@@ -24,6 +24,7 @@ return new class extends Migration
             $table->enum('pet_gender', ['male', 'female'])->default('male');
             $table->enum('appointment_status', ['pending', 'approved', 'rejected'])->default('pending');
             $table->string('pet_age');
+            $table->string('advance_payment_method')->nullable();
             $table->string('pet_weight');
             $table->boolean('isPetVaccinated')->default(false)->nullable();
             $table->timestamps();

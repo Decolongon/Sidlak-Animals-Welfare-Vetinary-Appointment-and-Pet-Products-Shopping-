@@ -3,6 +3,7 @@
 namespace App\Filament\Widgets;
 
 use App\Models\Donation\Donation;
+use BezhanSalleh\FilamentShield\Traits\HasWidgetShield;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\TextInput;
 use Filament\Tables;
@@ -17,6 +18,7 @@ use function Laravel\Prompts\search;
 
 class LatestDonations extends BaseWidget
 {
+    use HasWidgetShield;
 
     protected int | string | array $columnSpan = 'full';
 

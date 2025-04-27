@@ -2,25 +2,30 @@
 
 namespace App\Filament\Widgets;
 
-use App\Models\Adoption\Adoption;
-use App\Models\Animal\Dog;
-use App\Models\Donation\Donation;
-use App\Models\Volunteer\Volunteer;
-use Filament\Widgets\StatsOverviewWidget as BaseWidget;
-use Filament\Widgets\StatsOverviewWidget\Stat;
-use Filament\Support\Enums\IconPosition;
-use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
+use App\Models\Animal\Dog;
+use App\Models\Ecommerce\Order;
+use App\Models\Adoption\Adoption;
+use App\Models\Donation\Donation;
+use Illuminate\Support\Facades\DB;
+use App\Models\Volunteer\Volunteer;
+use Filament\Support\Enums\IconPosition;
+use Filament\Widgets\StatsOverviewWidget\Stat;
+use BezhanSalleh\FilamentShield\Traits\HasWidgetShield;
+use Filament\Widgets\StatsOverviewWidget as BaseWidget;
 
 class StatsOverview extends BaseWidget
 {
+    use HasWidgetShield;
     protected static ?string $pollingInterval = '60s';
-    protected static ?int $sort = 2;
+     protected static ?int $sort = 1;
     protected function getStats(): array
     {
         $pendingCount = Adoption::where('status', 'pending')->count();
 
         return [
+           
+
             Stat::make('Total', Dog::count())
                 ->descriptionIcon('heroicon-s-users', IconPosition::Before)
                 ->description('Registered dogs')
@@ -89,6 +94,7 @@ class StatsOverview extends BaseWidget
             ->toArray();
     }
 
+   
     protected function getAdoptionsDifference(): int
     {
         return $this->getDifference(Adoption::class);
