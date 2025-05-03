@@ -75,7 +75,7 @@ class ProductResource extends Resource
                                         ->maxLength(255)
                                         ->columnSpanFull()
                                         ->live(onBlur: true)
-                                        ->unique(Product::class, 'prod_name', ignoreRecord: true)
+                                        ->unique(Product::class, 'prod_name', ignoreRecord: true)   
                                         ->afterStateUpdated(fn (Set $set, ?string $state) => $set('prod_slug', Str::slug($state))),
     
                                     TextInput::make('prod_slug')
@@ -112,7 +112,8 @@ class ProductResource extends Resource
                                         ->label('Product Category')
                                         ->relationship(
                                             name: 'productCategories',
-                                            titleAttribute: 'prod_cat_name'
+                                            titleAttribute: 'prod_cat_name',
+                                            // ignoreRecord: true
                                         )
                                         ->getOptionLabelFromRecordUsing(fn ($record) => ucwords($record->prod_cat_name))
                                         ->preload()

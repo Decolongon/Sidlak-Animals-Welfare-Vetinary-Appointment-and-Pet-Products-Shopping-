@@ -15,8 +15,9 @@ return new class extends Migration
         Schema::create('vet_schedules', function (Blueprint $table) {
             $table->id();
             $table->foreignIdFor(User::class, 'user_id')->constrained()->cascadeOnDelete();
-            $table->dateTime('vet_shedule')->nullable();
-            
+            $table->dateTime('vet_schedule_open')->nullable();
+            $table->dateTime('vet_schedule_close')->nullable();
+            $table->boolean('is_the_same_schedule')->default(true);
             $table->timestamps();
         });
     }

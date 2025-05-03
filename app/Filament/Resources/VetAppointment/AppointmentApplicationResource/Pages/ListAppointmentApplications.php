@@ -14,7 +14,7 @@ class ListAppointmentApplications extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
-            Actions\CreateAction::make()->icon('heroicon-m-plus')->label('New Application'),
+            Actions\CreateAction::make()->icon('heroicon-s-plus-circle')->label('New Application'),
         ];
     }
 
@@ -29,4 +29,6 @@ class ListAppointmentApplications extends ListRecords
         ];
     }
 
+    
+    
 }

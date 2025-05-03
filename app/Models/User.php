@@ -126,7 +126,8 @@ class User extends Authenticatable
             return false; // Prevents errors when no user is logged in
         }
 
-        return $user->hasAnyRole(['super_admin','admin','admin_shop']);
+        //return $user->hasAnyRole(['super_admin','admin','admin_shop']);
+        return $user->roles()->exists();
     }
 
 

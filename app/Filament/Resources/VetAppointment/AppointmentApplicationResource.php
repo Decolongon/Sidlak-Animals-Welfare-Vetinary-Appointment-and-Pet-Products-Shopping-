@@ -9,6 +9,7 @@ use Filament\Forms\Form;
 use Filament\Pages\Page;
 use Filament\Tables\Table;
 use Illuminate\Support\Str;
+use Illuminate\Support\Carbon;
 use Filament\Infolists\Infolist;
 use Filament\Resources\Resource;
 use App\Enums\AppointmentStatusEnum;
@@ -37,8 +38,8 @@ class AppointmentApplicationResource extends Resource
 {
     protected static ?string $model = Appointment::class;
     protected static ?string $navigationGroup = 'Vetinary Appointment';
-    protected static ?int $navigationSort = 2;
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?int $navigationSort = 3;
+    protected static ?string $navigationIcon = 'heroicon-o-document-text';
     protected static SubNavigationPosition $subNavigationPosition = SubNavigationPosition::Top;
   
     public static function form(Form $form): Form
@@ -197,6 +198,12 @@ class AppointmentApplicationResource extends Resource
                 ->color(fn ($state) => AppointmentStatusEnum::tryFrom($state)?->getColor() ?? 'gray') 
                 ->icon(fn ($state) => AppointmentStatusEnum::tryFrom($state)?->getIcon() ?? null),
 
+                TextColumn::make('created_at')
+                ->label('Date')
+                ->dateTime('M d, Y')
+                ->sortable()
+                ->searchable()
+                ->formatStateUsing(fn ($state) => Carbon::parse($state)->format('M d, Y'))
             ])
             ->filters([
 
@@ -293,7 +300,7 @@ class AppointmentApplicationResource extends Resource
                    ->weight(FontWeight::ExtraBold),
 
                    TextEntry::make('pet_weight')
-                   ->label('Pet Weight')
+                   ->label('Pet Weight (kg)')
                    ->size(TextEntry\TextEntrySize::Large)
                    ->weight(FontWeight::ExtraBold),
 

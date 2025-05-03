@@ -31,7 +31,7 @@ class AppointmentCategoryResource extends Resource
 {
     protected static ?string $model = AppointmentCategory::class;
     protected static ?string $navigationGroup = 'Vetinary Appointment';
-
+    protected static ?int $navigationSort = 2;
     protected static ?string $navigationIcon = 'heroicon-m-folder';
     protected static SubNavigationPosition $subNavigationPosition = SubNavigationPosition::Top;
 

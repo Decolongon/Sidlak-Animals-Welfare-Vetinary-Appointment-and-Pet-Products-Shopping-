@@ -48,7 +48,7 @@ class ProductCategoryResource extends Resource
                     TextInput::make('prod_cat_name')
                     ->label('Product Category Name')
                     ->required()
-                   
+                    ->live(onBlur: true)
                     ->maxLength(255)
                     ->unique(ProductCategory::class, 'prod_cat_name', ignoreRecord: true)
                     ->afterStateUpdated(fn (Set $set, ?string $state) => $set('prod_cat_slug', Str::slug($state)))

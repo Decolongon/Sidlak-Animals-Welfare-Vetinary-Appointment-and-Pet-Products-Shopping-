@@ -23,8 +23,12 @@ class RoleBasedRedirect implements LoginResponseContract
         // Get the authenticated user
         $user = auth()->user();
         // Using Spatie's hasRole method to check for super_admin
-        if ($user->hasAnyRole(['super_admin', 'admin', 'super-admin','admin_shop'])) {
-            // Redirect to Filament admin panel
+        // if ($user->hasAnyRole(['super_admin', 'admin', 'super-admin','admin_shop'])) {
+        //     // Redirect to Filament admin panel
+        //     return redirect()->intended(config('filament.path', 'admin'));
+        // }
+
+        if($user->roles()->exists()){
             return redirect()->intended(config('filament.path', 'admin'));
         }
 

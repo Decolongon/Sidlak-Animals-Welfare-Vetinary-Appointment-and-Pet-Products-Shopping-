@@ -25,12 +25,14 @@ use App\Policies\Blog\BlogPostPolicy;
 use App\Policies\Blog\CategoryPolicy;
 use App\Http\Responses\LogoutResponse;
 use App\Models\Appointment\Appointment;
+use App\Models\Appointment\VetSchedule;
 use App\Models\Ecommerce\ProductReview;
 use App\Observers\AnnouncementObserver;
 use App\Policies\Contact\InquiryPolicy;
 use App\Policies\Ecommerce\OrderPolicy;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\ServiceProvider;
+use Filament\Navigation\NavigationGroup;
 use App\Models\Ecommerce\ProductCategory;
 use App\Policies\Adoption\AdoptionPolicy;
 use App\Policies\Donation\DonationPolicy;
@@ -38,9 +40,10 @@ use App\Policies\Ecommerce\ProductPolicy;
 use App\Policies\Volunteer\VolunteerPolicy;
 use App\Models\Appointment\AppointmentCategory;
 use App\Policies\Appointment\AppointmentPolicy;
+// use Filament\Http\Responses\Auth\Contracts\LogoutResponse as LogoutResponseContract;
+use App\Policies\Appointment\VetSchedulePolicy;
 use App\Policies\Ecommerce\ProductReviewPolicy;
 use App\Policies\Ecommerce\ProductCategoryPolicy;
-// use Filament\Http\Responses\Auth\Contracts\LogoutResponse as LogoutResponseContract;
 use App\Policies\Appointment\AppointmentCategoryPolicy;
 use Filament\Http\Responses\Auth\LoginResponse as AuthLoginResponse;
 use Filament\Http\Responses\Auth\Contracts\LogoutResponse as LogoutContractResponse;
@@ -53,7 +56,7 @@ class AppServiceProvider extends ServiceProvider
    
     public function register(): void
     {
-        $this->registerPolicies();
+        //$this->registerPolicies();
        
     }
 
@@ -65,9 +68,10 @@ class AppServiceProvider extends ServiceProvider
        
         Announcement::observe(AnnouncementObserver::class);
 
-        // $this->registerPolicies();
+        $this->registerPolicies();
        
-      
+        
+    
 
        
         
@@ -103,6 +107,7 @@ class AppServiceProvider extends ServiceProvider
            Order::class => OrderPolicy::class,
            Volunteer::class => VolunteerPolicy::class,
            Announcement::class => AnnouncementPolicy::class,
+           VetSchedule::class => VetSchedulePolicy::class,
         //    User::class => UserPolicy::class,
            
        ];

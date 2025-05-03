@@ -15,7 +15,7 @@ class UserSeeder extends Seeder
      */
     public function run(): void
     {
-
+        //super_admin
         $user = User::factory()->create([
             'name' => 'aye',
             'email' => 'aye@gmail.com',
@@ -34,19 +34,19 @@ class UserSeeder extends Seeder
             'email_verified_at' => now(),
             'password' => bcrypt('qwerty12345'),
         ]);
-        $role1 = Role::create(['name' => 'admin_shop']);
-        $admin_shop->assignRole($role1);
+        $role_shop = Role::create(['name' => 'admin_shop']);
+        $admin_shop->assignRole($role_shop);
 
 
         //admin for vet
-        $admin = User::factory()->create([
+        $admin_vet = User::factory()->create([
             'name' => 'vetinary',
             'email' => 'vet@gmail.com',
             'email_verified_at' => now(),
             'password' => bcrypt('qwerty12345'),
         ]);
-        $role1 = Role::create(['name' => 'admin']);
-        $admin->assignRole($role1);
+        $role_vet = Role::create(['name' => 'admin_vet']);
+        $admin_vet->assignRole($role_vet);
        
 
         $totalUsers = 15;

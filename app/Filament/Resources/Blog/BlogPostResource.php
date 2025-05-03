@@ -139,6 +139,7 @@ class BlogPostResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+        
             ->columns([
                 ImageColumn::make('post_image')->label('Featured Image'),
                 TextColumn::make('post_title')->sortable()->searchable()->label('Title')->wrap()->limit(70),

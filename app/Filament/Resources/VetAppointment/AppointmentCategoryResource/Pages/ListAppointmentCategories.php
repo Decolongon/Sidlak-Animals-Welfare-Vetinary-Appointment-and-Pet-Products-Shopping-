@@ -13,7 +13,7 @@ class ListAppointmentCategories extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
-            Actions\CreateAction::make()->label('Create Appointment Category')->icon('heroicon-m-plus'),
+            Actions\CreateAction::make()->label('Create Appointment Category')->icon('heroicon-s-plus-circle'),
         ];
     }
 }
