@@ -26,9 +26,11 @@ class Checkout extends Component
     public $notes;
     public $payment_method;
 
-    public $paymentIntent;
-    public $paymentIntent_id;
-    public $createPaymentIntent;
+    //paymonggo
+    protected $paymentMethod;
+    protected $paymentIntent;
+    protected $paymentIntent_id;
+    protected $createPaymentIntent;
 
     public function mount()
     {
@@ -81,6 +83,7 @@ class Checkout extends Component
         }
     }
 
+    //sanitization
     protected function sanitizeInput(array $data): array
     {
         return array_map(function ($value) {
@@ -88,71 +91,98 @@ class Checkout extends Component
         }, $data);
     }
 
-    //validate data 
-    protected $rules = [
+    
+    //validation of data
+    protected function rules(){
+       $rules =[
+        //    'payment_method' => 'required|in:gcash,card,paymaya,grab_pay'
         // 'shipping_street' => 'required',
         // 'shipping_city' => 'required',
         // 'shipping_state' => 'required',
         // 'shipping_zip' => 'required',
         'shipping_method' => 'required',
         'notes' => 'nullable|max:1000',
-    ];
+       ];
 
+       if ($this->shipping_method === 'card') {
+            $rules['card_name'] = 'required|string|min:3|max:100';
+            $rules['card_number'] = 'required|numeric|digits:16';
+            $rules['expiration_month'] = 'required|numeric|min:1|max:12';
+            $rules['expiration_year'] = 'required|numeric|min:' . date('Y') . '|max:' . (date('Y') + 15);
+            $rules['cvv'] = 'required|numeric|digits:3';
+        }
+
+       return $rules;
+    }
+   
     //place order
     public function placeOrder()
     {
-        // dd($this->payment_method); 
-        ($this->validate());
+        
+        $validatedData = $this->validate();
+        if ($this->shipping_method === 'e-wallet' && !$this->payment_method) {
+            $this->addError('payment_method', 'Please select a specific e-wallet.');
+            return;
+        }
 
-        $sanitizedData = $this->sanitizeInput([
-            // 'user_id' => Auth::id(),
-            // 'shipping_street' => $this->shipping_street,
-            // 'shipping_city' => $this->shipping_city,
-            // 'shipping_state' => $this->shipping_state,
-            // 'shipping_zip' => $this->shipping_zip,
-            'shipping_method' => $this->shipping_method,
-            'notes' => $this->notes,
+        $sanitizedData = $this->sanitizeInput($validatedData);
+       
+        $orders = Order::create([
+            'user_id' => Auth::id(),
+            // 'shipping_street' => $sanitizedData['shipping_street'],
+            // 'shipping_city' => $sanitizedData['shipping_city'],
+            // 'shipping_zip' => $sanitizedData['shipping_zip'],
+            'shipping_method' => $sanitizedData['shipping_method'],
+            'notes' => $sanitizedData['notes'],
+            'shipping_price' => $this->totalShipping,
             'total' => $this->subtotal,
+           
         ]);
 
-        // $this->paymentCreateIntent($this->subtotal);
-
-        // $this->paymentIntent = Paymongo::paymentIntent()->find($this->paymentIntent_id)->getAttributes();
-        // $attachedPaymentIntent = $this->createPaymentIntent->attach($this->paymentMethod->id, route('page.shop'));
-
-        // if($this->shipping_method == 'gcash'){
-        //     $
-        // }
-
-
-        $orders = Order::create([
-                    'user_id' => Auth::id(),
-                    // 'shipping_street' => $sanitizedData['shipping_street'],
-                    // 'shipping_city' => $sanitizedData['shipping_city'],
-                    // 'shipping_zip' => $sanitizedData['shipping_zip'],
-                    'shipping_method' => $sanitizedData['shipping_method'],
-                    'notes' => $sanitizedData['notes'],
-                    'shipping_price' => $this->totalShipping,
-                    'total' => $this->subtotal
-                ]);
-
-        foreach ($this->checkoutItems as $item) {
-             $orders->orderItems()->create([
-                    'product_id' => $item->product->id,
-                    'quantity' => $item->quantity,
-                    // 'total' => $this->subtotal,
-                    'price' => $item->product->prod_price,
-                ]);
-
-                Cart::where('id', $item->id)
-                ->where('user_id', Auth::id())
-                ->delete();
-        }
+       
+        if (in_array($this->shipping_method, ['gcash', 'paymaya', 'grab_pay', 'card'])) {
+            $this->paymentCreateIntent($this->subtotal);
        
 
-        // $redirectUrl = $attachedPaymentIntent->next_action['redirect']['url'];
-        $this->reset(['payment_method', 'shipping_method', 'notes', 'checkoutItems','totalShipping','subtotal']);
-        // return redirect($redirectUrl);
+            $this->paymentIntent = Paymongo::paymentIntent()->find($this->paymentIntent_id)->getAttributes();
+            $this->paymentCreateMethod($sanitizedData);
+
+        
+            $attachedPaymentIntent = $this->createPaymentIntent->attach($this->paymentMethod->id, route('page.shop'));
+           
+            $this->processOrderItems($orders);
+            
+            //update ang payment status to completed if  user ng ganmit e-wallet
+            $orders->update([
+                'payment_status' => 'completed'
+            ]);
+
+            if (
+                isset($attachedPaymentIntent->next_action['redirect']['url']) &&
+                $attachedPaymentIntent->status === 'awaiting_next_action'
+            ) {
+                // Redirect user to complete payment
+                return redirect()->away($attachedPaymentIntent->next_action['redirect']['url']);
+               
+            }
+            
+            // if ($attachedPaymentIntent->status === 'succeeded') {
+            //     // Payment completed instantly (e.g., some cards)
+              
+            //     // $this->handdleSuccesfullPayment();
+            //     // return redirect()->route('page.shop');
+            // }
+           
+
+        }        
+       
+       
+        $this->processOrderItems($orders);
+       
+
+     
+        $this->reset();
+      
         $this->alert('success','', [
             'position' => 'top-end',
             'timer' => 3000,
@@ -166,24 +196,80 @@ class Checkout extends Component
 
 
     public function paymentCreateIntent($amount){
-        $this->createPaymentIntent = Paymongo::paymentIntent()->create([
-            'amount' => $amount,
+        
+       
+    
+        $paymentIntent = Paymongo::paymentIntent()->create([
+            'amount' => $this->subtotal,
             'payment_method_allowed' => [
                 'card','paymaya','grab_pay', 'gcash',
             ],
-            'payment_method_options' => [
-                'card' => [
-                    'request_three_d_secure' => 'automatic',
-                ],
-            ],
-            'description' => 'Sidlak Animal Welfare Donation',
-            'statement_descriptor' => 'SIDLAK ANIMAL WELFARE',
             'currency' => 'PHP',
+            'description' => 'Sidlak Animal Welfare Ecommerce payment',
+            'statement_descriptor' => 'SIDLAK ANIMAL WELFARE',
         ]);
-      
-        $this->paymentIntent_id = $this->createPaymentIntent->id;
+    
+        $this->paymentIntent_id = $paymentIntent->id;
+        $this->createPaymentIntent = $paymentIntent;
+        // dd($this->createPaymentIntent);
+
     }
 
+    public function paymentCreateMethod($sanitizedData)
+    {
+      
+        if (in_array($this->shipping_method, ['gcash', 'paymaya', 'grab_pay'])) {
+            $this->paymentMethod = Paymongo::paymentMethod()->create([
+                'type' => $this->shipping_method,
+                'amount' => $this->subtotal * 100,
+                'currency' => 'PHP',
+                
+            ]);
+           
+        }
+    
+        // Card logic
+        if ($this->shipping_method === 'card') {
+            $this->paymentMethod = Paymongo::paymentMethod()->create([
+                'type' => 'card',
+                'details' => [
+                    'email' => Auth::user()->email,
+                    'details' => [
+                        'card_number' => $sanitizedData['card_number'],
+                        'exp_month' => (int)$sanitizedData['expiration_month'],
+                        'exp_year' => (int)$sanitizedData['expiration_year'],
+                        'cvc' => $sanitizedData['cvv'],
+                    ],
+                ],
+            ]);
+        }
+    }
+
+
+
+    protected function processOrderItems(Order $orders)
+    {
+        foreach ($this->checkoutItems as $item) {
+            $product = $item->product;
+
+            // Deduct quantity from product stock
+            $product->prod_quantity -= $item->quantity;
+            $product->save();
+
+            $orders->orderItems()->create([
+                'product_id' => $item->product->id,
+                'quantity' => $item->quantity,
+                'price' => $item->product->prod_price,
+            ]);
+
+            Cart::where('id', $item->id)
+                ->where('user_id', Auth::id())
+                ->delete();
+        }
+    }
+
+
+    
 
 
    

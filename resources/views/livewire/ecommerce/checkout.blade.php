@@ -204,6 +204,54 @@
                         </div>
                     </div>
 
+                @if($shipping_method === 'card')
+                    <div class="p-4 mb-4 bg-white border border-gray-200 shadow-sm lg:mb-5 rounded-xl md:p-5 dark:bg-neutral-900 dark:border-neutral-700 dark:text-neutral-400">
+                        <h3 class="font-medium inline-block text-sm text-gray-800 mt-2.5 mb-3 dark:text-neutral-200">{{'Card Details'}}</h3>
+
+                        <div class="mb-3">
+                        <input type="text" wire:model.blur="card_name" id="card_name" class="block w-full px-4 py-3 text-sm border-gray-200 rounded-lg focus:border-amber-500 focus:ring-amber-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-900 dark:border-neutral-700 dark:text-neutral-400 dark:placeholder-neutral-500 dark:focus:ring-neutral-600 bg-slate-100" placeholder="Name on Card">
+                        @error('card_name') <span class="text-sm text-red-500">{{ $message }}</span> @enderror
+                        </div>
+
+                        <div class="mb-3">
+                        <input type="text" wire:model.blur="card_number" id="card_number" class="block w-full px-3 py-3 text-sm border-gray-200 rounded-lg shadow-sm pe-11 focus:border-amber-500 focus:ring-amber-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-900 dark:border-neutral-700 dark:text-neutral-400 dark:placeholder-neutral-500 dark:focus:ring-neutral-600" placeholder="1234 5678 9012 3456">
+                        @error('card_number') <span class="text-sm text-red-500">{{ $message }}</span> @enderror
+                        </div>
+
+                        <div class="grid grid-cols-3 gap-4">
+                            <div>
+                                <span class="block mb-2 text-sm text-gray-600 dark:text-neutral-500">{{'Expiration Month'}}</span>
+                                <select wire:model.blur="expiration_month"  id="expiration_month" class="block w-full px-3 py-2 text-sm border-gray-200 rounded-lg shadow-sm pe-9 focus:border-amber-500 focus:ring-amber-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-900 dark:border-neutral-700 dark:text-neutral-400 dark:placeholder-neutral-500 dark:focus:ring-neutral-600">
+                                    <option value="">{{ __('Select Month') }}</option>
+                                    @for($i = 1; $i <= 12; $i++)
+                                        <option value="{{ $i }}">{{ str_pad($i, 2, '0', STR_PAD_LEFT) }}</option>
+                                    @endfor
+                                </select>
+                                @error('expiration_month') <span class="text-sm text-red-500">{{ $message }}</span> @enderror
+                            </div>
+
+                            <div>
+                                <span class="block mb-2 text-sm text-gray-600 dark:text-neutral-500"> {{'Year'}}</span>
+                                <select wire:model.blur="expiration_year" id="expiration_year"
+                                        class="block w-full px-3 py-2 text-sm border-gray-200 rounded-lg shadow-sm pe-9 focus:border-amber-500 focus:ring-amber-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-900 dark:border-neutral-700 dark:text-neutral-400 dark:placeholder-neutral-500 dark:focus:ring-neutral-600">
+                                    <option value="">{{'Year'}}</option>
+                                    @for($i = date('Y'); $i <= date('Y') + 10; $i++)
+                                        <option value="{{ $i }}">{{ $i }}</option>
+                                    @endfor
+                                </select>
+                                @error('expiration_year') <span class="text-sm text-red-600">{{ $message }}</span> @enderror
+                            </div>
+
+                            <div>
+                                <span class="block mb-2 text-sm text-gray-600 dark:text-neutral-500"> {{'CVV'}}</span>
+                                <input type="text" wire:model.blur="cvv" id="cvv" class="block w-full px-3 py-2 text-sm border-gray-200 rounded-lg shadow-sm pe-11 focus:border-amber-500 focus:ring-amber-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-900 dark:border-neutral-700 dark:text-neutral-400 dark:placeholder-neutral-500 dark:focus:ring-neutral-600"
+                                    placeholder="123">
+                                @error('cvv') <span class="text-sm text-red-600">{{ $message }}</span> @enderror
+                            </div>
+                        </div>
+                    </div>
+                @endif
+
                     <div class="mt-4">
                         <label for="order_notes" class="block text-sm font-medium text-gray-700 dark:text-neutral-400 mb-1">
                             Notes (optional)
