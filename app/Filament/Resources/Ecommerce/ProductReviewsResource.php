@@ -68,10 +68,11 @@ class ProductReviewsResource extends Resource
     
                                     RatingStar::make('rating')
                                         ->required()
+                                        // ->min(1)
                                         ->label('Rating'),
     
                                     Textarea::make('review')
-                                        ->required()
+                                        //->required()
                                         ->maxLength(255)
                                         ->label('Review'),
                                 ])

@@ -76,7 +76,28 @@
                             <input type="checkbox" wire:model="same_as_billing" class="mr-2">
                             Same as billing address
                         </label> --}}
-                
+      
+                <select wire:model.live="selectedCity" class="py-3 px-4 pe-9 block w-full border-gray-200 rounded-lg text-sm focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-900 dark:border-neutral-700 dark:text-neutral-400 dark:placeholder-neutral-500 dark:focus:ring-neutral-600">
+                    
+                    <option value="">-- Select City --</option>
+                    
+                    @foreach($cities as $city)
+                        <option wire:key="{{ 'city-' . $city->id }}" value="{{ $city->city_code }}">{{ $city->name }}</option>
+                    @endforeach
+                </select>
+
+                {{-- Barangay Dropdown --}}
+                @if ($selectedCity)
+                <select wire:model="selectedBarangay" class="py-3 px-4 pe-9 block w-full border-gray-200 rounded-lg text-sm focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-900 dark:border-neutral-700 dark:text-neutral-400 dark:placeholder-neutral-500 dark:focus:ring-neutral-600">
+                        <option value="">-- Select Barangay --</option>
+                        @foreach($barangays as $barangay)
+                            <option wire:key="{{ 'barangay-' . $barangay->id }}" value="{{ $barangay->barangay_code }}">{{ $barangay->name }}</option>
+                        @endforeach
+                    </select> 
+                @endif
+    
+
+{{--                 
                         <label for="shipping_street" class="sr-only">Street</label>
                         <input type="text" id="shipping_street" wire:model="shipping_street"
                             class="py-2.5 sm:py-3 px-4 block w-full border-gray-200 rounded-lg sm:text-sm 
@@ -103,7 +124,7 @@
                             class="py-2.5 sm:py-3 px-4 block w-full border-gray-200 rounded-lg sm:text-sm 
                                    focus:border-blue-500 focus:ring-blue-500 dark:bg-neutral-900 
                                    dark:border-neutral-700 dark:text-neutral-400 dark:placeholder-neutral-500"
-                            placeholder="ZIP Code Example: 6119" >
+                            placeholder="ZIP Code Example: 6119" > --}}
 
                             
                             <label class="flex items-center p-3 w-full bg-white border border-gray-200 rounded-lg text-sm dark:bg-neutral-900 dark:border-neutral-700 dark:text-neutral-400">

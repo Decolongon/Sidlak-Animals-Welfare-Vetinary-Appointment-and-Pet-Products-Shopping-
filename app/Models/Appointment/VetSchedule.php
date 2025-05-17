@@ -13,12 +13,14 @@ class VetSchedule extends Model
         'vet_schedule_open',
         'vet_schedule_close',
         'is_the_same_schedule',
+        'num_customers',
     ];
 
     protected $casts = [
         'vet_schedule_open' => 'datetime',
         'vet_schedule_close' => 'datetime',
         'is_the_same_schedule' => 'boolean',
+        'num_customers' => 'integer',
     ];
 
     public function user(): BelongsTo

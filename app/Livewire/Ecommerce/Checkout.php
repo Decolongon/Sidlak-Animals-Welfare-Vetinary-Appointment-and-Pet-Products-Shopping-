@@ -11,6 +11,10 @@ use Livewire\Attributes\Layout;
 use Illuminate\Support\Facades\Auth;
 use Luigel\Paymongo\Facades\Paymongo;
 use Jantinnerezo\LivewireAlert\LivewireAlert;
+use Woenel\Prpcmblmts\Models\PhilippineCity;
+use Woenel\Prpcmblmts\Models\PhilippineRegion;
+use Woenel\Prpcmblmts\Models\PhilippineBarangay;
+use Woenel\Prpcmblmts\Models\PhilippineProvince;
 
 class Checkout extends Component
 {
@@ -32,6 +36,12 @@ class Checkout extends Component
     protected $paymentIntent_id;
     protected $createPaymentIntent;
 
+    public $province_id = 37; //negros occidental
+    public $region_id = 7; //region VI (western visayas)
+    public $cities = [];
+    public $barangays = [];
+    public $selectedRegion, $selectedProvince, $selectedCity, $selectedBarangay;
+
     public function mount()
     {
       $this->getCheckoutItems();
@@ -39,6 +49,17 @@ class Checkout extends Component
       $this->calculateTotalShipping();
       $this->calculateSubtotal();
       //$this->placeOrder();
+
+       $this->selectedRegion = $this->region_id;
+       $this->selectedProvince = '0645'; //provincce_code of negroos occidental
+
+         // Load cities for the province
+      $this->cities = PhilippineCity::where('province_code', $this->selectedProvince)->get();
+
+        // // Load barangays if a city is already selected
+        if ($this->selectedCity) {
+            $this->barangays = PhilippineBarangay::where('city_code', $this->selectedCity)->get();
+        }
         
     }
 
@@ -147,31 +168,32 @@ class Checkout extends Component
             $this->paymentIntent = Paymongo::paymentIntent()->find($this->paymentIntent_id)->getAttributes();
             $this->paymentCreateMethod($sanitizedData);
 
-        
+            //dd($this->paymentIntent);
             $attachedPaymentIntent = $this->createPaymentIntent->attach($this->paymentMethod->id, route('page.shop'));
            
             $this->processOrderItems($orders);
+            //   if($this->paymentIntent->status === 'succeeded'){
+            //     $orders->update([
+            //         'payment_status' => $this->paymentIntent
+            //     ]);
+            // }
             
-            //update ang payment status to completed if  user ng ganmit e-wallet
-            $orders->update([
-                'payment_status' => 'completed'
-            ]);
-
+              $orders->update([
+                    'payment_status' => 'completed'
+                ]);
+          
+          
             if (
                 isset($attachedPaymentIntent->next_action['redirect']['url']) &&
                 $attachedPaymentIntent->status === 'awaiting_next_action'
             ) {
                 // Redirect user to complete payment
                 return redirect()->away($attachedPaymentIntent->next_action['redirect']['url']);
-               
-            }
-            
-            // if ($attachedPaymentIntent->status === 'succeeded') {
-            //     // Payment completed instantly (e.g., some cards)
               
-            //     // $this->handdleSuccesfullPayment();
-            //     // return redirect()->route('page.shop');
-            // }
+            }
+
+          
+          
            
 
         }        
@@ -197,10 +219,8 @@ class Checkout extends Component
 
     public function paymentCreateIntent($amount){
         
-       
-    
         $paymentIntent = Paymongo::paymentIntent()->create([
-            'amount' => $this->subtotal,
+            'amount' => $amount,
             'payment_method_allowed' => [
                 'card','paymaya','grab_pay', 'gcash',
             ],
@@ -246,6 +266,21 @@ class Checkout extends Component
     }
 
 
+    public function updatedSelectedCity($value)
+    {
+         $this->barangays = PhilippineBarangay::where('city_code', $value)->get();
+    }
+
+    public function updatedSelectedRegion($value)
+    {
+         // PhilippineRegion::where('id', $this->region_id)->first();
+    }
+
+    public function updateSelectedProvince($value)
+    {
+
+    }
+
 
     protected function processOrderItems(Order $orders)
     {
@@ -282,7 +317,9 @@ class Checkout extends Component
         return view('livewire.ecommerce.checkout',[
            'checkoutItems' => $this->checkoutItems,
            'subtotal' => $this->subtotal,
-           'totalShipping' => $this->totalShipping
+           'totalShipping' => $this->totalShipping,
+           'barangays' => $this->barangays,
+           'cities' => $this->cities
         ]);
     }
 }

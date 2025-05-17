@@ -166,14 +166,13 @@
             <div class="flex flex-col gap-5 mt-5 lg:gap-10 sm:flex-row sm:items-center sm:mt-0 sm:ps-5">
                 <x-nav-link wire:navigate.hover href="{{ route('page.home') }}" :active="request()->routeIs('page.home')">{{ __('Home') }}</x-nav-link>
                 <x-nav-link wire:navigate.hover href="{{ route('page.shop') }}" :active="request()->routeIs('page.shop')">{{ __('Shop') }}</x-nav-link>
+                 <x-nav-link wire:navigate.hover href="{{ route('appointment') }}" :active="request()->routeIs('appointment')">{{ __('Appointment') }}</x-nav-link>
                 <x-nav-link wire:navigate.hover href="{{ route('page.donate') }}" :active="request()->routeIs('page.donate')">{{ __('Give Love') }}</x-nav-link>
                 <x-nav-link wire:navigate.hover href="{{ route('page.volunteer') }}" :active="request()->routeIs('page.volunteer')">{{ __('Volunteers') }}</x-nav-link>
                 <x-nav-link wire:navigate href="{{ route('page.dogs') }}" :active="request()->routeIs('page.dogs') || request()->routeIs('page.dog.single')">{{ __('Dogs') }}</x-nav-link>
                 <x-nav-link wire:navigate.hover href="{{ route('page.blogs') }}" :active="request()->routeIs('page.blogs') || request()->routeIs('page.blog.single')">{{ __('Blogs') }}</x-nav-link>
                 <x-nav-link wire:navigate.hover href="{{ route('page.contact') }}" :active="request()->routeIs('page.contact')">{{ __('Contact') }}</x-nav-link>
                
-                {{-- <x-nav-link wire:navigate.hover href="{{ route('page.get-cart') }}" :active="request()->routeIs('page.get-cart')">{{ __('Appointment') }}</x-nav-link> --}}
-              
             
                 
             </div>

@@ -197,7 +197,7 @@ class OrderResource extends Resource
                                 ->optionsLimit(5)
                                 ->searchable()
                                 ->required()
-                                ->reactive()
+                                ->live(onBlur: true)
                                 ->afterStateUpdated(function ($state, $set, $get) {
                                         $product = Product::find($state);
                                         $set('price', $product?->prod_price ?? 0);
@@ -242,10 +242,11 @@ class OrderResource extends Resource
                                 ->default(1)
                                 ->required()
                                 ->maxValue(fn ($get) => Product::find($get('product_id'))?->prod_quantity ?? 1)
-                                ->reactive()
+                                // ->reactive()
                                 // ->afterStateUpdated(fn ($state, $set, $get) => 
                                 //     $set('total', ($get('price')) * ($state) + ($get('shipping_price')))
                                 // )
+                                ->live(onBlur: true)
                                 ->afterStateUpdated(function ($state, $set, $get) {
                                         $price = $get('price') ?? 0;
                                         $shipping = $get('shipping_cost') ?? 0;
@@ -275,31 +276,35 @@ class OrderResource extends Resource
                             
                                     if (!$product) return [];
                             
-                                    if ($product->prod_unit === 'pcs') {
+                                    if ($product->prod_unit === 'pcs' || $product->prod_unit === 'kg') {
                                         return ['integer'];
                                     }
                             
-                                    if ($product->prod_unit === 'kg') {
-                                        $weight = $product->prod_weight;
-                                        return function ($attribute, $value, $fail) use ($weight) {
-                                            if ($weight <= 0) return;
+                                    // if ($product->prod_unit === 'kg') {
+                                    //     $weight = $product->prod_weight;
+                                    //     return function ($attribute, $value, $fail) use ($weight) {
+                                    //         if ($weight <= 0) return;
                             
-                                            // Check if value is a multiple of prod_weight (e.g. 1.2, 2.4, etc.)
-                                            if (fmod($value, $weight) !== 0.0) {
-                                                $fail("Quantity must be a multiple of {$weight} kg.");
-                                            }
-                                        };
-                                    }
+                                    //         // Check if value is a multiple of prod_weight (e.g. 1.2, 2.4, etc.)
+                                    //         if (fmod($value, $weight) !== 0.0) {
+                                    //             $fail("Quantity must be a multiple of {$weight} kg.");
+                                    //         }
+                                    //     };
+                                    // }
                             
                                     return [];
                                 })
                                 ->hint(function ($get) {
                                     $product = Product::find($get('product_id'));
                                     if (!$product) return null;
+
+                                    if ($product->prod_unit === 'pcs' || $product->prod_unit === 'kg') {
+                                        return 'Input whole number only.';
+                                    }
                             
-                                    return $product->prod_unit === 'pcs'
-                                        ? 'Input whole number only.'
-                                        : "Input based on product weight. Example: 1.30, multiples of {$product->prod_weight} kg.";
+                                    // return $product->prod_unit === 'pcs'
+                                    //     ? 'Input whole number only.'
+                                    //     : "Input based on product weight. Example: 1.30, multiples of {$product->prod_weight} kg.";
                                 })
                                 ->hintColor('warning')
                                 ->label('Quantity'),
@@ -339,8 +344,8 @@ class OrderResource extends Resource
                         ->numeric()
                         ->required()
                         ->disabled()
-                        ->dehydrated()
-                        ->reactive(),
+                        ->dehydrated(),
+                        
                         
                           TextInput::make('total')
                           ->numeric()
@@ -348,6 +353,7 @@ class OrderResource extends Resource
                           ->disabled()
                           ->dehydrated()
                           ->minValue(0)
+                          ->formatStateUsing(fn ($state) => number_format( $state, 2))
                           ->label('Total'), 
 
                  ]),
@@ -392,7 +398,7 @@ class OrderResource extends Resource
                     $record->orderItems->first()?->product->images()
                         ->orderBy('created_at')
                         ->value('url')
-                ),
+                )->toggleable(isToggledHiddenByDefault: true),
 
 
 
@@ -422,6 +428,7 @@ class OrderResource extends Resource
                 TextColumn::make('shipping_method')
                     ->label('Shipping Method')
                     ->badge()
+                    ->toggleable(isToggledHiddenByDefault: true)
                     ->formatStateUsing(fn (string $state) : string =>
                     ($state == 'gcash' || $state == 'paymaya' || $state == 'grab_pay' || $state == 'card') ? 'E-Wallet/' . strtoupper($state) :
                     strtoupper($state))

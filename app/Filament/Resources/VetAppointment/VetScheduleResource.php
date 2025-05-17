@@ -11,7 +11,10 @@ use Filament\Tables\Table;
 use Illuminate\Support\Carbon;
 use Filament\Resources\Resource;
 use Filament\Forms\Components\Hidden;
+use Filament\Forms\Components\Section;
 use App\Models\Appointment\VetSchedule;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Forms\Components\TextInput;
 use Illuminate\Database\Eloquent\Builder;
 use Filament\Forms\Components\ToggleButtons;
 use Filament\Forms\Components\DateTimePicker;
@@ -24,7 +27,7 @@ class VetScheduleResource extends Resource
     protected static ?string $model = VetSchedule::class;
 
     
-
+    
     protected static ?string $navigationIcon = 'heroicon-o-calendar-date-range';
     protected static ?string $navigationLabel = 'Vetinary Schedule';
     protected static ?string $navigationGroup = 'Vetinary Appointment';
@@ -33,24 +36,31 @@ class VetScheduleResource extends Resource
     {
         return $form
             ->schema([
+            Section::make()
+                ->schema([
+                
+           
                 Hidden::make('user_id')
                 ->default(auth()->user()->id),
 
                 DateTimePicker::make('vet_schedule_open')
                 ->required()
-                ->displayFormat('F j, Y h:i A') //format full year, day, month, time
+                //->displayFormat('F j, Y h:i A') //format full year, day, month, time
                 ->rule('after_or_equal:now')
-                ->native(false)
-                ->timezone('Asia/Manila') 
+                 ->native(false)
+                 ->seconds(false)
+                ->date('F j, Y, g:i a')
+               
                 ->hint('Must be today or later')
                 ->hintColor('warning')
                 ->label('Opening Time'),
 
                 DateTimePicker::make('vet_schedule_close')
                 ->required()
+                ->seconds(false)
                 ->native(false) 
-                
-                ->displayFormat('F j, Y h:i A')
+                  ->date('F j, Y, g:i a')
+                // ->displayFormat('F j, Y h:i A')
                 // ->rule(function ( $get) {
                 //     $openTime = $get('vet_shedule_open');
                    
@@ -93,8 +103,22 @@ class VetScheduleResource extends Resource
                     false => 'heroicon-m-x-circle',
                     true => 'heroicon-m-check-circle',
                 ])
-                ->default(true),
-            ]);
+                ->default(false),
+
+                TextInput::make('num_customers')
+                ->label('Enter the number of appointments you wish to accommodate')
+                ->required()
+                ->columnSpanfull()
+                ->rules([
+                   'min:1',
+                   'max:50',
+                ])
+                ->numeric(),
+               
+                
+            ])->columns(1),
+
+        ])->columns(1);
     }
 
     public static function table(Table $table): Table
@@ -128,6 +152,13 @@ class VetScheduleResource extends Resource
                     false => 'heroicon-m-x-circle',
                     true => 'heroicon-m-check-badge',
                 ]),
+
+                TextColumn::make('num_customers')
+                ->label('Number of Appointments to Accommodate')
+                ->toggleable(isToggledHiddenByDefault: true)
+                ->sortable(),
+
+              
             ])
             ->filters([
                

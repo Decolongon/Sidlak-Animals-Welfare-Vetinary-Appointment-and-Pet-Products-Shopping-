@@ -31,8 +31,9 @@ class AppointmentCategoryResource extends Resource
 {
     protected static ?string $model = AppointmentCategory::class;
     protected static ?string $navigationGroup = 'Vetinary Appointment';
+     protected static ?string $navigationLabel = 'Services Offered';
     protected static ?int $navigationSort = 2;
-    protected static ?string $navigationIcon = 'heroicon-m-folder';
+    protected static ?string $navigationIcon = 'heroicon-o-square-3-stack-3d';
     protected static SubNavigationPosition $subNavigationPosition = SubNavigationPosition::Top;
 
     public static function form(Form $form): Form
@@ -42,7 +43,7 @@ class AppointmentCategoryResource extends Resource
 
                 TextInput::make('appoint_cat_name')
                 ->required()
-                ->label('Appointment Category Name')
+                ->label('Service Name')
                 ->maxLength(255)
                 ->live(onBlur: true)
                 ->afterStateUpdated(fn (Set $set, ?string $state) => $set('appoint_cat_slug', Str::slug($state)))
@@ -51,7 +52,7 @@ class AppointmentCategoryResource extends Resource
 
                 TextInput::make('appoint_cat_slug')
                 ->disabled()
-                ->label('Appointment Category Slug')
+                ->label('Service Slug')
                 ->dehydrated()
                 ->required()
                 ->maxLength(255)
@@ -59,7 +60,7 @@ class AppointmentCategoryResource extends Resource
                 ->columnSpan(1),
 
                 MarkdownEditor::make('appoint_cat_description')
-                ->label('Appointment Category Description')
+                ->label('Service Description')
                 ->maxLength(65535)
                 ->columnSpanFull(),
 

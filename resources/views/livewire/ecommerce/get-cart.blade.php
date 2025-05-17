@@ -12,12 +12,7 @@
       </button>
   </div>
   <div class="p-4">
-      @if(session()->has('message') || session()->has('error_message'))
-      <div class="p-2 mb-4 {{ session()->has('message') ? 'text-green-500 dark:text-green-400' : 'text-red-500 dark:text-red-400' }}">
-          {{ session('message') ?? session('error_message') }}
-      </div>
-      @endif
-
+      
        <!-- Select All Checkbox -->
        @if (count($carts) > 0)
         <div class="flex items-center mb-4">
@@ -56,7 +51,7 @@
                   </button>
 
                   <span class="text-lg font-semibold text-gray-900 dark:text-white">
-                      {{ $cart->quantity }}
+                      {{ number_format($cart->quantity,0) }}
                   </span>
 
                   <span wire:loading wire:target="increaseQuantity({{ $cart->id }})">
@@ -79,13 +74,17 @@
           @endforelse
       </div>
 
-      @if(count($carts) > 0)
-        <div class="sticky bottom-0 left-0 bg-white dark:bg-neutral-800 p-4 border-t dark:border-neutral-700">
+    @if(count($carts) > 0)
+        <div class="sticky bottom-8 left-0 bg-white dark:bg-neutral-800 p-4 border-t dark:border-neutral-700 z-10">
             <div class="mt-4 flex gap-3">
-                <button wire:click="removeSelected" class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700">Remove Item</button>
-                <x-button wire:click="checkout">Checkout</x-button>
+                <button wire:click="removeSelected" class="px-3 py-1.5 text-sm bg-red-600 text-white rounded-lg hover:bg-red-700">
+                    Remove Item
+                </button>
+                <x-button wire:click="checkout" class="px-3 py-1.5 text-sm">
+                    Checkout
+                </x-button>
             </div>
         </div>
-      @endif
+    @endif
   </div>
 </div>

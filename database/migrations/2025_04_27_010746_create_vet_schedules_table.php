@@ -17,6 +17,7 @@ return new class extends Migration
             $table->foreignIdFor(User::class, 'user_id')->constrained()->cascadeOnDelete();
             $table->dateTime('vet_schedule_open')->nullable();
             $table->dateTime('vet_schedule_close')->nullable();
+            $table->integer('num_customers')->nullable();
             $table->boolean('is_the_same_schedule')->default(true);
             $table->timestamps();
         });

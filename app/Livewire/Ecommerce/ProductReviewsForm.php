@@ -22,10 +22,10 @@ class ProductReviewsForm extends Component
 
       
     protected $rules = [
-        'review' => 'required|string|max:500',
+        'review' => 'max:10000',
         // 'image_review' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         'image_review.*' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
-        'rating' => 'required',
+        'rating' => 'required|numeric|min:1|max:5',
     ];
 
     public function mount(){
@@ -73,7 +73,7 @@ class ProductReviewsForm extends Component
             }
 
         }
-
+         //$this->rating !== '' ? (int) $this->rating : null,
         $data = $this->sanitizeInput([
             'review' => $this->review,
             'rating' => $this->rating,

@@ -20,7 +20,7 @@ class Shop extends Component
     public $query = ''; // search for products
     public $searchCat = ''; // search for prod categories
     public $categories;
-    public $products;
+    //public $products;
     public $selectedCat = null; // hold the selected category id
     public $selectedCatName = null; // seleceted category name
     public $sortBy = 'asc'; // default sort order
@@ -90,8 +90,9 @@ class Shop extends Component
             // if (in_array($this->sortBy, ['asc', 'desc'])) {
             //     $query->orderBy('prod_price', $this->sortBy);
             // }
-            $this->products = $query->get();
+            // $this->products = $query->paginate(4);
           
+          return $query->paginate(12);
     }
 
 
@@ -135,7 +136,7 @@ class Shop extends Component
     public function render()
     {
         return view('livewire.ecommerce.shop',[
-            'products' => $this->products,
+            'products' => $this->getProducts(),
             'categories' => $this->categories
         ]);
     }

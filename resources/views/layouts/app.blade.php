@@ -8,7 +8,7 @@
         <title>{{ config('app.name') . ' - ' .'SDAS' }}</title>
         <link rel="icon" href="{{ asset('imgs/sdas-logo.png') }}" type="image/png">
        
-
+     <link href="https://cdn.jsdelivr.net/npm/tom-select/dist/css/tom-select.css" rel="stylesheet">
         <!-- Fonts -->
         {{-- <link rel="preconnect" href="https://fonts.bunny.net"> --}}
         <style>
@@ -36,7 +36,7 @@
         @vite(['resources/js/app.js'])
         <script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
         <x-livewire-alert::scripts />
-
+        <script src="https://cdn.jsdelivr.net/npm/tom-select/dist/js/tom-select.complete.min.js"></script>
         <script>
             if (typeof attrs === 'undefined') {
                 let attrs = [

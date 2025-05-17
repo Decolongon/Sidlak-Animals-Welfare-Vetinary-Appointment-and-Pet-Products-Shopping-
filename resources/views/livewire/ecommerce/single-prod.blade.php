@@ -111,27 +111,36 @@
             @endif
              
             </div>
+ 
+        
+        @if ($activeTab == 'description')
+        <div 
+            x-data="{
+                expanded: false,
+                fullText: @js($product->prod_description),
+                shortText: @js(Str::limit($product->prod_description, 300, '...'))
+            }" 
+            class="mt-2 text-gray-800 dark:text-white"
+        >
+            <div 
+                x-bind:class="expanded ? '' : 'line-clamp-4'" 
+                class="text-gray-800 dark:text-white" 
+                x-html="expanded ? fullText : shortText">
+            </div>
 
-            <!-- Expandable Description -->
-            {{-- <p class="text-black dark:text-white mt-4">
-                {!! Str::limit($product->prod_description, 100) !!} 
-                <span x-data="{ expanded: false }">
-                    <span x-show="expanded" x-cloak class="text-black dark:text-white>{!! substr($product->prod_description, 100) !!}</span>
-                    <button @click="expanded = !expanded" class="ml-2 text-blue-600 dark:text-blue-400 hover:underline">
-                        <span x-show="!expanded">View More</span>
-                        <span x-show="expanded" x-cloak>View Less</span>
+            <template x-if="fullText.length > shortText.length">
+                <div class="mt-2">
+                    <button 
+                        class="text-blue-500 underline"
+                        @click="expanded = !expanded">
+                        <span x-text="expanded ? 'Show Less' : 'Show More'"></span>
                     </button>
-                </span>
-            </p> --}}
-
-            @if ($activeTab == 'description')
-                <div class="text-gray-800 dark:text-white mt-4">
-                   
-                    {!! $product->prod_description !!}
-                    
-                   
                 </div>
-             @endif
+            </template>
+        </div>
+@endif
+
+
            
             @if ($activeTab == 'reviews')
             {{-- @livewire('ecommerce.product-reviews-form', ['product_id' => $product->id]) --}}

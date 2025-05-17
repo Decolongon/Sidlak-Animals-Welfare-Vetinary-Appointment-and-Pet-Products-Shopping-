@@ -2,9 +2,10 @@
 
 namespace App\Filament\Resources\Ecommerce\OrderResource\Pages;
 
-use App\Filament\Resources\Ecommerce\OrderResource;
 use Filament\Actions;
+use App\Models\Ecommerce\Product;
 use Filament\Resources\Pages\EditRecord;
+use App\Filament\Resources\Ecommerce\OrderResource;
 
 class EditOrder extends EditRecord
 {
@@ -21,4 +22,17 @@ class EditOrder extends EditRecord
     {
         return $this->getResource()::getUrl('index');
     }
+
+    protected function afterSave(): void
+    {
+        foreach ($this->record->orderItems as $item) {
+            $product = Product::find($item->product_id);
+            if ($product) {
+                $product->prod_quantity -= $item->quantity;
+                $product->save();
+            }
+        }
+    }
+
+   
 }

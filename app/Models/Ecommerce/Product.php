@@ -4,11 +4,12 @@ namespace App\Models\Ecommerce;
 
 use App\Models\Ecommerce\OrderItem;
 use App\Models\Ecommerce\ProductImage;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Storage;
+use App\Models\Ecommerce\ProductDiscount;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class Product extends Model
@@ -76,6 +77,13 @@ class Product extends Model
     public function orderItems(): HasMany
     {
         return $this->hasMany(OrderItem::class);
+    }
+
+    public function discounts(): BelongsToMany
+    {
+       return $this->belongsToMany( ProductDiscount::class,'discount_details','product_discount_id','product_id')
+        ->withPivot('coupon_code','coupon_type','coupon_value')
+        ->withTimestamps();
     }
 
     public function getRouteKeyName(): string

@@ -196,7 +196,7 @@
         </footer>
 
         <div class="mt-8 lg:mt-14">
-          <a class="py-3 px-4 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg bg-amber-400 hover:bg-amber-500 text-black   disabled:opacity-50  dark:bg-amber dark:text-neutral-800" href="#">
+          <a class="py-3 px-4 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg bg-amber-400 hover:bg-amber-500 text-black   disabled:opacity-50  dark:bg-amber dark:text-neutral-800" href="{{route('appointment')}}">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
               <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 0 0 6 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 0 1 6 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 0 1 6-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0 0 18 18a8.967 8.967 0 0 0-6 2.292m0-14.25v14.25" />
             </svg>

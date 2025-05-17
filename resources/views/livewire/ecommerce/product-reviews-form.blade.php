@@ -3,7 +3,7 @@
 
     <div class="max-w-lg mx-auto space-y-5">
         <!-- User Input Form -->
-        <form wire:submit.prevent="submitReview" class="space-y-4 bg-white border p-4 rounded-2xl shadow-md dark:bg-neutral-900 dark:border-neutral-700">
+        <form wire:submit.prevent="submitReview"  class="space-y-4 bg-white border p-4 rounded-2xl shadow-md dark:bg-neutral-900 dark:border-neutral-700">
             <h2 class="font-medium text-gray-800 dark:text-white">Leave a Review</h2>
     
             <!-- Rating -->
@@ -66,7 +66,7 @@
             </div>
             @endif
            
-            <x-button type="submit" wire:target="image_review" class="mt-2"  wire:loading.attr="disabled">
+            <x-button type="submit" wire:target="image_review" class="mt-2"  wire:loading.attr="disabled" >
                 <span wire:loading.flex wire:target="submitReview"  class="items-center">
                     <svg class="animate-spin h-4 w-4 mr-2 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                         <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>

@@ -26,7 +26,7 @@
                     </button>
                 @endif
           </div>
-          <div wire:key="category-list">
+          <div wire:key="category-list " >
 
         <div class="relative group">
           <a wire:click="filterByCategory(null)"
@@ -177,14 +177,14 @@
                 {{ $product->prod_quantity > 10 ? 'In Stock' : 'Low in Stock ' . ($product->prod_unit == 'kg' ? (float) $product->prod_quantity . 'kg left' :  (int) $product->prod_quantity . ' left') }}
             </span>
             </p>
-            <p class="text-md font-semibold text-gray-800 dark:text-neutral-300 dark:group-hover:text-white">
+            <p class="text-sm font-semibold text-gray-800 dark:text-neutral-300 dark:group-hover:text-white">
               @if(!empty($product->prod_old_price) && $product->prod_old_price > $product->prod_price)
                 <del class="text-gray-500 dark:text-neutral-400">₱{{ number_format($product->prod_old_price, 2) }}</del>
              @endif
               ₱{{ number_format($product->prod_price, 2) }}
-              @if($product->prod_unit == 'kg')
-                <span class="text-xs font-normal  ">per kilo</span>
-              @endif
+              {{-- @if($product->prod_unit == 'kg')
+                <span class="text-xs font-normal  "></span>
+              @endif --}}
             </p>
           </div>
           
@@ -210,8 +210,19 @@
           <p class="text-gray-500 dark:text-neutral-400 text-lg">No products available.</p>
       </div>
     @endforelse
+
+    
+
   </div>
+  
 </div>
+
+<div class="mt-2 flex justify-start ml-6">
+    {{ $products->links() }}
+</div>
+
+
+
 
   
  

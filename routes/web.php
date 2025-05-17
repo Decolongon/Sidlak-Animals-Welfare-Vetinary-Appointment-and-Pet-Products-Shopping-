@@ -16,6 +16,7 @@ use App\Livewire\Ecommerce\SingleProd;
 use App\Livewire\Adoption\AdoptionCart;
 
 use App\Livewire\Pages\ApplicationForm;
+use App\Livewire\VetAppointment\Appointment;
 use App\Livewire\Pages\SingleBlogPostPage;
 use App\Livewire\Ecommerce\ProductReviewsForm;
 use App\Livewire\Pages\AnnouncementSinglePage;
@@ -34,9 +35,10 @@ Route::middleware([
     })->name('dashboard');
     Route::get('/checkout', Checkout::class)->name('checkout'); // ecommerce checkout page
     Route::get('/review', ProductReviewsForm::class)->name('page.review');
-
+    
 });
 
+Route::get('/appointment',Appointment::class)->name('appointment'); // vet appointment
 
 Route::get('/singleProd/{prod_slug}',SingleProd::class)->name('page.singleProd'); // para sa long description and reviews of specific product
 

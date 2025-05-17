@@ -49,7 +49,8 @@ class GetCart extends Component
         $cart = Cart::with('product')->find($cart_id);
 
         if ($cart && $cart->product && $cart->quantity < $cart->product->prod_quantity) {
-            $increase = $cart->product->prod_unit == 'kg' ? $cart->product->prod_weight : 1;
+            //$increase = $cart->product->prod_unit == 'kg' ? $cart->product->prod_weight : 1;
+            $increase = 1;
             //$cart->quantity += $increase;
             $cart->update(['quantity' =>  $cart->quantity += $increase]);
             //$cart->save()
@@ -75,7 +76,8 @@ class GetCart extends Component
         $cart = Cart::find($cart_id);
 
         if ($cart && $cart->quantity > 1) {
-            $decrease = $cart->product->prod_unit == 'kg' ? $cart->product->prod_weight : 1;
+           // $decrease = $cart->product->prod_unit == 'kg' ? $cart->product->prod_weight : 1;
+           $decrease = 1;
             //$cart->quantity -= $decrease;
             $cart->update(['quantity' => $cart->quantity -= $decrease]);
             // $cart->save();
@@ -99,6 +101,9 @@ class GetCart extends Component
         $this->getCarts();
        // $this->dispatch('cartUpdated');
     }
+
+
+    
 
     public function toggleSelectAll()
     {

@@ -2,6 +2,7 @@
 
 namespace App\Filament\Widgets;
 
+use Illuminate\Support\Facades\DB;
 use App\Models\Appointment\Appointment;
 use Filament\Support\Enums\IconPosition;
 use Filament\Widgets\StatsOverviewWidget\Stat;
@@ -19,11 +20,13 @@ class StatsVetOverview extends BaseWidget
             Stat::make('Total Book Appointments', Appointment::count())
             ->descriptionIcon('heroicon-o-rectangle-stack', IconPosition::Before)
             ->description('Total Appointments')
-            // ->chart($this->getOrders())
+            //->chart($this->getChartVet())
             ->url(route('filament.admin.resources.vet-appointment.appointment-applications.index', [
                 'tableFilters[appointment_status][value]' => 'pending'
             ]))
             ->color('warning'),
         ];
     }
+
+    
 }

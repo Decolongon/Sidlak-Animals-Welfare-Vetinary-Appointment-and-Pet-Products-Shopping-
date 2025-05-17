@@ -19,7 +19,7 @@ return new class extends Migration
             $table->foreignId('user_id')->constrained('users')->cascadeOnDelete();
             //$table->foreignIdFor(User::class, 'user_id')->constrained()->cascadeOnDelete();
             $table->integer('rating')->nullable();
-            $table->text('review');
+            $table->text('review')->nullable();
             $table->json('image_review')->nullable();
             $table->timestamps();
         });

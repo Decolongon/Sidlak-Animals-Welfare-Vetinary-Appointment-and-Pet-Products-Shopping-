@@ -9,7 +9,7 @@ use Flowframe\Trend\Trend;
 use Flowframe\Trend\TrendValue;
 use Illuminate\Support\Facades\DB;
 
-class AdoptionStatsOverview extends BaseWidget
+    class AdoptionStatsOverview extends BaseWidget
 {
     protected function getStats(): array
     {

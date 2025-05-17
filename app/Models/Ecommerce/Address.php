@@ -2,8 +2,10 @@
 
 namespace App\Models\Ecommerce;
 
+use App\Models\User;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Address extends Model
 {
@@ -14,10 +16,17 @@ class Address extends Model
         'state',
         'zip',
         'address_type',
+        // 'user_id',
+        // 'province'
     ];
 
     public function addressable(): MorphTo
     {
         return $this->morphTo();
+    }
+
+    public function userAddress():BelongsTo
+    {
+        return $this->belongsTo(User::class);
     }
 }

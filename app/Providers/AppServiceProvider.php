@@ -34,6 +34,7 @@ use Illuminate\Support\Facades\Session;
 use Illuminate\Support\ServiceProvider;
 use Filament\Navigation\NavigationGroup;
 use App\Models\Ecommerce\ProductCategory;
+use App\Models\Ecommerce\ProductDiscount;
 use App\Policies\Adoption\AdoptionPolicy;
 use App\Policies\Donation\DonationPolicy;
 use App\Policies\Ecommerce\ProductPolicy;
@@ -44,6 +45,7 @@ use App\Policies\Appointment\AppointmentPolicy;
 use App\Policies\Appointment\VetSchedulePolicy;
 use App\Policies\Ecommerce\ProductReviewPolicy;
 use App\Policies\Ecommerce\ProductCategoryPolicy;
+use App\Policies\Ecommerce\ProductDiscountPolicy;
 use App\Policies\Appointment\AppointmentCategoryPolicy;
 use Filament\Http\Responses\Auth\LoginResponse as AuthLoginResponse;
 use Filament\Http\Responses\Auth\Contracts\LogoutResponse as LogoutContractResponse;
@@ -56,7 +58,7 @@ class AppServiceProvider extends ServiceProvider
    
     public function register(): void
     {
-        //$this->registerPolicies();
+         $this->registerPolicies();
        
     }
 
@@ -67,14 +69,8 @@ class AppServiceProvider extends ServiceProvider
     {
        
         Announcement::observe(AnnouncementObserver::class);
-
-        $this->registerPolicies();
+        //$this->registerPolicies();
        
-        
-    
-
-       
-        
     }
 
      /**
@@ -108,6 +104,7 @@ class AppServiceProvider extends ServiceProvider
            Volunteer::class => VolunteerPolicy::class,
            Announcement::class => AnnouncementPolicy::class,
            VetSchedule::class => VetSchedulePolicy::class,
+           ProductDiscount::class => ProductDiscountPolicy::class,
         //    User::class => UserPolicy::class,
            
        ];

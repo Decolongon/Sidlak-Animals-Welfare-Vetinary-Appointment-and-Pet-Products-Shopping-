@@ -110,8 +110,8 @@ class AddToCartForm extends Component
         // }
 
             // check if ang unit is equal to kg ma add ka qunatity base sa weight else quantity
-        $quantityAdd = ($product->prod_unit =='kg') ? $product->prod_weight : 1;
-
+        //$quantityAdd = ($product->prod_unit =='kg') ? $product->prod_weight : 1;
+        $quantityAdd = 1;
         if ($cart) {
             if($cart->quantity + $quantityAdd > $product->prod_quantity){ // if stock cart quantity
                                                           //mg lapaw sa product quantity throw error message

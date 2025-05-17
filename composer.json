@@ -19,7 +19,8 @@
         "laravel/sanctum": "^4.0",
         "laravel/tinker": "^2.9",
         "livewire/livewire": "^3.6",
-        "luigel/laravel-paymongo": "^2.5"
+        "luigel/laravel-paymongo": "^2.5",
+        "woenel/prpcmblmts": "2.x-dev"
     },
     "require-dev": {
         "fakerphp/faker": "^1.23",

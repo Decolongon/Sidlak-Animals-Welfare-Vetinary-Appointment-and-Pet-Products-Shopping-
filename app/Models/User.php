@@ -11,6 +11,7 @@ use App\Models\Ecommerce\Cart;
 use App\Models\Ecommerce\Order;
 use App\Models\Adoption\Adoption;
 use App\Models\Donation\Donation;
+use App\Models\Ecommerce\Address;
 use Laravel\Sanctum\HasApiTokens;
 use App\Models\Volunteer\Volunteer;
 use Illuminate\Support\Facades\Auth;
@@ -172,5 +173,10 @@ class User extends Authenticatable
     public function vetschedules(): HasMany
     {
         return $this->hasMany(VetSchedule::class);
+    }
+
+    public function addresses(): HasMany
+    {
+        return $this->hasMany(Address::class);
     }
 }

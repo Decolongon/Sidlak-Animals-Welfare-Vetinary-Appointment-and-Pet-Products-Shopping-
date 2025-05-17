@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\User;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
@@ -14,7 +15,9 @@ return new class extends Migration
     {
         Schema::create('addresses', function (Blueprint $table) {
             $table->id();
+           // $table->foreignIdFor(User::class, 'user_id')->constrained()->cascadeOnDelete();
             $table->string('country')->nullable()->default('Philippines');
+           // $table->string('province')->nullable()->default('Negros Occidental');
             $table->string('street')->nullable();
             $table->string('city')->nullable();
             $table->string('state')->nullable();

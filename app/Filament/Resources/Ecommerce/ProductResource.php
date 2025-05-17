@@ -276,6 +276,7 @@ class ProductResource extends Resource
                                     '16:9',
                                     '4:3',
                                 ])
+                               
                                 ->maxSize(2048)
                                 ->required()
                                 ->afterStateUpdated(fn ($state, $set) =>
@@ -312,6 +313,7 @@ class ProductResource extends Resource
                         ->addActionLabel('Add Product Images')
                         ->collapsible()
                         ->deletable(fn ($get) => count($get('images')) > 1)
+                        ->maxItems(5)
                         ->reorderable(),
                 ]),
         ]);
@@ -376,7 +378,7 @@ class ProductResource extends Resource
                         ->label('Quantity')
                         ->badge()
                         ->sortable()
-                        ->color('success'),
+                        ->color('info'),
 
                         TextColumn::make('prod_unit')
                         ->label('Unit')
@@ -394,7 +396,7 @@ class ProductResource extends Resource
                             $record->prod_quantity > 10 => 'In&nbsp;Stock',
                             $record->prod_quantity > 0 && $record->prod_quantity <= 10 => 'Low&nbsp;in&nbsp;Stock',
                             default => 'Out&nbsp;of&nbsp;Stock',
-                        })->html()
+                        })->html() ->badge()
                         ->color(fn ($record) => match (true) {
                             $record->prod_quantity > 10 => 'success',
                             $record->prod_quantity > 0 && $record->prod_quantity <= 10 => 'warning',
@@ -417,6 +419,8 @@ class ProductResource extends Resource
                     // ->sortable()
                     ->color('warning')
                     ->formatStateUsing(fn (string $state) : string => ucwords($state)),
+
+
 
                 ]),
 
@@ -529,65 +533,119 @@ class ProductResource extends Resource
     {
         return $infolist->schema([
             InfoSection::make()->schema([
-
-                // Product Images
+                // Product Images, Product Name, SKU
                 ImageEntry::make('images.url')
                     ->hiddenLabel()
-                    ->stacked()
                     ->limit(3)
-                    ->height(100)
-                    ->square(),
-
-                // Product Name
-                TextEntry::make('prod_name')
-                    ->label('Product')
-                    ->size(TextEntry\TextEntrySize::Large)
-                    ->weight(FontWeight::ExtraBold)
-                    ->formatStateUsing(fn (string $state): string => ucwords($state)),
-
-                // SKU
-                TextEntry::make('prod_sku')
-                    ->label('SKU')
-                    ->size(TextEntry\TextEntrySize::Large)
-                    ->weight(FontWeight::ExtraBold)
-                    ->badge()
-                    ->color('success')
-                    ->copyable(),
-
-                // Product Details Section
-                ComponentsSection::make('Product Details')
-                    ->icon('heroicon-o-information-circle')
-                    ->schema([
-                        TextEntry::make('prod_short_description')
-                            ->markdown()
-                            ->weight(FontWeight::Bold)
-                            ->label('Short Description:')
-                            ->formatStateUsing(fn (string $state): string => ucfirst(strip_tags($state)))
-                            ->columnSpan(2),
-
-                        TextEntry::make('prod_description')
-                            ->markdown()
-                            ->weight(FontWeight::Bold)
-                            ->label('Long Description:')
-                            ->formatStateUsing(fn (string $state): string => ucfirst(strip_tags($state)))
-                            ->columnSpan(2),
+                    ->width('100%')
+                    ->height(300),
+                   
+        
+                    ComponentsGroup::make([
+                        TextEntry::make('prod_name')
+                            ->label('Product Name')
+                            ->size(TextEntry\TextEntrySize::Large)
+                            ->weight(FontWeight::ExtraBold)
+                            ->formatStateUsing(fn (string $state): string => ucwords($state)),
+                
+                        TextEntry::make('prod_sku')
+                            ->label('')
+                            ->size(TextEntry\TextEntrySize::Large)
+                            ->weight(FontWeight::ExtraBold)
+                            ->badge()
+                            ->color('success')
+                            ->copyable(),
                     ]),
-
-                // Product Prices Section
-                // ComponentsSection::make('Product Prices')
-                //     ->icon('heroicon-o-information-circle')
-                //     ->schema([
-                //         TextEntry::make('prod_old_price')
-                //             ->label('Old Price')
-                //             ->columnSpan(2),
-
-                //         TextEntry::make('prod_price')
-                //             ->label('Price')
-                //             ->columnSpan(2),
-                //     ]),
-
-            ]),
+            ])->columns(2)->compact()->collapsible(),
+        
+            // Product Details Section
+            ComponentsSection::make('Product Details')
+                ->icon('heroicon-o-information-circle')
+                ->schema([
+                    TextEntry::make('prod_short_description')
+                        ->markdown()
+                        ->weight(FontWeight::Bold)
+                        ->label('Short Description:')
+                        ->html()
+                        // ->formatStateUsing(fn (string $state): string => ucfirst(strip_tags($state)))
+                        ->columnSpan(1),
+        
+                    TextEntry::make('prod_description')
+                        ->markdown()
+                        ->weight(FontWeight::Bold)
+                        ->label('Long Description:')
+                        ->html()
+                        // ->formatStateUsing(fn (string $state): string => ucfirst(strip_tags($state)))
+                        ->columnSpan(1),
+                ])->collapsible()
+                ->columns(2),
+        
+            // Pricing Section
+            ComponentsSection::make('Pricing')
+                // ->icon('heroicon-s-currency-pesos')
+                ->schema([
+                    TextEntry::make('prod_old_price')
+                        ->label('Old Price')
+                        ->badge()
+                        ->color('warning'),
+        
+                    TextEntry::make('prod_price')
+                        ->label('Current Price')
+                        ->badge()
+                        ->color('primary'),
+                ])
+                ->columns(2),
+        
+            // Inventory Section
+            ComponentsSection::make('Inventory')
+                ->icon('heroicon-o-archive-box')
+                ->schema([
+                    TextEntry::make('prod_quantity')
+                        ->label('Available Quantity')
+                        ->badge()
+                        ->color('info'),
+        
+                    TextEntry::make('prod_unit')
+                        ->label('Unit Type (e.g., piece, kilo)')
+                        ->badge()
+                        ->color('gray'),
+                ])
+                ->columns(2),
+        
+            // Shipping Section
+            ComponentsSection::make('Shipping Info')
+                ->icon('heroicon-o-truck')
+                ->schema([
+                    TextEntry::make('prod_requires_shipping')
+                        ->label('Requires Shipping?')
+                        ->badge()
+                        ->formatStateUsing(fn ($state) => $state ? 'Yes' : 'No')
+                        ->color(fn ($state) => $state ? 'success' : 'warning'),
+        
+                        TextEntry::make('prod_weight')
+                        ->label('Weight (kg)')
+                        ->badge()
+                        ->color('gray')
+                        ->hidden(fn ($component) => $component->getRecord()->prod_unit === 'pcs'),
+        
+                    TextEntry::make('shipping_cost')
+                        ->label('Shipping Cost')
+                        ->badge()
+                        ->hidden(fn ($component) => !$component->getRecord()->prod_requires_shipping)
+                        ->color('blue'),
+                ])
+                ->columns(2),
+        
+            // Market Visibility
+            InfoSection::make()->schema([
+                TextEntry::make('is_visible_to_market')
+                    ->label('Visible to Market?')
+                    ->badge()
+                    ->color(fn ($state) => $state ? 'success' : 'warning')
+                    ->formatStateUsing(fn ($state) => $state ? 'Yes' : 'No'),
+            ])->columns(2),
         ]);
+        
     }
 
 
