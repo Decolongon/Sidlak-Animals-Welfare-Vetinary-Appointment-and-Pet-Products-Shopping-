@@ -30,4 +30,9 @@ class ProductDiscount extends Model
         ->withTimestamps();
     }
 
+    public function getRouteKeyName()
+    {
+        return 'discount_slug';
+    }
+
 }

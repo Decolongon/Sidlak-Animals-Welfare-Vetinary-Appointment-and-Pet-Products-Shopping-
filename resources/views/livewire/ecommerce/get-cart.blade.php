@@ -38,12 +38,7 @@
               </div>
 
               <div class="mt-3 flex items-center justify-end gap-2">
-                  <span wire:loading wire:target="decreaseQuantity({{ $cart->id }})">
-                      <svg class="animate-spin h-5 w-5 text-gray-500 dark:text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
-                      </svg>
-                  </span>
+              
 
                   <button type="button" wire:click="decreaseQuantity({{ $cart->id }})" wire:loading.attr="disabled"
                       class="px-3 py-1 text-sm font-semibold rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-100 dark:border-neutral-700 dark:text-white dark:hover:bg-neutral-700">
@@ -54,12 +49,7 @@
                       {{ number_format($cart->quantity,0) }}
                   </span>
 
-                  <span wire:loading wire:target="increaseQuantity({{ $cart->id }})">
-                      <svg class="animate-spin h-5 w-5 text-gray-500 dark:text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
-                      </svg>
-                  </span>
+                
 
                   <button type="button" wire:click="increaseQuantity({{ $cart->id }})" wire:loading.attr="disabled"
                       class="px-3 py-1 text-sm font-semibold rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-100 dark:border-neutral-700 dark:text-white dark:hover:bg-neutral-700">

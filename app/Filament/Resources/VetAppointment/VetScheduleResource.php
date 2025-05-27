@@ -16,6 +16,7 @@ use App\Models\Appointment\VetSchedule;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Forms\Components\TextInput;
 use Illuminate\Database\Eloquent\Builder;
+use App\Filament\Widgets\VetinarySchedule;
 use Filament\Forms\Components\ToggleButtons;
 use Filament\Forms\Components\DateTimePicker;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
@@ -26,8 +27,6 @@ class VetScheduleResource extends Resource
 {
     protected static ?string $model = VetSchedule::class;
 
-    
-    
     protected static ?string $navigationIcon = 'heroicon-o-calendar-date-range';
     protected static ?string $navigationLabel = 'Vetinary Schedule';
     protected static ?string $navigationGroup = 'Vetinary Appointment';
@@ -50,7 +49,6 @@ class VetScheduleResource extends Resource
                  ->native(false)
                  ->seconds(false)
                 ->date('F j, Y, g:i a')
-               
                 ->hint('Must be today or later')
                 ->hintColor('warning')
                 ->label('Opening Time'),
@@ -90,25 +88,25 @@ class VetScheduleResource extends Resource
                 ->hintColor('warning')
                 ->label('Closing Time'),
 
-                ToggleButtons::make('is_the_same_schedule')
-                ->required()
-                ->boolean()
-                ->label('Is the same schedule every day?')
-                ->grouped()
-                ->colors([
-                    false => 'warning',
-                    true => 'success',
-                ])
-                ->icons([
-                    false => 'heroicon-m-x-circle',
-                    true => 'heroicon-m-check-circle',
-                ])
-                ->default(false),
+                // ToggleButtons::make('is_the_same_schedule')
+                // ->required()
+                // ->boolean()
+                // ->label('Is the same schedule every day?')
+                // ->grouped()
+                // ->colors([
+                //     false => 'warning',
+                //     true => 'success',
+                // ])
+                // ->icons([
+                //     false => 'heroicon-m-x-circle',
+                //     true => 'heroicon-m-check-circle',
+                // ])
+                // ->default(false),
 
                 TextInput::make('num_customers')
                 ->label('Enter the number of appointments you wish to accommodate')
                 ->required()
-                ->columnSpanfull()
+                // ->columnSpanfull()
                 ->rules([
                    'min:1',
                    'max:50',
@@ -116,9 +114,9 @@ class VetScheduleResource extends Resource
                 ->numeric(),
                
                 
-            ])->columns(1),
+            ])->columns(2),
 
-        ])->columns(1);
+        ])->columns(2);
     }
 
     public static function table(Table $table): Table
@@ -141,21 +139,22 @@ class VetScheduleResource extends Resource
                 ->sortable()
                 ->formatStateUsing(fn ($state) => date('F j, Y h:i A', strtotime($state))),
 
-                Tables\Columns\IconColumn::make('is_the_same_schedule')
-                ->boolean()
-                ->label('Is the same schedule every day?')
-                ->colors([
-                    false => 'warning',
-                    true => 'success',
-                ])
-                ->icons([
-                    false => 'heroicon-m-x-circle',
-                    true => 'heroicon-m-check-badge',
-                ]),
+                // Tables\Columns\IconColumn::make('is_the_same_schedule')
+                // ->boolean()
+                // ->label('Is the same schedule every day?')
+                // ->colors([
+                //     false => 'warning',
+                //     true => 'success',
+                // ])
+                // ->icons([
+                //     false => 'heroicon-m-x-circle',
+                //     true => 'heroicon-m-check-badge',
+                // ]),
 
                 TextColumn::make('num_customers')
                 ->label('Number of Appointments to Accommodate')
-                ->toggleable(isToggledHiddenByDefault: true)
+                ->badge()
+                //->toggleable(isToggledHiddenByDefault: true)
                 ->sortable(),
 
               
@@ -181,6 +180,13 @@ class VetScheduleResource extends Resource
             ])->emptyStateIcon('heroicon-s-calendar-date-range')
             ->emptyStateHeading('No Vetinary Schedules');
     }
+
+    public static function getWidgets(): array
+    {
+        return [
+            VetinarySchedule::class
+        ];
+    }   
 
     public static function getRelations(): array
     {

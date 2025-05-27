@@ -6,6 +6,7 @@ use Livewire\Component;
 use Livewire\Attributes\Title;
 use Livewire\Attributes\Layout;
 use Illuminate\Support\Facades\Auth;
+use App\Models\Appointment\VetSchedule;
 use Jantinnerezo\LivewireAlert\LivewireAlert;
 use App\Models\Appointment\AppointmentCategory;
 use App\Models\Appointment\Appointment as VetAppointment;
@@ -23,9 +24,20 @@ class Appointment extends Component
     public $pet_weight;
     public $isPetVaccinated;
 
+    public $num_customer_to_accomodate;
+
+
+    public $donor_payment_method;
+    public $card_name;
+    public $card_number;
+    public $expiration_month;
+    public $expiration_year;
+    public $cvv;
+
     public function mount()
     {
         $this->getAppointmentCat();
+        $this->getVetSchedule();
        
     }
 
@@ -51,6 +63,20 @@ class Appointment extends Component
     public function getAppointmentCat()
     {
         return AppointmentCategory::get(['id', 'appoint_cat_name']);
+    }
+
+    public function getVetSchedule()
+    {
+        $schedules= VetSchedule::with('user')
+        ->where('vet_schedule_open', '<=', now())
+        ->where('vet_schedule_close', '>=', now())
+        ->get();
+
+        if ($schedules->isNotEmpty()) {
+            $this->num_customer_to_accomodate = $schedules->first()->num_customers;
+        }
+
+        return $schedules;
     }
 
     public function submit()
@@ -96,7 +122,8 @@ class Appointment extends Component
     public function render()
     {
         return view('livewire.vet-appointment.appointment',[
-            'appointmentCategories' => $this->getAppointmentCat()
+            'appointmentCategories' => $this->getAppointmentCat(),
+            'schedules' => $this->getVetSchedule()
         ]);
     }
 }

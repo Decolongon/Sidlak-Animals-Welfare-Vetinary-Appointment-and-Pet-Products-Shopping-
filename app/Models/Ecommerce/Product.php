@@ -79,10 +79,10 @@ class Product extends Model
         return $this->hasMany(OrderItem::class);
     }
 
-    public function discounts(): BelongsToMany
+    public function productDiscounts(): BelongsToMany
     {
-       return $this->belongsToMany( ProductDiscount::class,'discount_details','product_discount_id','product_id')
-        ->withPivot('coupon_code','coupon_type','coupon_value')
+       return $this->belongsToMany( ProductDiscount::class,'discount_details','product_id','product_discount_id')
+        ->withPivot('discount_code','discount_type','discounted_price')
         ->withTimestamps();
     }
 

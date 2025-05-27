@@ -8,16 +8,17 @@ use App\Livewire\Ecommerce\GetCart;
 use App\Livewire\Pages\ContactPage;
 use App\Livewire\Ecommerce\Checkout;
 use App\Livewire\Pages\DonationPage;
+use App\Livewire\Ecommerce\ViewOrder;
 use App\Livewire\Pages\Announcements;
 use App\Livewire\Pages\DogSinglePage;
 use App\Livewire\Pages\VolunteerPage;
 use Illuminate\Support\Facades\Route;
 use App\Livewire\Ecommerce\SingleProd;
-use App\Livewire\Adoption\AdoptionCart;
 
+use App\Livewire\Adoption\AdoptionCart;
 use App\Livewire\Pages\ApplicationForm;
-use App\Livewire\VetAppointment\Appointment;
 use App\Livewire\Pages\SingleBlogPostPage;
+use App\Livewire\VetAppointment\Appointment;
 use App\Livewire\Ecommerce\ProductReviewsForm;
 use App\Livewire\Pages\AnnouncementSinglePage;
 use App\Http\Controllers\Paymongo\PaymentController;
@@ -35,6 +36,7 @@ Route::middleware([
     })->name('dashboard');
     Route::get('/checkout', Checkout::class)->name('checkout'); // ecommerce checkout page
     Route::get('/review', ProductReviewsForm::class)->name('page.review');
+    Route::get('/view-order', ViewOrder::class)->name('view-order');
     
 });
 

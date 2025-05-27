@@ -11,6 +11,7 @@
         "codeat3/blade-vaadin-icons": "^1.5",
         "filament/filament": "^3.2.134",
         "flowframe/laravel-trend": "^0.3.0",
+        "guava/calendar": "^1.14",
         "hasnayeen/blade-eva-icons": "^2.0",
         "ibrahimbougaoua/filament-rating-star": "^1.0",
         "jantinnerezo/livewire-alert": "^3.0",
@@ -19,8 +20,7 @@
         "laravel/sanctum": "^4.0",
         "laravel/tinker": "^2.9",
         "livewire/livewire": "^3.6",
-        "luigel/laravel-paymongo": "^2.5",
-        "woenel/prpcmblmts": "2.x-dev"
+        "luigel/laravel-paymongo": "^2.5"
     },
     "require-dev": {
         "fakerphp/faker": "^1.23",

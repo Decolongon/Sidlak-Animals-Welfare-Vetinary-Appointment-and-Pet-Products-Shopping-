@@ -6,7 +6,7 @@
                 <p class="mt-2 text-sm text-gray-600 dark:text-neutral-400">
                   {{ __("Don't have an account yet?") }}
                   @if (Route::has('register'))
-                  <a class="font-medium text-amber-600 decoration-2 hover:underline dark:text-amber-500" href="{{ route('register') }}">
+                  <a class="font-medium text-amber-600 decoration-2 hover:underline dark:text-amber-500"  wire:navigate.hover href="{{ route('register') }}">
                     {{ __('Sign up here') }}
                   </a>
                   @endif
@@ -47,7 +47,7 @@
                 </div>
 
                 @if (Route::has('password.request'))
-                    <a class="text-sm text-gray-600 underline rounded-md hover:text-gray-500 focus:outline-none focus:ring-1 focus:ring-offset-1 focus:ring-amber-500" href="{{ route('password.request') }}">
+                    <a class="text-sm text-gray-600 underline rounded-md hover:text-gray-500 focus:outline-none focus:ring-1 focus:ring-offset-1 focus:ring-amber-500" wire:navigate.hover  href="{{ route('password.request') }}">
                         {{ __('Forgot your password?') }}
                     </a>
                 @endif

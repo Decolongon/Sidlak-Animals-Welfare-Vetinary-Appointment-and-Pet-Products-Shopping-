@@ -20,7 +20,7 @@ class StatsVetOverview extends BaseWidget
             Stat::make('Total Book Appointments', Appointment::count())
             ->descriptionIcon('heroicon-o-rectangle-stack', IconPosition::Before)
             ->description('Total Appointments')
-            //->chart($this->getChartVet())
+            ->chart($this->getChartAppointment())
             ->url(route('filament.admin.resources.vet-appointment.appointment-applications.index', [
                 'tableFilters[appointment_status][value]' => 'pending'
             ]))
@@ -28,5 +28,21 @@ class StatsVetOverview extends BaseWidget
         ];
     }
 
+      protected function getChartData(string $model): array
+    {
+        return $model::select(DB::raw('DATE(created_at) as date'), DB::raw('COUNT(*) as count'))
+            ->where('created_at', '>=', now()->subDays(7))
+            ->groupBy('date')
+            ->orderBy('date')
+            ->get()
+            ->pluck('count')
+            ->toArray();
+    }
+
+
+    protected function getChartAppointment(): array
+    {
+        return [1,3,5,7,9,11,13,15];
+    }
     
 }

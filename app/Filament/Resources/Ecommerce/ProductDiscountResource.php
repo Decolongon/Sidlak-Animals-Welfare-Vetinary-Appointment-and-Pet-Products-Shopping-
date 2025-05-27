@@ -11,6 +11,7 @@ use Filament\Tables\Table;
 use Illuminate\Support\Str;
 use Filament\Resources\Resource;
 use Filament\Forms\Components\Group;
+use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Section;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Forms\Components\TextInput;
@@ -27,7 +28,7 @@ class ProductDiscountResource extends Resource
 {
     protected static ?string $model = ProductDiscount::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-percent-badge';
+    protected static ?string $navigationIcon = 'heroicon-o-currency-pound';
     protected static ?string $navigationGroup = 'Ecommerce';
     protected static ?int $navigationSort = 2;
     public static function form(Form $form): Form
@@ -43,6 +44,7 @@ class ProductDiscountResource extends Resource
                 ->live(onBlur: true)
                 ->afterStateUpdated(fn (Set $set, ?string $state) => $set('discount_slug', Str::slug($state)))
                 ->maxLength(255),
+
 
                 TextInput::make('discount_slug')
                 ->disabled()

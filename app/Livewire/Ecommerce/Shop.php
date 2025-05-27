@@ -8,6 +8,7 @@ use App\Models\Ecommerce\Cart;
 use Livewire\Attributes\Layout;
 use App\Models\Ecommerce\Product;
 use App\Models\Ecommerce\ProductCategory;
+use App\Models\Ecommerce\ProductDiscount;
 Use Livewire\Attributes\Title;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
@@ -30,7 +31,7 @@ class Shop extends Component
         // $this->products = Product::with(['images','productCategories'])
         // ->where('prod_quantity', '>' , 0)
         // ->get();
-        $this->categories = ProductCategory::limit(5)->get(['id','prod_cat_name']);
+        $this->categories = ProductCategory::limit(7)->get(['id','prod_cat_name']);
         $this->getProducts();
 
     }
@@ -48,7 +49,7 @@ class Shop extends Component
      public function updatedSearchCat()
      {
          $this->categories = ProductCategory::where('prod_cat_name', 'LIKE', '%' . $this->searchCat . '%')
-                             ->limit(5)->get(['id', 'prod_cat_name']);
+                             ->get(['id', 'prod_cat_name']);
      }
 
     // public function getProducts (){
@@ -67,7 +68,13 @@ class Shop extends Component
     public function getProducts(){
 
         $query = Product::with(['images',
-        'productCategories' 
+        'productCategories',
+        'productDiscounts' => function ($query) {
+             $query->select('product_discounts.id', 'discount_name', 'start_at', 'end_at',)
+                      ->where('start_at', '<=', now())
+                      ->where('end_at', '>=', now());
+            //$query->withPivot
+            } 
         ])
         ->where([ ['prod_quantity', '>' , 0 ],
                   ['is_visible_to_market', true]
@@ -91,8 +98,40 @@ class Shop extends Component
             //     $query->orderBy('prod_price', $this->sortBy);
             // }
             // $this->products = $query->paginate(4);
+            
+            $products = $query->paginate(12);
+
+            // Calculate discounted prices for each product
+           foreach ($products as $product) {
+                $product->discounted_price = null;
+                $product->discount_amount = null;
+                $product->discount_label = null;
+
+                $discount = $product->productDiscounts->first();
+
+                if (!$discount || !$discount->pivot) {
+                    continue;
+                }
+
+                $type = $discount->pivot->discount_type;
+                $value = floatval($discount->pivot->discounted_price);
+
+                if ($type === 'fixed') {
+                    $product->discount_amount = $value;
+                    $product->discounted_price = $product->prod_price - $value;
+                    $product->discount_label = ' ₱' . number_format($value, 0) . ' off';
+                } 
+                if ($type === 'percent') {
+                    $discountValue = $product->prod_price * ($value / 100);
+                    $product->discount_amount = $discountValue;
+                    $product->discounted_price = $product->prod_price - $discountValue;
+                    $product->discount_label = number_format($value, 0) . ' % off';
+                }
+            }       
+
+            return $products;
+           
           
-          return $query->paginate(12);
     }
 
 

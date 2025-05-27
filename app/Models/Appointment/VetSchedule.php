@@ -3,10 +3,13 @@
 namespace App\Models\Appointment;
 
 use App\Models\User;
+use Illuminate\Support\Carbon;
+use Guava\Calendar\Contracts\Eventable;
 use Illuminate\Database\Eloquent\Model;
+use Guava\Calendar\ValueObjects\CalendarEvent;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-class VetSchedule extends Model
+class VetSchedule extends Model implements Eventable
 {
     protected $fillable = [
         'user_id',
@@ -26,5 +29,14 @@ class VetSchedule extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+     public function toCalendarEvent(): CalendarEvent|array {
+
+        return CalendarEvent::make($this)
+            ->title('Schedule')
+            ->start(Carbon::parse($this->vet_schedule_open)->timezone('Asia/Manila')->toIso8601String())
+            ->end(Carbon::parse($this->vet_schedule_close)->timezone('Asia/Manila')->toIso8601String());
+          
     }
 }

@@ -15,7 +15,7 @@ class ProductSeeder extends Seeder
 
     public function run(): void
     {
-        $products = 6;
+        $products = 8;
         $progressBar = $this->command->getOutput()->createProgressBar($products);
         $progressBar->setFormat("CREATING Products\n %current%/%max% [%bar%] %percent:3s%% ");
         $progressBar->start();
@@ -25,7 +25,8 @@ class ProductSeeder extends Seeder
             $product = Product::factory()->create();
 
             // Create 1–3 images per product
-            $imageCount = rand(1, 3);
+            // $imageCount = rand(1, 3);
+            $imageCount = 1;
 
             for ($j = 0; $j < $imageCount; $j++) {
                 $filename = $this->CanCreateProductImage($product->prod_name);

@@ -132,7 +132,7 @@
           <p class="text-gray-600 dark:text-neutral-400">
             Want to book an appointment?You must login first
           </p>
-          <a class="inline-flex items-center gap-x-1.5 text-blue-600 decoration-2 hover:underline focus:outline-hidden focus:underline font-medium dark:text-blue-500" href="{{ route('login') }}">
+          <a class="inline-flex items-center gap-x-1.5 text-blue-600 decoration-2 hover:underline focus:outline-hidden focus:underline font-medium dark:text-blue-500" wire:navigate.hover href="{{ route('login') }}">
             click here
             <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
           </a>
@@ -148,7 +148,38 @@
 
 </div>
 
-@if(Auth::user())
+<div x-data="{ showSchedule: false }" class="mb-8 flex justify-center">
+  <div>
+    <button 
+      @click="showSchedule = !showSchedule"
+      class="mb-4 px-4 py-2 bg-amber-400 text-black rounded-full font-medium hover:bg-amber-500 transition"
+    >
+      Clinic Opening & Closing Time
+    </button>
+
+    <div x-show="showSchedule" x-transition class="p-4 w-full max-w-xl text-center rounded-lg bg-gray-50 dark:bg-neutral-800 border border-gray-200 dark:border-neutral-600">
+      <h2 class="text-md font-semibold text-gray-700 dark:text-neutral-100 mb-2">Veterinary Opening Time</h2>
+      <ul class="space-y-1 list-disc list-inside text-gray-600 dark:text-neutral-300 text-left">
+        @foreach ($schedules as $sched)
+        
+            <span class="font-medium text-gray-800 dark:text-white">
+              {{-- Dr. {{ ucwords($sched->user->name) ?? 'N/A' }} --}}
+            </span>
+            {{-- @if($sched->vet_schedule_open <= now() && $sched->vet_schedule_close >= now()) --}}
+            {{ \Carbon\Carbon::parse($sched->vet_schedule_open)->format('M d, g A') }} — 
+            {{ \Carbon\Carbon::parse($sched->vet_schedule_close)->format('M d, g A') }}
+            {{-- @endif --}}
+          
+        @endforeach
+      </ul>
+    </div>
+  </div>
+</div>
+
+
+
+
+@if(Auth::user() )
 {{-- Vet form --}}
 <div class=" max-w-5xl mx-auto">
   <h1 class="text-3xl font-bold text-center text-gray-800 dark:text-neutral-100 mb-8">
@@ -160,6 +191,7 @@
       Pet & Appointment Details
     </h2>
 
+    @if( App\Models\Appointment\Appointment::count() < $num_customer_to_accomodate)
     <form wire:submit.prevent="submit" >
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6">
 
@@ -292,6 +324,115 @@
               <span class="text-sm text-red-500">{{ $message }}</span>
             @enderror
         </div>
+
+       <!-- Payment Method Section -->
+<div x-data="{ showPaymentOptions: false }" class="col-span-full py-6 border-t border-gray-200 first:pt-0 last:pb-0 first:border-transparent dark:border-neutral-700 dark:first:border-transparent">
+    <button type="button" 
+    @click="showPaymentOptions = !showPaymentOptions" class="inline-block mb-2 text-sm font-medium lg:mb-3 dark:text-white">
+        Payment Method
+    </button>
+
+    <div x-show="showPaymentOptions" 
+    x-transition class="mt-2 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <!-- GCash -->
+        <label class="relative block p-4 bg-white border border-gray-200 rounded-xl shadow-sm cursor-pointer transition hover:shadow-md dark:bg-neutral-800 dark:border-neutral-700">
+            <input type="radio" name="donor_payment_method" value="gcash" wire:model.live="donor_payment_method"
+                class="absolute top-4 right-4 w-5 h-5 text-amber-600 border-gray-300 rounded-full focus:ring-amber-500 dark:bg-neutral-800 dark:border-neutral-600">
+            <img src="{{ asset('imgs/gcash.png') }}" class="w-20 h-20 mx-auto mb-3 object-contain" />
+            <p class="text-center text-sm font-semibold text-gray-800 dark:text-neutral-200">Pay using GCash</p>
+            <p class="text-center text-xs text-gray-500 dark:text-neutral-400">Pay with your GCash wallet</p>
+        </label>
+
+        <!-- Card -->
+        <label class="relative block p-4 bg-white border border-gray-200 rounded-xl shadow-sm cursor-pointer transition hover:shadow-md dark:bg-neutral-800 dark:border-neutral-700">
+            <input type="radio" name="donor_payment_method" value="card" wire:model.live="donor_payment_method"
+                class="absolute top-4 right-4 w-5 h-5 text-amber-600 border-gray-300 rounded-full focus:ring-amber-500 dark:bg-neutral-800 dark:border-neutral-600">
+            <img src="{{ asset('imgs/card.png') }}" class="w-20 h-20 mx-auto mb-3 object-contain" />
+            <p class="text-center text-sm font-semibold text-gray-800 dark:text-neutral-200">Pay using Card</p>
+            <p class="text-center text-xs text-gray-500 dark:text-neutral-400">Pay via credit or debit card</p>
+        </label>
+
+        <!-- PayMaya -->
+        <label class="relative block p-4 bg-white border border-gray-200 rounded-xl shadow-sm cursor-pointer transition hover:shadow-md dark:bg-neutral-800 dark:border-neutral-700">
+            <input type="radio" name="donor_payment_method" value="paymaya" wire:model.live="donor_payment_method"
+                class="absolute top-4 right-4 w-5 h-5 text-amber-600 border-gray-300 rounded-full focus:ring-amber-500 dark:bg-neutral-800 dark:border-neutral-600">
+            <img src="{{ asset('imgs/paymaya.png') }}" class="w-20 h-20 mx-auto mb-3 object-contain" />
+            <p class="text-center text-sm font-semibold text-gray-800 dark:text-neutral-200">Pay using PayMaya</p>
+            <p class="text-center text-xs text-gray-500 dark:text-neutral-400">Pay with your PayMaya wallet</p>
+        </label>
+
+        <!-- GrabPay -->
+        <label class="relative block p-4 bg-white border border-gray-200 rounded-xl shadow-sm cursor-pointer transition hover:shadow-md dark:bg-neutral-800 dark:border-neutral-700">
+            <input type="radio" name="donor_payment_method" value="grab_pay" wire:model.live="donor_payment_method"
+                class="absolute top-4 right-4 w-5 h-5 text-amber-600 border-gray-300 rounded-full focus:ring-amber-500 dark:bg-neutral-800 dark:border-neutral-600">
+            <img src="{{ asset('imgs/grabpay.png') }}"class="w-20 h-20 mx-auto mb-3 object-contain" />
+            <p class="text-center text-sm font-semibold text-gray-800 dark:text-neutral-200">Pay using GrabPay</p>
+            <p class="text-center text-xs text-gray-500 dark:text-neutral-400">Pay through GrabPay wallet</p>
+        </label>
+    </div>
+
+    @error('donor_payment_method') 
+        <span class="mt-4 text-sm text-red-500 block">{{ $message }}</span> 
+    @enderror
+
+   @if($donor_payment_method === 'card')
+    <div class="p-4 mb-4 bg-white border border-gray-200 shadow-sm lg:mb-5 rounded-xl md:p-5 dark:bg-neutral-900 dark:border-neutral-700 dark:text-neutral-400">
+        <h3 class="font-medium inline-block text-sm text-gray-800 mt-2.5 mb-3 dark:text-neutral-200">{{ 'Card Details' }}</h3>
+
+        <div class="mb-3">
+            <input type="text" wire:model.blur="card_name" id="card_name"
+                class="block w-full px-4 py-3 text-sm border-gray-200 rounded-lg focus:border-amber-500 focus:ring-amber-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-900 dark:border-neutral-700 dark:text-neutral-400 dark:placeholder-neutral-500 dark:focus:ring-neutral-600 bg-slate-100"
+                placeholder="Name on Card">
+            @error('card_name') <span class="text-sm text-red-500">{{ $message }}</span> @enderror
+        </div>
+
+        <div class="mb-3">
+            <input type="text" wire:model.blur="card_number" id="card_number"
+                class="block w-full px-3 py-3 text-sm border-gray-200 rounded-lg shadow-sm pe-11 focus:border-amber-500 focus:ring-amber-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-900 dark:border-neutral-700 dark:text-neutral-400 dark:placeholder-neutral-500 dark:focus:ring-neutral-600"
+                placeholder="1234 5678 9012 3456">
+            @error('card_number') <span class="text-sm text-red-500">{{ $message }}</span> @enderror
+        </div>
+
+        <div class="grid grid-cols-3 gap-4">
+            <div>
+                <span class="block mb-2 text-sm text-gray-600 dark:text-neutral-500">{{ 'Expiration Month' }}</span>
+                <select wire:model.blur="expiration_month" id="expiration_month"
+                    class="block w-full px-3 py-2 text-sm border-gray-200 rounded-lg shadow-sm pe-9 focus:border-amber-500 focus:ring-amber-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-900 dark:border-neutral-700 dark:text-neutral-400 dark:placeholder-neutral-500 dark:focus:ring-neutral-600">
+                    <option value="">{{ __('Select Month') }}</option>
+                    @for($i = 1; $i <= 12; $i++)
+                        <option value="{{ $i }}">{{ str_pad($i, 2, '0', STR_PAD_LEFT) }}</option>
+                    @endfor
+                </select>
+                @error('expiration_month') <span class="text-sm text-red-500">{{ $message }}</span> @enderror
+            </div>
+
+            <div>
+                <span class="block mb-2 text-sm text-gray-600 dark:text-neutral-500">{{ 'Year' }}</span>
+                <select wire:model.blur="expiration_year" id="expiration_year"
+                    class="block w-full px-3 py-2 text-sm border-gray-200 rounded-lg shadow-sm pe-9 focus:border-amber-500 focus:ring-amber-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-900 dark:border-neutral-700 dark:text-neutral-400 dark:placeholder-neutral-500 dark:focus:ring-neutral-600">
+                    <option value="">{{ 'Year' }}</option>
+                    @for($i = date('Y'); $i <= date('Y') + 10; $i++)
+                        <option value="{{ $i }}">{{ $i }}</option>
+                    @endfor
+                </select>
+                @error('expiration_year') <span class="text-sm text-red-600">{{ $message }}</span> @enderror
+            </div>
+
+            <div>
+                <span class="block mb-2 text-sm text-gray-600 dark:text-neutral-500">{{ 'CVV' }}</span>
+                <input type="text" wire:model.blur="cvv" id="cvv"
+                    class="block w-full px-3 py-2 text-sm border-gray-200 rounded-lg shadow-sm pe-11 focus:border-amber-500 focus:ring-amber-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-900 dark:border-neutral-700 dark:text-neutral-400 dark:placeholder-neutral-500 dark:focus:ring-neutral-600"
+                    placeholder="123">
+                @error('cvv') <span class="text-sm text-red-600">{{ $message }}</span> @enderror
+            </div>
+        </div>
+    </div>
+ @endif
+
+
+</div>
+
+
       </div>
 
       <div class="mt-6 flex justify-center w-full max-w-md mx-auto">
@@ -307,6 +448,13 @@
         </p>
       </div>
     </form>
+    @else
+        {{-- Fully Booked Message --}}
+        <div class="max-w-xl mx-auto mt-10 text-center bg-yellow-100 text-yellow-800 p-6 rounded-xl border border-yellow-300 dark:bg-yellow-900 dark:text-yellow-100 dark:border-yellow-700">
+          <h2 class="text-2xl font-semibold mb-2">Fully Booked</h2>
+          <p>Sorry, all appointment slots are currently full. Please try again later.</p>
+      </div>
+    @endif
   </div>
 </div>
 {{--end of Vet form --}}

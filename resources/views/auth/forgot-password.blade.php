@@ -6,7 +6,7 @@
                 <h1 class="block text-2xl font-bold text-gray-800 dark:text-white">{{ __('Forgot password?') }}</h1>
                 <p class="mt-2 text-sm text-gray-600 dark:text-neutral-400">
                  {{ __(' Remember your password?') }}
-                  <a class="font-medium text-amber-600 decoration-2 hover:underline dark:text-amber-500" href="{{ route('login') }}">
+                  <a class="font-medium text-amber-600 decoration-2 hover:underline dark:text-amber-500"  href="{{ route('login') }}">
                     {{ __('Sign in here') }}
                   </a>
                 </p>

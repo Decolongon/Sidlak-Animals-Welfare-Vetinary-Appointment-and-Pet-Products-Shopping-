@@ -118,7 +118,7 @@ class ProductResource extends Resource
                                         ->getOptionLabelFromRecordUsing(fn ($record) => ucwords($record->prod_cat_name))
                                         ->preload()
                                         ->searchable()
-                                        ->optionsLimit(5)
+                                        // ->optionsLimit(5)
                                         ->required()
                                         ->createOptionForm([
                                             Section::make('Product Category Information')->schema([
@@ -151,31 +151,33 @@ class ProductResource extends Resource
                                         ->options([
                                             'pcs' => 'Piece (pcs)',
                                             'kg' => 'Kilograms (kg)',
+                                            'g' => 'Grams (g)',
                                         ])
+                                        ->default('pcs')
                                         ->reactive(),
     
                                     TextInput::make('prod_weight')
-                                        ->label('Kilograms To Sell')
+                                        ->label(fn ($get) => $get('prod_unit') === 'kg' ? 'Product Weight (kg)' : 'Product Weight (g)')
                                         ->required()
                                         ->numeric()
-                                        ->hidden(fn ($get) => $get('prod_unit') !== 'kg'),
+                                        ->hidden(fn ($get) => $get('prod_unit') === 'pcs'),
     
                                     TextInput::make('prod_quantity')
-                                        ->label('Product Quantity (pcs/kg)')
+                                        ->label('Product Quantity')
                                         ->required()
                                         ->numeric()
                                         ->default(1),
     
-                                    TextInput::make('prod_old_price')
-                                        ->label('Product Old Price')
-                                        ->numeric()
-                                        ->default(0),
+                                    // TextInput::make('prod_old_price')
+                                    //     ->label('Product Old Price')
+                                    //     ->numeric()
+                                    //     ->default(0),
     
                                     TextInput::make('prod_price')
                                         ->label('Product Price')
                                         ->required()
                                         ->numeric()
-                                        ->hint(fn ($get) => $get('prod_unit') === 'kg' ? 'Price is per kilo.' : null)
+                                        // ->hint(fn ($get) => $get('prod_unit') === 'kg' ? 'Price is per kilo.' : null)
                                         ->hintColor('warning')
                                         ->default(0),
     
@@ -200,6 +202,8 @@ class ProductResource extends Resource
                                             TextInput::make('shipping_cost')
                                                 ->label('Shipping Cost')
                                                 ->numeric()
+                                                ->minValue(20)
+                                                ->maxValue(100)
                                                 ->required(fn ($get) => $get('prod_requires_shipping') == true)
                                                 ->hidden(fn ($get) => $get('prod_requires_shipping') == false),
     
@@ -253,7 +257,7 @@ class ProductResource extends Resource
                             'md' => 2,
                             'lg' => 2,
                         ]),
-                ])
+                    ])
                 ->columns([
                     'sm' => 1,
                     'md' => 2,
@@ -271,6 +275,7 @@ class ProductResource extends Resource
                                 ->label('Image Upload')
                                 ->image()
                                 ->imageEditor()
+                                ->disk('public')
                                 ->imageEditorAspectRatios([
                                     null,
                                     '16:9',
@@ -303,6 +308,7 @@ class ProductResource extends Resource
                                 ])
                                 ->default(false)
                                 ->dehydrated(),
+                               
                         ])
                         ->columns([
                             'sm' => 1,
@@ -325,10 +331,10 @@ class ProductResource extends Resource
 {
     return $table
         ->columns([
-            Grid::make([
-                'lg' => 3,
-                '2xl' => 3,
-            ]),
+            // Grid::make([
+            //     'lg' => 3,
+            //     '2xl' => 3,
+            // ]),
             
             Tables\Columns\Layout\Stack::make([
                 Tables\Columns\Layout\Split::make([
@@ -339,9 +345,12 @@ class ProductResource extends Resource
                         ->copyable()
                         ->color('success')
                         ->weight(FontWeight::Bold),
+
+                        
+                        
                         
                     
-                ]),
+                    ]),
 
                 ImageColumn::make('images.url')
                         ->label('Primary Image')
@@ -359,9 +368,20 @@ class ProductResource extends Resource
                     ->searchable()
                     ->weight(FontWeight::Bold)
                     ->size(TextColumn\TextColumnSize::Large)
-                    ->formatStateUsing(fn ($record) => 
-                        $record->prod_unit == 'kg' ? $record->prod_name . ' - ' . $record->prod_weight . ' kg' : $record->prod_name
-                    ),
+                    ->formatStateUsing(function ($record){
+                        if($record->prod_unit === 'kg')
+                        {
+                            return ucwords($record->prod_name) .' - '. $record->prod_weight.' '.$record->prod_unit;
+                        }
+
+                        if($record->prod_unit === 'g')
+                        {
+                            return ucwords($record->prod_name) .' - '. $record->prod_weight.' '.$record->prod_unit;
+                        }
+                        
+                        return ucwords($record->prod_name);
+                       
+                    }),
 
                    
                
@@ -377,18 +397,10 @@ class ProductResource extends Resource
                     TextColumn::make('prod_quantity')
                         ->label('Quantity')
                         ->badge()
+                        ->formatStateUsing(fn (string $state) : string => number_format($state,0))
                         ->sortable()
                         ->color('info'),
 
-                        TextColumn::make('prod_unit')
-                        ->label('Unit')
-                        ->formatStateUsing(fn ($record) => 
-                            $record?->prod_unit == 'kg' 
-                                ? ($record->quantity < 10 ? "kg" : 'kg') 
-                                : ($record->quantity < 10 ? "pcs" : 'pcs')
-                        ),
-                        //->hidden(fn ($record) => $record?->prod_unit != 'kg'),
-                       
                     
                     TextColumn::make('prod_status')
                         ->label('Status')
@@ -421,7 +433,6 @@ class ProductResource extends Resource
                     ->formatStateUsing(fn (string $state) : string => ucwords($state)),
 
 
-
                 ]),
 
                
@@ -431,6 +442,7 @@ class ProductResource extends Resource
         ])
         ->contentGrid([
             'md' => 2,
+            'lg' => 3,
             'xl' => 3,
         ])
         ->paginated([
@@ -530,123 +542,119 @@ class ProductResource extends Resource
     }
     
     public static function infolist(Infolist $infolist): Infolist
-    {
-        return $infolist->schema([
-            InfoSection::make()->schema([
-                // Product Images, Product Name, SKU
+{
+    return $infolist->schema([
+        // Product Overview Section
+        InfoSection::make()->schema([
+            ComponentsGroup::make([
                 ImageEntry::make('images.url')
                     ->hiddenLabel()
-                    ->limit(3)
-                    ->width('100%')
-                    ->height(300),
-                   
-        
-                    ComponentsGroup::make([
-                        TextEntry::make('prod_name')
-                            ->label('Product Name')
-                            ->size(TextEntry\TextEntrySize::Large)
-                            ->weight(FontWeight::ExtraBold)
-                            ->formatStateUsing(fn (string $state): string => ucwords($state)),
-                
-                        TextEntry::make('prod_sku')
-                            ->label('')
-                            ->size(TextEntry\TextEntrySize::Large)
-                            ->weight(FontWeight::ExtraBold)
-                            ->badge()
-                            ->color('success')
-                            ->copyable(),
-                    ]),
-            ])->columns(2)->compact()->collapsible(),
-        
-            // Product Details Section
-            ComponentsSection::make('Product Details')
-                ->icon('heroicon-o-information-circle')
-                ->schema([
-                    TextEntry::make('prod_short_description')
-                        ->markdown()
-                        ->weight(FontWeight::Bold)
-                        ->label('Short Description:')
-                        ->html()
-                        // ->formatStateUsing(fn (string $state): string => ucfirst(strip_tags($state)))
-                        ->columnSpan(1),
-        
-                    TextEntry::make('prod_description')
-                        ->markdown()
-                        ->weight(FontWeight::Bold)
-                        ->label('Long Description:')
-                        ->html()
-                        // ->formatStateUsing(fn (string $state): string => ucfirst(strip_tags($state)))
-                        ->columnSpan(1),
-                ])->collapsible()
-                ->columns(2),
-        
-            // Pricing Section
-            ComponentsSection::make('Pricing')
-                // ->icon('heroicon-s-currency-pesos')
-                ->schema([
-                    TextEntry::make('prod_old_price')
-                        ->label('Old Price')
-                        ->badge()
-                        ->color('warning'),
-        
-                    TextEntry::make('prod_price')
-                        ->label('Current Price')
-                        ->badge()
-                        ->color('primary'),
-                ])
-                ->columns(2),
-        
-            // Inventory Section
-            ComponentsSection::make('Inventory')
-                ->icon('heroicon-o-archive-box')
-                ->schema([
-                    TextEntry::make('prod_quantity')
-                        ->label('Available Quantity')
-                        ->badge()
-                        ->color('info'),
-        
-                    TextEntry::make('prod_unit')
-                        ->label('Unit Type (e.g., piece, kilo)')
-                        ->badge()
-                        ->color('gray'),
-                ])
-                ->columns(2),
-        
-            // Shipping Section
-            ComponentsSection::make('Shipping Info')
-                ->icon('heroicon-o-truck')
-                ->schema([
-                    TextEntry::make('prod_requires_shipping')
-                        ->label('Requires Shipping?')
-                        ->badge()
-                        ->formatStateUsing(fn ($state) => $state ? 'Yes' : 'No')
-                        ->color(fn ($state) => $state ? 'success' : 'warning'),
-        
-                        TextEntry::make('prod_weight')
-                        ->label('Weight (kg)')
-                        ->badge()
-                        ->color('gray')
-                        ->hidden(fn ($component) => $component->getRecord()->prod_unit === 'pcs'),
-        
-                    TextEntry::make('shipping_cost')
-                        ->label('Shipping Cost')
-                        ->badge()
-                        ->hidden(fn ($component) => !$component->getRecord()->prod_requires_shipping)
-                        ->color('blue'),
-                ])
-                ->columns(2),
-        
-            // Market Visibility
-            InfoSection::make()->schema([
-                TextEntry::make('is_visible_to_market')
-                    ->label('Visible to Market?')
+                    ->limit(5)
+                    ->width(200)
+                    ->height(200)
+                    ->extraAttributes(['style' => 'object-fit: cover; border-radius: 0.5rem;']),
+            ])->columnSpanFull(),
+
+            ComponentsGroup::make([
+                TextEntry::make('prod_name')
+                    ->label('Product Name')
+                    ->size(TextEntry\TextEntrySize::Large)
+                    ->weight(FontWeight::ExtraBold)
+                    ->formatStateUsing(fn (string $state): string => ucwords($state)),
+
+                TextEntry::make('prod_sku')
+                    ->label('')
+                    ->size(TextEntry\TextEntrySize::Large)
+                    ->weight(FontWeight::ExtraBold)
                     ->badge()
-                    ->color(fn ($state) => $state ? 'success' : 'warning')
-                    ->formatStateUsing(fn ($state) => $state ? 'Yes' : 'No'),
+                    ->color('success')
+                    ->copyable(),
             ])->columns(2),
-        ]);
-        
-    }
+        ])->columns(1)->compact()->collapsible(),
+
+        // Product Details Section
+        ComponentsSection::make('Product Details')
+            ->icon('heroicon-o-information-circle')
+            ->schema([
+                TextEntry::make('prod_short_description')
+                    ->markdown()
+                    ->weight(FontWeight::Bold)
+                    ->label('Short Description:')
+                    ->html()
+                    ->columnSpan(1),
+
+                TextEntry::make('prod_description')
+                    ->markdown()
+                    ->weight(FontWeight::Bold)
+                    ->label('Long Description:')
+                    ->html()
+                    ->columnSpan(1),
+            ])->collapsible()
+            ->columns(2),
+
+        // Pricing Section
+        ComponentsSection::make('Pricing and Category')
+            ->schema([
+                TextEntry::make('prod_old_price')
+                    ->label('Old Price')
+                    ->badge()
+                    ->color('warning'),
+
+                TextEntry::make('productCategories')
+                ->label('Categories')
+                ->formatStateUsing(fn ($state, $record) => $record->productCategories->pluck('prod_cat_name')->join(', '))
+                ->badge()
+                ->color('info'),
+            ])->columns(2)->collapsible(),
+
+        // Inventory Section
+        ComponentsSection::make('Inventory')
+            ->icon('heroicon-o-archive-box')
+            ->schema([
+                TextEntry::make('prod_quantity')
+                    ->label('Available Quantity')
+                    ->badge()
+                    ->color('info'),
+
+                TextEntry::make('prod_unit')
+                    ->label('Unit Type (e.g., piece, kg, g)')
+                    ->badge()
+                    ->color('gray'),
+            ])->columns(2)->collapsible(),
+
+        // Shipping Section
+        ComponentsSection::make('Shipping Info')
+            ->icon('heroicon-o-truck')
+            ->schema([
+                TextEntry::make('prod_requires_shipping')
+                    ->label('Requires Shipping?')
+                    ->badge()
+                    ->formatStateUsing(fn ($state) => $state ? 'Yes' : 'No')
+                    ->color(fn ($state) => $state ? 'success' : 'warning'),
+
+                TextEntry::make('prod_weight')
+                    ->label(fn ($component) => $component->getRecord()->prod_unit === 'g' ? 'Weight (g)' : 'Weight (kg)')
+                    ->badge()
+                    ->color('gray')
+                    ->formatStateUsing(fn ($component, $state) => $state . ' ' . ($component->getRecord()->prod_unit === 'g' ? 'g' : 'kg'))
+                    ->hidden(fn ($component) => $component->getRecord()->prod_unit === 'pcs'),
+
+                TextEntry::make('shipping_cost')
+                    ->label('Shipping Cost')
+                    ->badge()
+                    ->hidden(fn ($component) => !$component->getRecord()->prod_requires_shipping)
+                    ->color('info'),
+            ])->columns(2)->collapsible(),
+        // Market Visibility
+        InfoSection::make()->schema([
+            TextEntry::make('is_visible_to_market')
+                ->label('Visible to Market?')
+                ->badge()
+                ->color(fn ($state) => $state ? 'success' : 'warning')
+                ->formatStateUsing(fn ($state) => $state ? 'Yes' : 'No'),
+        ])->columns(2)->collapsible(),
+    ]);
+}
 
 
 

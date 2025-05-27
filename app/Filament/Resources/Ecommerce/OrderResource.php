@@ -4,34 +4,45 @@ namespace App\Filament\Resources\Ecommerce;
 
 use Filament\Forms;
 use Filament\Tables;
+use Filament\Forms\Get;
 use Filament\Forms\Form;
 use Filament\Pages\Page;
 use Filament\Tables\Table;
 use App\Enums\OrderStatusEnum;
 use App\Models\Ecommerce\Order;
 use App\Enums\PaymentStatusEnum;
-use Filament\Resources\Resource;
 // use Filament\Resources\Pages\Page;
+use Filament\Infolists\Infolist;
+use Filament\Resources\Resource;
 use App\Models\Ecommerce\Product;
 use App\Ecommerce\Models\OrderItem;
+use Filament\Tables\Actions\Action;
 use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Toggle;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Repeater;
+use Filament\Forms\Components\Textarea;
+use Filament\Tables\Actions\BulkAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Forms\Components\TextInput;
+
+use Filament\Notifications\Notification;
 use Filament\Tables\Columns\ImageColumn;
+use Filament\Pages\SubNavigationPosition;
 use Filament\Tables\Filters\SelectFilter;
 use Illuminate\Database\Eloquent\Builder;
 use Filament\Forms\Components\ToggleButtons;
+use Filament\Infolists\Components\IconEntry;
+use Filament\Infolists\Components\TextEntry;
+use Filament\Infolists\Components\RepeatableEntry;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use App\Filament\Resources\UserResource\Pages\EditUser;
 use App\Filament\Resources\Ecommerce\OrderResource\Pages;
 use App\Filament\Resources\UserResource\Pages\CreateUser;
+use Filament\Infolists\Components\Section as InfoSection;
 use App\Filament\Resources\Ecommerce\OrderResource\RelationManagers;
 use App\Filament\Resources\Ecommerce\OrderResource\Widgets\OrderStatsOverview;
-
 
 class OrderResource extends Resource
 {
@@ -39,6 +50,10 @@ class OrderResource extends Resource
     protected static ?string $navigationGroup = 'Ecommerce';
     protected static ?string $navigationIcon = 'heroicon-o-shopping-cart';
     protected static ?int $navigationSort = 3;
+
+   //protected static SubNavigationPosition $subNavigationPosition = SubNavigationPosition::Top;
+
+
     public static function getNavigationBadge(): ?string
     {
         return static::getModel()::count();
@@ -167,13 +182,18 @@ class OrderResource extends Resource
                         ->label('Shipping Method')
                         ->options([
                             'COD' => 'Cash on Delivery',
-                            'gcash' => 'gcash',
-                            'paymaya' => 'paymaya',
-                            'card' => 'card',
-                            'grab_pay' => 'grab_pay',
+                            // 'gcash' => 'gcash',
+                            // 'paymaya' => 'paymaya',
+                            // 'card' => 'card',
+                            // 'grab_pay' => 'grab_pay',
                         ])
                         ->default('COD')
                         ->required(),
+
+                    Textarea::make('notes')
+                    ->maxLength(1000)
+                    ->rows(5)
+                        ->label('Notes (optional)')
                    
                 ])
                 ->columns(2),       
@@ -271,41 +291,8 @@ class OrderResource extends Resource
                                         }
                                     }
                                 })
-                                ->rule(function ($get) {
-                                    $product = Product::find($get('product_id'));
-                            
-                                    if (!$product) return [];
-                            
-                                    if ($product->prod_unit === 'pcs' || $product->prod_unit === 'kg') {
-                                        return ['integer'];
-                                    }
-                            
-                                    // if ($product->prod_unit === 'kg') {
-                                    //     $weight = $product->prod_weight;
-                                    //     return function ($attribute, $value, $fail) use ($weight) {
-                                    //         if ($weight <= 0) return;
-                            
-                                    //         // Check if value is a multiple of prod_weight (e.g. 1.2, 2.4, etc.)
-                                    //         if (fmod($value, $weight) !== 0.0) {
-                                    //             $fail("Quantity must be a multiple of {$weight} kg.");
-                                    //         }
-                                    //     };
-                                    // }
-                            
-                                    return [];
-                                })
-                                ->hint(function ($get) {
-                                    $product = Product::find($get('product_id'));
-                                    if (!$product) return null;
-
-                                    if ($product->prod_unit === 'pcs' || $product->prod_unit === 'kg') {
-                                        return 'Input whole number only.';
-                                    }
-                            
-                                    // return $product->prod_unit === 'pcs'
-                                    //     ? 'Input whole number only.'
-                                    //     : "Input based on product weight. Example: 1.30, multiples of {$product->prod_weight} kg.";
-                                })
+                                ->rule(['integer'])
+                                ->hint('Input whole number only.')
                                 ->hintColor('warning')
                                 ->label('Quantity'),
     
@@ -353,7 +340,7 @@ class OrderResource extends Resource
                           ->disabled()
                           ->dehydrated()
                           ->minValue(0)
-                          ->formatStateUsing(fn ($state) => number_format( $state, 2))
+                        //   ->formatStateUsing(fn ($state) => number_format( $state, 2))
                           ->label('Total'), 
 
                  ]),
@@ -375,6 +362,8 @@ class OrderResource extends Resource
                     ->formatStateUsing(fn (string $state) : string => ucwords($state)) 
                     ->searchable(),
 
+             
+
                 TextColumn::make('orderItems.product.prod_name')
                     ->label('Product Ordered')
                     ->sortable()
@@ -382,6 +371,7 @@ class OrderResource extends Resource
                     ->searchable()
                     ->formatStateUsing(fn (string $state) : string => ucwords($state)),
 
+              
                 ImageColumn::make('images.url')
                     ->label('Product Image')
                     ->circular()
@@ -401,13 +391,33 @@ class OrderResource extends Resource
                 )->toggleable(isToggledHiddenByDefault: true),
 
 
+                 TextColumn::make('orderItems')
+                    ->label('Quantity')
+                    ->formatStateUsing(function ($record) {
+                        return $record->orderItems->map(function ($item) {
+                            $qty = number_format($item->quantity,0) ?? 0;
+                            $unit = $item->product->prod_unit ?? '';
+                            $weight = $item->product->prod_weight ?? 0;
+
+                            return $unit === 'pcs'
+                                ? "{$qty}"
+                                : "{$qty} × " . number_format($weight, 2) . $unit;
+                        })->join(', ');
+                    })
+                    ->toggleable(isToggledHiddenByDefault: true),
+
+
+                   TextColumn::make('notes')
+                    ->limit(70)
+                    ->html()
+                    ->label('Notes')
+                    ->toggleable(isToggledHiddenByDefault: true),
 
                 TextColumn::make('order_status')
                     ->label('Order Status')
                     ->formatStateUsing(fn ($state) => OrderStatusEnum::tryFrom($state)?->getLabel() ?? 'Unknown') // display label halin sa orderstatusenum
                     ->color(fn ($state) => OrderStatusEnum::tryFrom($state)?->getColor() ?? 'gray') 
-                    ->icon(fn ($state) => OrderStatusEnum::tryFrom($state)?->getIcon() ?? null)
-                    ->sortable(),
+                    ->icon(fn ($state) => OrderStatusEnum::tryFrom($state)?->getIcon() ?? null),
                 
                     TextColumn::make('shipping_price')
                         ->label('Shipping Cost')
@@ -422,8 +432,7 @@ class OrderResource extends Resource
                     ->label('Payment Status')
                     ->formatStateUsing(fn ($state) => PaymentStatusEnum::tryFrom($state)?->getLabel() ?? 'Unknown') // display label halin sa paymentstatusenum
                     ->color(fn ($state) => PaymentStatusEnum::tryFrom($state)?->getColor() ?? 'gray') 
-                    ->icon(fn ($state) => PaymentStatusEnum::tryFrom($state)?->getIcon() ?? null)
-                    ->sortable(),
+                    ->icon(fn ($state) => PaymentStatusEnum::tryFrom($state)?->getIcon() ?? null),
 
                 TextColumn::make('shipping_method')
                     ->label('Shipping Method')
@@ -460,12 +469,92 @@ class OrderResource extends Resource
                 Tables\Actions\ViewAction::make(),
                 Tables\Actions\ActionGroup::make([
                     Tables\Actions\EditAction::make(),
+
+                    Action::make('update_order_status')
+                    ->label('Update Status')
+                    ->icon('heroicon-o-wrench-screwdriver')
+                    ->requiresConfirmation() 
+                    ->tooltip('Update Order and Payment status')
+                    ->modalHeading(fn ($record) => 'Confirm Status Update')
+                    ->modalDescription(fn ($record) => 'Are you sure you want to update the status of ' . $record->user->name . '?')
+                    ->color('warning') 
+                    ->modalSubmitActionLabel('Confirm Update') 
+                    ->modalWidth('2xl') // Change modal size: sm, md, lg, xl, 2xl, 3xl, 4xl, 5xl, 6xl, 7xl
+                        ->form([
+                            ToggleButtons::make('order_status')
+                                ->options(OrderStatusEnum::class)
+                                // ->default(OrderStatusEnum::New)
+                                ->default(fn ($record) => $record->order_status)
+                                ->dehydrated()
+                                ->inline()
+                                ->required()
+                                ->label('Order Status'),
+
+                            ToggleButtons::make('payment_status')
+                                ->options(PaymentStatusEnum::class)
+                                // ->default(PaymentStatusEnum::Pending)
+                                ->default(fn ($record) => $record->payment_status)
+                                ->inline()
+                                ->dehydrated()
+                                ->required()
+                                ->label('Payment Status'),
+                        ])
+                        ->action(function (array $data, $record) {
+                            $record->update([
+                                'order_status' => $data['order_status'],
+                                'payment_status' => $data['payment_status'],
+                            ]);
+                            Notification::make()
+                            ->title('Updates Successfuly')
+                            ->success()
+                            ->send();
+                        }),
+                    
                     Tables\Actions\DeleteAction::make(),
                 ])->tooltip('Actions')
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
                     Tables\Actions\DeleteBulkAction::make(),
+
+                      BulkAction::make('update_order_status')
+                    ->label('Update Status')
+                    ->icon('heroicon-o-wrench-screwdriver')
+                    ->requiresConfirmation() 
+                    ->tooltip('Update Order and Payment status')
+                    ->modalHeading('Confirm Status Update')
+                    ->modalDescription( 'Are you sure you want to update the status of all selected orders ?')
+                    ->color('warning') 
+                    ->modalSubmitActionLabel('Confirm Update') 
+                    ->modalWidth('2xl') // Change modal size: sm, md, lg, xl, 2xl, 3xl, 4xl, 5xl, 6xl, 7xl
+                        ->form([
+                            ToggleButtons::make('order_status')
+                                ->options(OrderStatusEnum::class)
+                                ->dehydrated()
+                                ->inline()
+                                ->required()
+                                ->label('Order Status'),
+
+                            ToggleButtons::make('payment_status')
+                                ->options(PaymentStatusEnum::class)
+                                ->inline()
+                                ->dehydrated()
+                                ->required()
+                                ->label('Payment Status'),
+                        ])
+                        ->action(function (array $data, $records) {
+                         foreach($records as $record){
+                             $record->update([
+                                'order_status' => $data['order_status'],
+                                'payment_status' => $data['payment_status'],
+                            ]);
+                        }
+                         Notification::make()
+                            ->title('Updates Successfuly')
+                            ->success()
+                            ->send();
+                           
+                        }),
                 ]),
             ])->emptyStateActions([
                 Tables\Actions\CreateAction::make()
@@ -489,6 +578,7 @@ class OrderResource extends Resource
             'index' => Pages\ListOrders::route('/'),
             'create' => Pages\CreateOrder::route('/create'),
             'edit' => Pages\EditOrder::route('/{record}/edit'),
+            'view' => Pages\ViewOrder::route('/{record}'),
         ];
     }
 
@@ -512,5 +602,82 @@ class OrderResource extends Resource
     //        OrderStatsOverview::class
     //     ];
     // }
+
+
+
+public static function infolist(Infolist $infolist): Infolist
+{
+    return $infolist
+        ->schema([
+            InfoSection::make('Customer Details')
+            ->icon('heroicon-o-user')
+            ->iconColor('primary')
+                ->schema([
+                    TextEntry::make('user.name')->label('Name'),
+                    TextEntry::make('user.email')->label('Email'),
+                ])
+                ->collapsible()
+                ->columns(2),
+
+            InfoSection::make('Order Details')
+            ->icon('heroicon-o-shopping-cart')
+            ->iconColor('primary')
+                ->schema([
+                    TextEntry::make('order_status')->label('Order Status')
+                     ->color(fn ($state) => OrderStatusEnum::tryFrom($state)?->getColor())
+                     ->icon(fn ($state) => OrderStatusEnum::tryFrom($state)?->getIcon())
+                     ->formatStateUsing(fn ($state) => OrderStatusEnum::tryFrom($state)?->getLabel()),
+                  
+                    TextEntry::make('payment_status')->label('Payment Status')
+                     ->color(fn ($state) => PaymentStatusEnum::tryFrom($state)?->getColor())
+                     ->icon(fn ($state) => PaymentStatusEnum::tryFrom($state)?->getIcon())
+                     ->formatStateUsing(fn ($state) => PaymentStatusEnum::tryFrom($state)?->getLabel()),
+
+                    TextEntry::make('shipping_method')->label('Shipping Method')
+                    ->badge(),
+                    TextEntry::make('notes')->label('Notes')->html()->columnSpanFull(),
+                ])
+                ->collapsible()
+                ->columns(2),
+
+            InfoSection::make('Order Items')
+            ->icon('heroicon-o-shopping-bag')
+            ->iconColor('primary')
+                ->schema([
+                    RepeatableEntry::make('orderItems')
+                        ->label('Items')
+                        ->schema([
+                            TextEntry::make('product.prod_name')->label('Product Name'),
+                            TextEntry::make('price')->label('Price')->money('PHP')
+                            ->badge()
+                            ->formatStateUsing(fn ($state) => number_format($state, 2)),
+                            TextEntry::make('quantity')->label('Quantity')
+                            ->formatStateUsing(function ($state, $record) {
+                                $qty = number_format($state, 0);
+                                $unit = $record->product->prod_unit ?? '';
+                                $weight = $record->product->prod_weight ?? 0;
+
+                                return $unit === 'pcs'
+                                    ? "{$qty}"
+                                    : "{$qty} × " . number_format($weight, 2) . $unit;
+                            })
+                            ->badge(),
+                           
+                        ])
+                        // ->collapsible()
+                        ->columns(2)
+                        ->columnSpanFull(),
+                        
+                    TextEntry::make('shipping_price')->label('Total Shipping Cost')->money('PHP')
+                    ->badge()
+                    ->formatStateUsing(fn ($state) => number_format($state, 2)),
+                    TextEntry::make('total')->label('Grand Total')->money('PHP')
+                     ->badge()
+                    ->formatStateUsing(fn ($state) => number_format($state, 2)),
+                ])
+                ->columns(2)->collapsible(),
+        ]);
+}
+
 
 }

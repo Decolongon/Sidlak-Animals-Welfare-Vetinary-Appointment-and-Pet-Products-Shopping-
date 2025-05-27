@@ -10,8 +10,8 @@ class CreateProductDiscount extends CreateRecord
 {
     protected static string $resource = ProductDiscountResource::class;
 
-    protected function getRedirectUrl(): string
-    {
-        return $this->getResource()::getUrl('index');
-    }
+    // protected function getRedirectUrl(): string
+    // {
+    //     return $this->getResource()::getUrl('index');
+    // }
 }

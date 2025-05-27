@@ -2,7 +2,7 @@
 <div>
     <header class="z-50 flex flex-wrap w-full py-4 text-sm sm:justify-start sm:flex-nowrap bg-slate-50 dark:bg-neutral-800 lg:static">
         <nav class="flex flex-wrap items-center justify-between w-full px-4 mx-auto max-w-7xl basis-full" aria-label="Global">
-        <a class="flex-none text-xl font-semibold sm:order-1 dark:text-white" href="{{ route('page.home') }}">
+        <a class="flex-none text-xl font-semibold sm:order-1 dark:text-white" wire:navigate.hover href="{{ route('page.home') }}">
             <img src="{{ asset('imgs/sdas-logo.png') }}" class="h-auto w-14" alt="" srcset="">
         </a>
         <div class="flex items-center sm:order-3 gap-x-2">
@@ -34,12 +34,12 @@
                 @endauth
 
                 @guest
-                    <a href="{{ route('login') }}" class="inline-flex items-center px-3 py-2 text-sm font-medium text-black border border-gray-200 gap-x-2 rounded-xl hover:bg-gray-100 disabled:opacity-50 disabled:pointer-events-none dark:border-neutral-700 dark:hover:bg-white/10 dark:text-white dark:hover:text-white">
+                    <a wire:navigate.hover href="{{ route('login') }}" class="inline-flex items-center px-3 py-2 text-sm font-medium text-black border border-gray-200 gap-x-2 rounded-xl hover:bg-gray-100 disabled:opacity-50 disabled:pointer-events-none dark:border-neutral-700 dark:hover:bg-white/10 dark:text-white dark:hover:text-white">
                         {{ __('Sign in') }}
                     </a>
 
                     @if (Route::has('register'))
-                    <a href="{{ route('register') }}" class="inline-flex items-center px-3 py-2 text-sm font-medium text-black transition border border-transparent gap-x-2 rounded-xl bg-amber-400 hover:bg-amber-500 disabled:opacity-50 disabled:pointer-events-none focus:outline-none focus:bg-amber-500">
+                    <a wire:navigate.hover  href="{{ route('register') }}" class="inline-flex items-center px-3 py-2 text-sm font-medium text-black transition border border-transparent gap-x-2 rounded-xl bg-amber-400 hover:bg-amber-500 disabled:opacity-50 disabled:pointer-events-none focus:outline-none focus:bg-amber-500">
                         {{ __('Sign Up') }}
                     </a>
                     @endif
@@ -106,12 +106,12 @@
                             </div>
                         <div class="py-2 mt-2 first:pt-0 last:pb-0">
 
-                            <a class="flex items-center gap-x-3.5 py-2 px-3 rounded-lg text-sm text-gray-800 hover:bg-gray-100 focus:ring-2 focus:ring-amber-500 dark:text-neutral-400 dark:hover:bg-neutral-700 dark:hover:text-neutral-300" href="{{ route('profile.show') }}">
+                            <a class="flex items-center gap-x-3.5 py-2 px-3 rounded-lg text-sm text-gray-800 hover:bg-gray-100 focus:ring-2 focus:ring-amber-500 dark:text-neutral-400 dark:hover:bg-neutral-700 dark:hover:text-neutral-300" wire:navigate.hover href="{{ route('profile.show') }}">
                             <svg class="flex-shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
                             {{ __('Profile') }}
                             </a>
                             {{-- Auth::user()->hasAnyRole(['admin', 'super_admin','admin_shop']) --}}
-                            <a href="{{ Auth::user()->roles()->exists() ? route('filament.admin.pages.dashboard') : route('dashboard') }}"
+                            <a  href="{{ Auth::user()->roles()->exists() ? route('filament.admin.pages.dashboard') : route('dashboard') }}"
                                 class="flex items-center gap-x-3.5 py-2 px-3 rounded-lg text-sm text-gray-800 hover:bg-gray-100 focus:ring-2 focus:ring-amber-500 dark:text-neutral-400 dark:hover:bg-neutral-700 dark:hover:text-neutral-300">
                                 <svg class="flex-shrink-0 size-4" width="24" height="24" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6A2.25 2.25 0 0 1 6 3.75h2.25A2.25 2.25 0 0 1 10.5 6v2.25a2.25 2.25 0 0 1-2.25 2.25H6a2.25 2.25 0 0 1-2.25-2.25V6ZM3.75 15.75A2.25 2.25 0 0 1 6 13.5h2.25a2.25 2.25 0 0 1 2.25 2.25V18a2.25 2.25 0 0 1-2.25 2.25H6A2.25 2.25 0 0 1 3.75 18v-2.25ZM13.5 6a2.25 2.25 0 0 1 2.25-2.25H18A2.25 2.25 0 0 1 20.25 6v2.25A2.25 2.25 0 0 1 18 10.5h-2.25a2.25 2.25 0 0 1-2.25-2.25V6ZM13.5 15.75a2.25 2.25 0 0 1 2.25-2.25H18a2.25 2.25 0 0 1 2.25 2.25V18A2.25 2.25 0 0 1 18 20.25h-2.25A2.25 2.25 0 0 1 13.5 18v-2.25Z" />

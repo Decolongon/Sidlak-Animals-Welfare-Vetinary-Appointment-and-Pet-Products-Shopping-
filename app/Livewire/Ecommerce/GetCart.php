@@ -25,6 +25,7 @@ class GetCart extends Component
     public function mount()
     {
         $this->getCarts();
+        
     }
 
 
@@ -49,94 +50,79 @@ class GetCart extends Component
         $cart = Cart::with('product')->find($cart_id);
 
         if ($cart && $cart->product && $cart->quantity < $cart->product->prod_quantity) {
-            //$increase = $cart->product->prod_unit == 'kg' ? $cart->product->prod_weight : 1;
-            $increase = 1;
-            //$cart->quantity += $increase;
-            $cart->update(['quantity' =>  $cart->quantity += $increase]);
-            //$cart->save()
-            
-            $this->getCarts();
-            //$this->dispatch('cartUpdated');
-            // $this->dispatch('refreshCartItem', $cart->id);
+            $cart->increment('quantity', 1);
         } else {
-           // session()->flash('error_message', 'Not enough stock available');
-           $this->alert('warning','', [
-            'position' => 'top-end',
-            'timer' => 3000,
-            'toast' => true,
-            'text' => 'Not enough stock available!',
+            $this->alert('warning', '', [
+                'position' => 'top-end',
+                'timer' => 3000,
+                'toast' => true,
+                'text' => 'Not enough stock available!',
             ]);
         }
-       $this->getCarts();
-    //    $this->dispatch('cartUpdated');
+
+        $this->getCarts(); // Keep this if needed to recalculate totals
+    // $this->dispatch('cartUpdated'); // Needed for frontend update (if used)
     }
 
     public function decreaseQuantity($cart_id)
     {
         $cart = Cart::find($cart_id);
 
-        if ($cart && $cart->quantity > 1) {
-           // $decrease = $cart->product->prod_unit == 'kg' ? $cart->product->prod_weight : 1;
-           $decrease = 1;
-            //$cart->quantity -= $decrease;
-            $cart->update(['quantity' => $cart->quantity -= $decrease]);
-            // $cart->save();
+        if ($cart) {
+            if ($cart->quantity > 1) {
+                $cart->decrement('quantity', 1);
+            } else {
+                $cart->delete();
 
-            $this->getCarts();
-          //$this->dispatch('cartUpdated');
-            
-            // $this->dispatch('refreshCartItem', $cart->id);
-        } else {
-            $cart->delete();
-            // session()->flash('message', 'Product removed from cart');
-            $this->alert('success','', [
-                'position' => 'top-end',
-                'timer' => 3000,
-                'toast' => true,
-                'text' => 'Product removed from cart',
-            ]);
-            $this->dispatch('cartUpdated');
-            
+                $this->alert('success', '', [
+                    'position' => 'top-end',
+                    'timer' => 3000,
+                    'toast' => true,
+                    'text' => 'Product removed from cart',
+                ]);
+            }
         }
-        $this->getCarts();
-       // $this->dispatch('cartUpdated');
+
+        $this->getCarts(); // Keep this if you need to recalculate totals
+        //$this->dispatch('cartUpdated');
     }
+
 
 
     
 
     public function toggleSelectAll()
     {
-        if ($this->selectAll) {
-            $this->selectedItems = $this->carts->pluck('id')->toArray();
-        } else {
-            $this->selectedItems = [];
-        }
+        $this->selectedItems = $this->selectAll
+            ? $this->carts->pluck('id')->all()
+            : [];
 
         $this->updatedSelectedItems();
     }
-
+    
     public function removeSelected()
     {
-        if (!empty($this->selectedItems)) {
-            // Delete selected cart items
-            Cart::whereIn('id', $this->selectedItems)->delete();
-
-            // Remove selected items from local state
-            $this->carts = $this->carts->reject(fn ($c) => in_array($c->id, $this->selectedItems));
-
-            $this->selectedItems = [];
-            //session()->flash('message', 'Selected items removed from cart');
-            $this->alert('success', '', [
-                'position' => 'top-end',
-                'timer' => 3000,
-                'toast' => true,
-                'text' => 'Selected items removed from cart'
-
-            ]);
+        if (empty($this->selectedItems)) {
+            return;
         }
-    }
 
+        // Delete from DB
+        Cart::whereIn('id', $this->selectedItems)->delete();
+
+        // Remove from local state
+        $this->carts = $this->carts->reject(
+            fn($cart) => in_array($cart->id, $this->selectedItems)
+        );
+
+        $this->selectedItems = [];
+
+        $this->alert('success', '', [
+            'position' => 'top-end',
+            'timer' => 3000,
+            'toast' => true,
+            'text' => 'Selected items removed from cart',
+        ]);
+    }
 
     //checkout btn
     public function checkout(){

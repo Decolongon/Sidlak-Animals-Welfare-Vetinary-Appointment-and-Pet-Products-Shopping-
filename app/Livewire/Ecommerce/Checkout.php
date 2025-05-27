@@ -8,10 +8,11 @@ use App\Models\Ecommerce\Cart;
 use Livewire\Attributes\Title;
 use App\Models\Ecommerce\Order;
 use Livewire\Attributes\Layout;
+use App\Models\Ecommerce\Product;
 use Illuminate\Support\Facades\Auth;
 use Luigel\Paymongo\Facades\Paymongo;
-use Jantinnerezo\LivewireAlert\LivewireAlert;
 use Woenel\Prpcmblmts\Models\PhilippineCity;
+use Jantinnerezo\LivewireAlert\LivewireAlert;
 use Woenel\Prpcmblmts\Models\PhilippineRegion;
 use Woenel\Prpcmblmts\Models\PhilippineBarangay;
 use Woenel\Prpcmblmts\Models\PhilippineProvince;
@@ -42,8 +43,21 @@ class Checkout extends Component
     public $barangays = [];
     public $selectedRegion, $selectedProvince, $selectedCity, $selectedBarangay;
 
+    public $card_name;
+    public $card_number;
+    public $expiration_month;
+    public $expiration_year;
+    public $cvv;
+
+    public $itemsTotal;
+    public $itemId;
     public function mount()
     {
+         $this->itemId =  session('buy_now_product');
+        // dd($this->itemId);
+
+       
+
       $this->getCheckoutItems();
      
       $this->calculateTotalShipping();
@@ -54,38 +68,57 @@ class Checkout extends Component
        $this->selectedProvince = '0645'; //provincce_code of negroos occidental
 
          // Load cities for the province
-      $this->cities = PhilippineCity::where('province_code', $this->selectedProvince)->get();
+    //   $this->cities = PhilippineCity::where('province_code', $this->selectedProvince)->get();
 
-        // // Load barangays if a city is already selected
-        if ($this->selectedCity) {
-            $this->barangays = PhilippineBarangay::where('city_code', $this->selectedCity)->get();
-        }
+    //     // // Load barangays if a city is already selected
+    //     if ($this->selectedCity) {
+    //         $this->barangays = PhilippineBarangay::where('city_code', $this->selectedCity)->get();
+    //     }
         
     }
 
-    public function getCheckoutItems(){
-        if(!Auth::user()){
+    public function getCheckoutItems()
+    {
+        if (!Auth::check()) {
             return redirect()->route('login');
         }
-        // $selectedItemIds = session()->pull('selected_checkout_items', []);
-        $selectedItemIds = session('selected_checkout_items',[]);
-        $this->checkoutItems = Cart::with('product')
-                                ->where('user_id', Auth::id())
-                                ->whereIn('id', $selectedItemIds)
-                                ->get();
 
-     
-        // return $this->checkoutItems;
-       
+        // Handle single product checkout
+        if ($singleProductId = session('buy_now_product')) {
+            $product = Product::find($singleProductId);
+
+          session()->forget('buy_now_product');
+
+            if ($product) {
+                $this->checkoutItems = collect([
+                    (object)[
+                        'product' => $product,
+                        'quantity' => 1,
+                        'id' => null,
+                    ]
+                ]);
+            }
+
+            return;
+        }
+
+        // Handle cart checkout
+        $selectedItemIds = (array) session('selected_checkout_items', []);
+
+        $this->checkoutItems = Cart::with('product')
+            ->where('user_id', Auth::id())
+            ->whereIn('id', $selectedItemIds)
+            ->get();
     }
+   
 
     //calculate subtotal
     public function calculateSubtotal(){
        
-        $itemsTotal = $this->checkoutItems->sum(function($item) {
+        $this->itemsTotal = $this->checkoutItems->sum(function($item) {
             return $item->product->prod_price * $item->quantity;
         });
-      $this->subtotal = $itemsTotal + $this->totalShipping;
+      $this->subtotal = $this->itemsTotal + $this->totalShipping;
     }
 
     //calculate total shipping
@@ -201,7 +234,7 @@ class Checkout extends Component
        
         $this->processOrderItems($orders);
        
-
+        session()->forget('buy_now_product');
      
         $this->reset();
       
@@ -250,26 +283,27 @@ class Checkout extends Component
     
         // Card logic
         if ($this->shipping_method === 'card') {
-            $this->paymentMethod = Paymongo::paymentMethod()->create([
+           $this->paymentMethod = Paymongo::paymentMethod()->create([
                 'type' => 'card',
                 'details' => [
+                    'card_number' => preg_replace('/\D/', '', (string) $sanitizedData['card_number']),
+                    'exp_month' => (int)$sanitizedData['expiration_month'],
+                    'exp_year' => (int)$sanitizedData['expiration_year'],
+                    'cvc' => $sanitizedData['cvv'],
+                ],
+                'billing' => [
                     'email' => Auth::user()->email,
-                    'details' => [
-                        'card_number' => $sanitizedData['card_number'],
-                        'exp_month' => (int)$sanitizedData['expiration_month'],
-                        'exp_year' => (int)$sanitizedData['expiration_year'],
-                        'cvc' => $sanitizedData['cvv'],
-                    ],
+                    'name' => $sanitizedData['card_name'], // optional, but helpful
                 ],
             ]);
         }
     }
 
 
-    public function updatedSelectedCity($value)
-    {
-         $this->barangays = PhilippineBarangay::where('city_code', $value)->get();
-    }
+    // public function updatedSelectedCity($value)
+    // {
+    //      $this->barangays = PhilippineBarangay::where('city_code', $value)->get();
+    // }
 
     public function updatedSelectedRegion($value)
     {
@@ -304,6 +338,69 @@ class Checkout extends Component
     }
 
 
+    public function increaseQuantity($id = null)
+{
+    if ($this->itemId) {
+        // Buy Now mode
+        if (isset($this->checkoutItems[0]) && $this->checkoutItems[0]->product->prod_quantity > $this->checkoutItems[0]->quantity) {
+            $this->checkoutItems[0]->quantity += 1;
+            $this->calculateSubtotal();
+        } else {
+            $this->alert('warning', '', [
+                'position' => 'top-end',
+                'timer' => 3000,
+                'toast' => true,
+                'text' => 'Not enough stock available!',
+            ]);
+        }
+    } else {
+        // Cart mode
+        $cartItem = Cart::where('user_id', Auth::id())->where('id', $id)->first();
+
+        if ($cartItem && $cartItem->quantity < $cartItem->product->prod_quantity) {
+            $cartItem->quantity += 1;
+            $cartItem->save();
+            $this->getCheckoutItems();
+            $this->calculateSubtotal();
+        } else {
+            $this->alert('warning', '', [
+                'position' => 'top-end',
+                'timer' => 3000,
+                'toast' => true,
+                'text' => 'Not enough stock available!',
+            ]);
+        }
+    }
+}
+
+ 
+
+public function decreaseQuantity($id = null)
+{
+    if ($this->itemId) {
+        // Buy Now mode
+        if (isset($this->checkoutItems[0]) && $this->checkoutItems[0]->quantity > 1) {
+            $this->checkoutItems[0]->quantity -= 1;
+            $this->calculateSubtotal();
+        }
+    } else {
+        // Cart mode
+        $cartItem = Cart::where('user_id', Auth::id())->where('id', $id)->first();
+
+        if ($cartItem && $cartItem->quantity > 1) {
+            $cartItem->quantity -= 1;
+            $cartItem->save();
+        }
+
+        $this->getCheckoutItems();
+        $this->calculateSubtotal();
+    }
+}
+
+
+
+
+
     
 
 
@@ -319,7 +416,8 @@ class Checkout extends Component
            'subtotal' => $this->subtotal,
            'totalShipping' => $this->totalShipping,
            'barangays' => $this->barangays,
-           'cities' => $this->cities
+           'cities' => $this->cities,
+           'itemsTotal' => $this->itemsTotal
         ]);
     }
 }

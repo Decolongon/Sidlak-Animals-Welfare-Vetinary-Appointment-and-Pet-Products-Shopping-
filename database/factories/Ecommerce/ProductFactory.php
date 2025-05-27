@@ -25,6 +25,8 @@ class ProductFactory extends Factory
         'Adjustable Red Nylon Collar for Pets',
         'Outdoor Adventure Jacket for Dogs',
         'Heavy-Duty Red Dog Leash with Brass Hook',
+        '9 Lives Crunchy Cat Treats',
+        'Vegan Duo Dog and Cat Food',
 
      ];
     public function definition(): array

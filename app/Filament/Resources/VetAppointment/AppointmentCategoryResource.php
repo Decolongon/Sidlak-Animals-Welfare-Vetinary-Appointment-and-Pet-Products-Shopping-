@@ -75,12 +75,12 @@ class AppointmentCategoryResource extends Resource
                 Tables\Columns\TextColumn::make('appoint_cat_name')
                 ->searchable()
                 ->sortable()
-                ->label('Appointment Category Name')    
+                ->label('Services')    
                 ->formatStateUsing(fn ($state) => ucfirst($state)),
 
                 Tables\Columns\TextColumn::make('appoint_cat_description')
                 ->formatStateUsing(fn ($state) => ucfirst(Str::limit(strip_tags($state), 50, '...')))
-                ->label('Appointment Category Description')
+                ->label('Sercvices Description')
 
             ])
             ->filters([

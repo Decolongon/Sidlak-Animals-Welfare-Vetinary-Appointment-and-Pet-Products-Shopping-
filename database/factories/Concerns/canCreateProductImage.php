@@ -19,6 +19,8 @@ trait CanCreateProductImage
             'Adjustable Red Nylon Collar for Pets' => 'collar_for_dog_or_cat.png',
             'Outdoor Adventure Jacket for Dogs' => 'dog_clothes.jpg',
             'Heavy-Duty Red Dog Leash with Brass Hook' => 'dog_leash_enhanced.jpg',
+            '9 Lives Crunchy Cat Treats' => 'cat_treats.png',
+            'Vegan Duo Dog and Cat Food'=> 'dog_food_&_cat_food.jpg',
         ];
 
         $filename = $productImages[$productName] ?? null;

@@ -28,19 +28,37 @@
 
                 <div class="border-b-2 border-gray-200 dark:border-neutral-700">
                     <nav class="-mb-0.5 flex gap-x-6">
-                        {{-- cart for dogs --}}
-                        <a class="inline-flex items-center gap-2 px-1 py-4 text-sm font-medium border-b-2 text-amber-600 border-amber-500 whitespace-nowrap focus:outline-none focus:text-amber-800 dark:text-amber-500" href="{{ route('page.cart') }}" aria-current="page">
+
+                        {{-- View All Orders --}}
+                        <a wire:navigate.hover href="{{ route('view-order') }}" 
+                           class="inline-flex items-center gap-2 px-1 py-4 text-sm font-medium whitespace-nowrap
+                               {{ request()->routeIs('vieworder') ? 'border-b-2 text-amber-600 border-amber-500' : 'text-gray-500 border-b-2 border-transparent hover:text-amber-600' }}
+                               focus:outline-none focus:text-amber-800 dark:{{ request()->routeIs('vieworder') ? 'text-amber-500' : 'neutral-500' }}">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M20.25 6.375c0 2.278-3.694 4.125-8.25 4.125S3.75 8.653 3.75 6.375m16.5 0c0-2.278-3.694-4.125-8.25-4.125S3.75 4.097 3.75 6.375m16.5 0v11.25c0 2.278-3.694 4.125-8.25 4.125s-8.25-1.847-8.25-4.125V6.375m16.5 0v3.75m-16.5-3.75v3.75m16.5 0v3.75C20.25 16.153 16.556 18 12 18s-8.25-1.847-8.25-4.125v-3.75m16.5 0c0 2.278-3.694 4.125-8.25 4.125s-8.25-1.847-8.25-4.125" />
+                            </svg>
+
+                            View All Orders
+                        </a>
+
+                        {{-- Cart for Dogs --}}
+                        <a wire:navigate.hover href="{{ route('page.cart') }}" 
+                           class="inline-flex items-center gap-2 px-1 py-4 text-sm font-medium whitespace-nowrap
+                               {{ request()->routeIs('page.cart') ? 'border-b-2 text-amber-600 border-amber-500' : 'text-gray-500 border-b-2 border-transparent hover:text-amber-600' }}
+                               focus:outline-none focus:text-amber-800 dark:{{ request()->routeIs('page.cart') ? 'text-amber-500' : 'neutral-500' }}">
                             <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <circle cx="12" cy="12" r="10"></circle>
-                            <circle cx="12" cy="10" r="3"></circle>
-                            <path d="M7 20.662V19a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v1.662"></path>
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <circle cx="12" cy="10" r="3"></circle>
+                                <path d="M7 20.662V19a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v1.662"></path>
                             </svg>
                             Selected Dog
                         </a>
-                        {{-- cart for ecommerce --}}
-                        
 
-                        <a class="inline-flex items-center gap-2 px-1 py-4 text-sm text-gray-500 border-b-2 border-transparent whitespace-nowrap hover:text-amber-600 focus:outline-none focus:text-amber-600 dark:text-neutral-500 dark:hover:text-amber-500 dark:focus:text-amber-500" href="{{ route('page.cart') }}">
+                        {{-- Request --}}
+                        <a wire:navigate.hover href="{{ route('page.cart') }}"
+                           class="inline-flex items-center gap-2 px-1 py-4 text-sm whitespace-nowrap
+                               {{ request()->routeIs('page.cart') ? 'border-b-2 text-amber-600 border-amber-500' : 'text-gray-500 border-b-2 border-transparent hover:text-amber-600' }}
+                               focus:outline-none focus:text-amber-800 dark:{{ request()->routeIs('page.cart') ? 'text-amber-500' : 'neutral-500' }}">
                             <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"  width="24" height="24">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827v.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 5.25h.008v.008H12v-.008Z" />
                             </svg>
@@ -48,23 +66,25 @@
                         </a>
 
                         @if(Auth::user()->hasRole('volunteer'))
-                        <a class="inline-flex items-center gap-2 px-1 py-4 text-sm text-gray-500 border-b-2 border-transparent whitespace-nowrap hover:text-amber-600 focus:outline-none focus:text-amber-600 dark:text-neutral-500 dark:hover:text-amber-500 dark:focus:text-amber-500" href="{{ route('page.announcements') }}">
+                            <a wire:navigate.hover href="{{ route('page.announcements') }}"
+                               class="inline-flex items-center gap-2 px-1 py-4 text-sm whitespace-nowrap
+                                   {{ request()->routeIs('page.announcements') ? 'border-b-2 text-amber-600 border-amber-500' : 'text-gray-500 border-b-2 border-transparent hover:text-amber-600' }}
+                                   focus:outline-none focus:text-amber-800 dark:{{ request()->routeIs('page.announcements') ? 'text-amber-500' : 'neutral-500' }}">
+                                <svg class="shrink-0 size-4" width="24" height="24" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M10.34 15.84c-.688-.06-1.386-.09-2.09-.09H7.5a4.5 4.5 0 1 1 0-9h.75c.704 0 1.402-.03 2.09-.09m0 9.18c.253.962.584 1.892.985 2.783.247.55.06 1.21-.463 1.511l-.657.38c-.551.318-1.26.117-1.527-.461a20.845 20.845 0 0 1-1.44-4.282m3.102.069a18.03 18.03 0 0 1-.59-4.59c0-1.586.205-3.124.59-4.59m0 9.18a23.848 23.848 0 0 1 8.835 2.535M10.34 6.66a23.847 23.847 0 0 0 8.835-2.535m0 0A23.74 23.74 0 0 0 18.795 3m.38 1.125a23.91 23.91 0 0 1 1.014 5.395m-1.014 8.855c-.118.38-.245.754-.38 1.125m.38-1.125a23.91 23.91 0 0 0 1.014-5.395m0-3.46c.495.413.811 1.035.811 1.73 0 .695-.316 1.317-.811 1.73m0-3.46a24.347 24.347 0 0 1 0 3.46" />
+                                </svg>
 
-                            <svg class="shrink-0 size-4" width="24" height="24" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M10.34 15.84c-.688-.06-1.386-.09-2.09-.09H7.5a4.5 4.5 0 1 1 0-9h.75c.704 0 1.402-.03 2.09-.09m0 9.18c.253.962.584 1.892.985 2.783.247.55.06 1.21-.463 1.511l-.657.38c-.551.318-1.26.117-1.527-.461a20.845 20.845 0 0 1-1.44-4.282m3.102.069a18.03 18.03 0 0 1-.59-4.59c0-1.586.205-3.124.59-4.59m0 9.18a23.848 23.848 0 0 1 8.835 2.535M10.34 6.66a23.847 23.847 0 0 0 8.835-2.535m0 0A23.74 23.74 0 0 0 18.795 3m.38 1.125a23.91 23.91 0 0 1 1.014 5.395m-1.014 8.855c-.118.38-.245.754-.38 1.125m.38-1.125a23.91 23.91 0 0 0 1.014-5.395m0-3.46c.495.413.811 1.035.811 1.73 0 .695-.316 1.317-.811 1.73m0-3.46a24.347 24.347 0 0 1 0 3.46" />
-                            </svg>
-
-                            Announcements
-                        </a>
+                                Announcements
+                            </a>
                         @endif
                     </nav>
                 </div>
             </div>
 
-
             <div class="overflow-hidden bg-white border border-gray-200 shadow-sm lg:shadow-xl rounded-xl dark:bg-neutral-900 dark:border-neutral-700 sm:rounded-lg">
                 <x-welcome />
             </div>
+
         </div>
     </div>
 </x-app-layout>
