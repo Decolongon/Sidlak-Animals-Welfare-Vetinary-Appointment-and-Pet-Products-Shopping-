@@ -30,7 +30,7 @@
                     <nav class="-mb-0.5 flex gap-x-6">
 
                         {{-- View All Orders --}}
-                        <a wire:navigate.hover href="{{ route('view-order') }}" 
+                        <a wire:navigate href="{{ route('view-order') }}" 
                            class="inline-flex items-center gap-2 px-1 py-4 text-sm font-medium whitespace-nowrap
                                {{ request()->routeIs('vieworder') ? 'border-b-2 text-amber-600 border-amber-500' : 'text-gray-500 border-b-2 border-transparent hover:text-amber-600' }}
                                focus:outline-none focus:text-amber-800 dark:{{ request()->routeIs('vieworder') ? 'text-amber-500' : 'neutral-500' }}">
@@ -42,7 +42,7 @@
                         </a>
 
                         {{-- Cart for Dogs --}}
-                        <a wire:navigate.hover href="{{ route('page.cart') }}" 
+                        <a wire:navigate href="{{ route('page.cart') }}" 
                            class="inline-flex items-center gap-2 px-1 py-4 text-sm font-medium whitespace-nowrap
                                {{ request()->routeIs('page.cart') ? 'border-b-2 text-amber-600 border-amber-500' : 'text-gray-500 border-b-2 border-transparent hover:text-amber-600' }}
                                focus:outline-none focus:text-amber-800 dark:{{ request()->routeIs('page.cart') ? 'text-amber-500' : 'neutral-500' }}">
@@ -55,7 +55,7 @@
                         </a>
 
                         {{-- Request --}}
-                        <a wire:navigate.hover href="{{ route('page.cart') }}"
+                        <a wire:navigate href="{{ route('page.cart') }}"
                            class="inline-flex items-center gap-2 px-1 py-4 text-sm whitespace-nowrap
                                {{ request()->routeIs('page.cart') ? 'border-b-2 text-amber-600 border-amber-500' : 'text-gray-500 border-b-2 border-transparent hover:text-amber-600' }}
                                focus:outline-none focus:text-amber-800 dark:{{ request()->routeIs('page.cart') ? 'text-amber-500' : 'neutral-500' }}">
@@ -66,7 +66,7 @@
                         </a>
 
                         @if(Auth::user()->hasRole('volunteer'))
-                            <a wire:navigate.hover href="{{ route('page.announcements') }}"
+                            <a wire:navigate href="{{ route('page.announcements') }}"
                                class="inline-flex items-center gap-2 px-1 py-4 text-sm whitespace-nowrap
                                    {{ request()->routeIs('page.announcements') ? 'border-b-2 text-amber-600 border-amber-500' : 'text-gray-500 border-b-2 border-transparent hover:text-amber-600' }}
                                    focus:outline-none focus:text-amber-800 dark:{{ request()->routeIs('page.announcements') ? 'text-amber-500' : 'neutral-500' }}">
