@@ -59,6 +59,7 @@ class AppServiceProvider extends ServiceProvider
     public function register(): void
     {
          $this->registerPolicies();
+         
        
     }
 
@@ -70,6 +71,10 @@ class AppServiceProvider extends ServiceProvider
        
         Announcement::observe(AnnouncementObserver::class);
         //$this->registerPolicies();
+         $this->app->bind(
+            LogoutContractResponse::class,
+            LogoutResponse::class,
+        );
        
     }
 
