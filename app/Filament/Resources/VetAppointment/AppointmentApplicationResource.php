@@ -12,24 +12,29 @@ use Illuminate\Support\Str;
 use Illuminate\Support\Carbon;
 use Filament\Infolists\Infolist;
 use Filament\Resources\Resource;
+use Filament\Tables\Actions\Action;
 use App\Enums\AppointmentStatusEnum;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Section;
 use Filament\Support\Enums\FontWeight;
 use App\Models\Appointment\Appointment;
+
 use Filament\Tables\Columns\TextColumn;
 use Filament\Forms\Components\TextInput;
+use Filament\Notifications\Notification;
 use Filament\Pages\SubNavigationPosition;
 use Filament\Tables\Filters\SelectFilter;
 use Illuminate\Database\Eloquent\Builder;
 use Filament\Forms\Components\ToggleButtons;
 use Filament\Infolists\Components\TextEntry;
+use Illuminate\Database\Eloquent\Collection;
 use Filament\Forms\Components\MarkdownEditor;
 use App\Models\Appointment\AppointmentCategory;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Filament\Infolists\Components\Section as InfoSection;
 use Filament\Infolists\Components\TextEntry\TextEntrySize;
 use Filament\Infolists\Components\Group as ComponentsGroup;
+use Filament\Tables\Actions\BulkAction;
 use Filament\Infolists\Components\Section as ComponentsSection;
 use App\Filament\Resources\VetAppointment\AppointmentApplicationResource\Pages;
 use App\Filament\Resources\VetAppointment\AppointmentApplicationResource\RelationManagers;
@@ -221,11 +226,69 @@ class AppointmentApplicationResource extends Resource
                 Tables\Actions\ViewAction::make(),
                 Tables\Actions\ActionGroup::make([
                     Tables\Actions\EditAction::make(),
+                    Action::make('update_appointment_status')
+                    ->label('Update Status')
+                    ->icon('heroicon-o-wrench-screwdriver')
+                    ->requiresConfirmation() 
+                    ->tooltip('Update Appointment status')
+                    ->modalHeading(fn ($record) => 'Confirm Status Update')
+                    ->modalDescription(fn ($record) => 'Are you sure you want to update the status of ' . $record->user->name . '?')
+                    ->color('warning') 
+                    ->modalSubmitActionLabel('Confirm Update') 
+                    ->modalWidth('2xl')
+                    ->form([
+                        ToggleButtons::make('appointment_status')
+                        ->options(AppointmentStatusEnum::class)
+                        ->default(fn ($record) => $record->appointment_status)
+                        ->dehydrated()
+                        ->inline()
+                        ->required()
+                        ->label('Appointment Status')
+                    ])
+                    ->action(function ($record, array $data) {
+                        $record->update([
+                            'appointment_status' => $data['appointment_status'],
+                        ]);
+                        Notification::make()
+                            ->title('Updates Successfuly')
+                            ->success()
+                            ->send();
+                    }),
                     Tables\Actions\DeleteAction::make(),
                 ])->tooltip('Actions')
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
+                    BulkAction::make('update_appointment_status')
+                    ->label('Update Status')
+                    ->icon('heroicon-o-wrench-screwdriver')
+                    ->requiresConfirmation()
+                    ->tooltip('Update Appointment status')
+                    ->modalHeading('Confirm Status Update')
+                    ->modalDescription('Are you sure you want to update the status of all selected appointments?')
+                    ->color('warning')
+                    ->modalSubmitActionLabel('Confirm Update')
+                    ->modalWidth('2xl')
+                    ->form([
+                        ToggleButtons::make('appointment_status')
+                        ->options(AppointmentStatusEnum::class)
+                        ->inline()
+                        ->required()
+                        ->label('Appointment Status')
+
+                    ])
+                    ->action(function (Collection $records, array $data) {
+                        foreach ($records as $record) {
+                            $record->update([
+                                'appointment_status' => $data['appointment_status'],
+                            ]);
+                        }
+                         Notification::make()
+                            ->title('Updates Successfuly')
+                            ->success()
+                            ->send();
+                    }),
+                    
                     Tables\Actions\DeleteBulkAction::make(),
                 ]),
             ])->emptyStateActions([

@@ -33,9 +33,9 @@ enum AppointmentStatusEnum: string implements HasColor, HasIcon, HasLabel
     public function getIcon(): string
     {
         return match ($this) {
-            self::Pending => 'heroicon-m-clock',
+            self::Pending => 'heroicon-o-clock',
             self::Approved => 'heroicon-m-hand-thumb-up',
-            self::Rejected => 'heroicon-m-x-circle',
+            self::Rejected => 'heroicon-o-x-circle',
         };
     }
 }

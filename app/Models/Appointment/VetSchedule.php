@@ -3,7 +3,7 @@
 namespace App\Models\Appointment;
 
 use App\Models\User;
-use Illuminate\Support\Carbon;
+use Carbon\Carbon;
 use Guava\Calendar\Contracts\Eventable;
 use Illuminate\Database\Eloquent\Model;
 use Guava\Calendar\ValueObjects\CalendarEvent;
@@ -34,9 +34,11 @@ class VetSchedule extends Model implements Eventable
      public function toCalendarEvent(): CalendarEvent|array {
 
         return CalendarEvent::make($this)
-            ->title('Schedule')
+            ->title("Available Slots: {$this->num_customers}")
             ->start(Carbon::parse($this->vet_schedule_open)->timezone('Asia/Manila')->toIso8601String())
-            ->end(Carbon::parse($this->vet_schedule_close)->timezone('Asia/Manila')->toIso8601String());
+            ->end(Carbon::parse($this->vet_schedule_close)->timezone('Asia/Manila')->toIso8601String())
+            ->displayAuto();
+            
           
     }
 }

@@ -2,10 +2,10 @@
 
 namespace App\Filament\Widgets;
 
-use Actions\CreateAction;
+use Carbon\Carbon;
 use Filament\Actions\Action;
 use Filament\Widgets\Widget;
-use Illuminate\Support\Carbon;
+use Filament\Actions\CreateAction;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
 use Filament\Forms\Components\Hidden;
@@ -24,14 +24,18 @@ class VetinarySchedule extends CalendarWidget
     use HasWidgetShield;
     protected bool $eventClickEnabled = true;
     protected bool $eventResizeEnabled = true;
+    // protected bool $dateClickEnabled = true;
     protected ?string $defaultEventClickAction = 'edit';
+    //protected ?string $defaultEventClickAction = 'view';
+    
     protected static ?int $sort = 5;
-
+  
     public function getHeading(): string
     {
          return 'Vetinary Schedule';
     }
 
+   
     public function getHeaderActions(): array
     {
         return [
@@ -48,7 +52,7 @@ class VetinarySchedule extends CalendarWidget
                 DateTimePicker::make('vet_schedule_open')
                 ->required()
                 ->rule('after_or_equal:now')
-                 ->native(false)
+                ->native(false)
                  ->seconds(false)
                 ->date('F j, Y, g:i a')
                
@@ -120,11 +124,12 @@ class VetinarySchedule extends CalendarWidget
                 //$schedule->is_the_same_schedule = $data['is_the_same_schedule'];
                 $schedule->num_customers = $data['num_customers'];
                 $schedule->save();
-                // $this->refreshRecords();
+               $this->refreshRecords();
                 return $schedule;
                 
                 
         })
+       
       
        
         ];
@@ -135,13 +140,14 @@ class VetinarySchedule extends CalendarWidget
         return [
             'nowIndicator' => true,
             'slotDuration' => '00:15:00',
-           'timeZone' => 'Asia/Manila',
+           
+      
         ];
     }
      public function getEvents(array $fetchInfo = []): Collection | array
     {
-        return VetSchedule::get();
-        //  return VetSchedule::all()->map(fn($schedule) => $schedule->toCalendarEvent());
+        return VetSchedule::get(['id', 'vet_schedule_open', 'vet_schedule_close','num_customers']);
+         
        
     }
 
@@ -243,5 +249,14 @@ class VetinarySchedule extends CalendarWidget
        
     };
 }
+
+    public function getEventClickContextMenuActions(): array
+    {
+        return [
+            $this->viewAction(),
+            $this->editAction(),
+            $this->deleteAction(),
+        ];
+    }
    
 }
