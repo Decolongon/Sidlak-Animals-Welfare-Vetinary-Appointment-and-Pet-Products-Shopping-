@@ -31,7 +31,7 @@ class Shop extends Component
         // $this->products = Product::with(['images','productCategories'])
         // ->where('prod_quantity', '>' , 0)
         // ->get();
-        $this->categories = ProductCategory::limit(7)->get(['id','prod_cat_name']);
+        $this->categories = ProductCategory::get(['id','prod_cat_name']);
         $this->getProducts();
 
     }
@@ -76,7 +76,7 @@ class Shop extends Component
             //$query->withPivot
             } 
         ])
-        ->where([ ['prod_quantity', '>' , 0 ],
+        ->where([ 
                   ['is_visible_to_market', true]
                  
         ])
@@ -135,39 +135,30 @@ class Shop extends Component
     }
 
 
-    //display selected category name sa dropdown
-   public function filterByCategory($id){
-       $this->selectedCat = $id;
+    // //default sorting asc 
+    // public function filterByCategory($id)
+    // {
+    //     $this->filterByCategoryAndOrder($id, $this->sortBy ?? 'asc');
+    // }
 
-       //selected category name
-       if($id){
-           $category = ProductCategory::find($id);
-           $this->selectedCatName = $category ? $category->prod_cat_name : null;
-
-       } else {
-           $this->selectedCatName = null;
-           $this->sortBy; // default sort sa all categories
-       }
-
-       $this->getProducts();
-   }
-
-
-
-
-
-   //Sorting by price and category kng naka all categories ang default sorting is asc
-   public function filterByCategoryAndOrder($id, $order)
+    //filter by category kg order is asc or desc? kng null default asc
+    public function filterByCategoryAndOrder($id = null, $order = 'asc')
     {
         $this->selectedCat = $id;
         $this->sortBy = $order;
 
-        // Get selected category name
-        $this->selectedCatName = $id ? ProductCategory::find($id)?->prod_cat_name : null;
+        // Update selected category name
+        $this->selectedCatName = $id ? optional(ProductCategory::find($id))->prod_cat_name : null;
 
         $this->getProducts();
     }
- 
+
+    //arrange by trigger lng ang filter by category kng gstu ni user eh change ang order
+    public function arrangeBy($order)
+    {
+        $this->filterByCategoryAndOrder($this->selectedCat, $order);
+    }
+
     
 
     #[Layout('layouts.app')]

@@ -2,8 +2,9 @@
 
    {{-- sorting menu  BY CATEGORIES--}}
    <div class="flex items-center gap-4 mt-10 ml-6">
-    <!-- Sorting Menu --> 
-<div class="hs-dropdown relative inline-flex" wire:ignore.self>
+  
+<!-- Sorting Menu -->
+<div class="hs-dropdown relative inline-flex" wire:ignore.self x-data="{ showSortOptions: false }">
   <button 
     id="hs-dropdown-slideup-animation" 
     type="button" 
@@ -15,19 +16,62 @@
     data-hs-dropdown-toggle
   >
     <span>{{ $selectedCatName ? ucwords($selectedCatName) : 'All Categories' }} ({{ strtoupper($sortBy) }})</span>
-    <svg class="hs-dropdown-open:rotate-180 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <svg 
+      @click.stop="showSortOptions = !showSortOptions"
+      class="hs-dropdown-open:rotate-180 size-4" 
+      xmlns="http://www.w3.org/2000/svg" 
+      width="24" 
+      height="24" 
+      viewBox="0 0 24 24" 
+      fill="none" 
+      stroke="currentColor" 
+      stroke-width="2" 
+      stroke-linecap="round" 
+      stroke-linejoin="round"
+    >
       <path d="m6 9 6 6 6-6"/>
     </svg>
   </button>
+
+  <!-- Sorting options that appear when clicking the chevron -->
+  <div 
+    x-show="showSortOptions"
+    @click.outside="showSortOptions = false"
+    class="absolute left-full top-0 bg-white dark:bg-neutral-800 shadow-md rounded-lg border dark:border-neutral-700 min-w-40 z-20 ml-1"
+    style="display: none"
+  > 
+  {{-- ({{ $selectedCatId ?? 'null' }}, --}}
+    <a 
+      wire:click.prevent="arrangeBy('asc')"
+      @click="showSortOptions = false"
+      class="block px-4 py-2 text-sm text-gray-800 hover:bg-gray-100 dark:text-neutral-400 dark:hover:bg-neutral-700 cursor-pointer whitespace-nowrap"
+    >
+      Price: Low to High (ASC)
+    </a>
+    <a 
+      wire:click.prevent="arrangeBy('desc')"
+      @click="showSortOptions = false"
+      class="block px-4 py-2 text-sm text-gray-800 hover:bg-gray-100 dark:text-neutral-400 dark:hover:bg-neutral-700 cursor-pointer whitespace-nowrap"
+    >
+      Price: High to Low (DESC)
+    </a>
+  </div>
+
+  <!-- Original dropdown menu for categories (unchanged) -->
   <div class="hs-dropdown-menu transition-[opacity,margin] duration hs-dropdown-open:opacity-100 opacity-0 hidden z-10 duration-300 mt-2 min-w-60 bg-white shadow-md rounded-lg dark:bg-neutral-800 dark:border dark:border-neutral-700 dark:divide-neutral-700" role="menu" aria-orientation="vertical" aria-labelledby="hs-dropdown-slideup-animation" wire:ignore.self>
     <div class="p-1 space-y-0.5">
       <div class="relative">
-        <input type="text" wire:model.live="searchCat" placeholder="Search category..."
-          class="w-full px-3 py-2 text-sm border rounded-md focus:ring focus:ring-gray-300 dark:bg-neutral-700 dark:border-neutral-600 dark:text-white pr-10"
-          x-on:click.stop />
+        <div x-on:click.stop>
+          <input 
+              type="text" 
+              wire:model.live="searchCat" 
+              placeholder="Search category..."
+              class="w-full px-3 py-2 text-sm border rounded-md focus:ring focus:ring-gray-300 dark:bg-neutral-700 dark:border-neutral-600 dark:text-white pr-10"
+          >
+        </div>
 
         @if ($searchCat)
-          <button type="button" wire:click="$set('searchCat', '')"
+          <button type="button" wire:click="$set('searchCat', '') "    x-on:click.stop
             class="absolute inset-y-0 end-2 flex items-center text-gray-400 hover:text-gray-600 dark:text-white/60 dark:hover:text-white">
             <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
               stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -37,58 +81,18 @@
           </button>
         @endif
       </div>
-      <div wire:key="category-list">
+      <div wire:key="category-list" class="max-h-60 overflow-y-auto">
         <!-- All Categories -->
-        <div class="relative group">
-          <a wire:click.prevent="filterByCategory(null)"
-            class="flex items-center gap-x-3.5 py-2 px-3 rounded-lg text-sm text-gray-800 hover:bg-gray-100 focus:outline-none focus:bg-gray-100 dark:text-neutral-400 dark:hover:bg-neutral-700 dark:hover:text-neutral-300 dark:focus:bg-neutral-700 cursor-pointer">
-            All Categories
-            <svg class="size-4 ml-auto transition-transform group-hover:rotate-180"
-              xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
-              fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-              stroke-linejoin="round">
-              <path d="m6 9 6 6 6-6" />
-            </svg>
-          </a>
-
-          <div class="absolute left-full top-0 hidden group-hover:block bg-white dark:bg-neutral-800 shadow-md rounded-lg border dark:border-neutral-700 min-w-40 z-20">
-            <a wire:click.prevent="filterByCategoryAndOrder(null, 'asc')"
-              class="block px-4 py-2 text-sm text-gray-800 hover:bg-gray-100 dark:text-neutral-400 dark:hover:bg-neutral-700 cursor-pointer">
-              Price:&nbsp;Low&nbsp;to&nbsp;High(ASC)
-            </a>
-            <a wire:click.prevent="filterByCategoryAndOrder(null, 'desc')"
-              class="block px-4 py-2 text-sm text-gray-800 hover:bg-gray-100 dark:text-neutral-400 dark:hover:bg-neutral-700 cursor-pointer">
-              Price:&nbsp;High&nbsp;to&nbsp;Low(DESC)
-            </a>
-          </div>
-        </div>
+        <a wire:click.prevent="filterByCategoryAndOrder(null, '{{ $sortBy }}')"
+          class="flex items-center gap-x-3.5 py-2 px-3 rounded-lg text-sm text-gray-800 hover:bg-gray-100 focus:outline-none focus:bg-gray-100 dark:text-neutral-400 dark:hover:bg-neutral-700 dark:hover:text-neutral-300 dark:focus:bg-neutral-700 cursor-pointer">
+          All Categories
+        </a>
 
         @forelse ($categories->filter(fn($cat) => stripos($cat->prod_cat_name, $searchCat ?? '') !== false) as $prodCat)
-          <div class="relative group">
-            <a wire:click.prevent="filterByCategory({{ $prodCat->id }})"
-              class="flex items-center gap-x-3.5 py-2 px-3 rounded-lg text-sm text-gray-800 hover:bg-gray-100 focus:outline-none focus:bg-gray-100 dark:text-neutral-400 dark:hover:bg-neutral-700 dark:hover:text-neutral-300 dark:focus:bg-neutral-700 cursor-pointer">
-              {{ ucwords($prodCat->prod_cat_name) }}
-
-              <svg class="size-4 ml-auto transition-transform group-hover:rotate-180"
-                xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
-                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                stroke-linejoin="round">
-                <path d="m6 9 6 6 6-6" />
-              </svg>
-            </a>
-
-            <!-- Submenu for Sorting -->
-            <div class="absolute left-full top-0 hidden group-hover:block bg-white dark:bg-neutral-800 shadow-md rounded-lg border dark:border-neutral-700 min-w-40 z-20">
-              <a wire:click.prevent="filterByCategoryAndOrder({{ $prodCat->id }}, 'asc')"
-                class="block px-4 py-2 text-sm text-gray-800 hover:bg-gray-100 dark:text-neutral-400 dark:hover:bg-neutral-700 cursor-pointer">
-                Price:&nbsp;Low&nbsp;to&nbsp;High(ASC)
-              </a>
-              <a wire:click.prevent="filterByCategoryAndOrder({{ $prodCat->id }}, 'desc')"
-                class="block px-4 py-2 text-sm text-gray-800 hover:bg-gray-100 dark:text-neutral-400 dark:hover:bg-neutral-700 cursor-pointer">
-                Price:&nbsp;High&nbsp;to&nbsp;Low(DESC)
-              </a>
-            </div>
-          </div>
+          <a wire:click.prevent="filterByCategoryAndOrder({{ $prodCat->id }}, '{{ $sortBy }}')"
+            class="flex items-center gap-x-3.5 py-2 px-3 rounded-lg text-sm text-gray-800 hover:bg-gray-100 focus:outline-none focus:bg-gray-100 dark:text-neutral-400 dark:hover:bg-neutral-700 dark:hover:text-neutral-300 dark:focus:bg-neutral-700 cursor-pointer">
+            {{ ucwords($prodCat->prod_cat_name) }}
+          </a>
         @empty
           <p class="text-sm text-gray-800 dark:text-neutral-400 px-3 py-2">
             No categories found.
@@ -229,8 +233,11 @@
           
     
             <div class="mt-auto ">
+              @if($product->prod_quantity > 0)
               <livewire:ecommerce.add-to-cart-form :product_id="$product->id" wire:key="add-to-cart-{{ $product->id }}" />
-               
+              @else
+                <p class="text-red-600 dark:text-red-400">{{__('Out of stock')}}</p>
+               @endif
             </div>
     
            
