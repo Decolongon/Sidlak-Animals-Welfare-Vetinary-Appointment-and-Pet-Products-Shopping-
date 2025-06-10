@@ -4,13 +4,13 @@ namespace App\Livewire\Ecommerce;
 
 use Livewire\Component;
 use App\Models\Ecommerce\Cart;
-use Livewire\Attributes\Layout;
 use App\Models\Ecommerce\Product;
+use Livewire\Attributes\Layout;
+use Livewire\Attributes\Locked;
+use Livewire\Attributes\Title;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Session;
-Use Livewire\Attributes\Title;
 use Jantinnerezo\LivewireAlert\LivewireAlert;
-use Livewire\Attributes\Locked;
 
 class AddToCartForm extends Component
 {
@@ -27,161 +27,144 @@ class AddToCartForm extends Component
     public $user_id;
     public $cartItems;
 
-    // Validation rules (if needed)
-    protected $rules = [
-        'product_id' => 'required|exists:products,id',
-        'quantity' => 'required|numeric|min:1',
-    ];
-
-    // Sanitize input
-    protected function sanitizeInput(array $data): array
+    protected function rules(): array
     {
-        return array_map(function ($value) {
-            return is_array($value) ? $this->sanitizeInput($value) : strip_tags($value);
-        }, $data);
+        return [
+            'product_id' => 'required|exists:products,id',
+            'quantity' => 'required|numeric|min:1',
+        ];
     }
 
-    public function mount()
+    public function mount(): void
+    {
+        $this->initializeSession();
+        $this->user_id = Auth::id();
+        $this->migrateGuestCartToUser();
+        $this->getCartItems();
+    }
+
+    protected function initializeSession(): void
     {
         if (!Session::isStarted()) {
             Session::start();
         }
-        $this->session_id = Session::getId(); // get session id for guest user
-        $this->user_id = Auth::id(); // Kwa id sa Authenticated user
-       
-
-        $this->getCartItems(); // Load cart items
+        $this->session_id = Session::get('guest_session_id', Session::getId());
     }
 
-    public function addToCart()
-    {   
-       
-       // default quantity
+    //store ang cart if user is logged in else sa session
+    protected function migrateGuestCartToUser(): void
+    {
+        if ($this->user_id && Session::has('guest_session_id')) {
+            Cart::where('session_id', $this->session_id)
+                ->update([
+                    'user_id' => $this->user_id,
+                    'session_id' => null
+                ]);
+            Session::forget('guest_session_id');
+        }
+    }
+
+    public function addToCart(): void
+    {
         $product = Product::find($this->product_id);
 
-        if (!$product ) {
-            
-            //session()->flash('message', 'Product not found ');
-            $this->alert('warning','', [
-                'position' => 'top-end',
-                'timer' => 3000,
-                'toast' => true,
-                'text' => 'Product not found!',
-            ]);
+        if (!$product) {
+            $this->showAlert('warning', 'Product not found!');
             return;
         }
 
-        $session_id = $this->session_id; 
-        $user_id = $this->user_id; //kwa user id ara sa mount function
+        $cart = $this->getExistingCartItem($product);
 
-
-         //if user naka login store store sa account ya ang cart item
-         if ($user_id) {
-            Cart::where('session_id', $session_id)
-            ->update(['user_id' => $user_id, 'session_id' => null]);
-        }
-
-        // //if user naka login store store sa account ya ang cart item
-        // if ($user_id) {
-        //     Cart::where('session_id', $session_id)
-        //         ->update(['user_id' => $user_id, 'session_id' => null]);
-        // }
-        // Check if the product is already in the cart
-        $cart = Cart::where('product_id', $product->id)
-            ->where(function ($query) use ($user_id, $session_id) {
-                if ($user_id) { // para sa logged-in user
-                    $query->where('user_id', $user_id);
-                } else { // windows shopping or guest
-                    $query->where('session_id', $session_id);
-                }
-            })->first();
-
-        // if item ga exist sa cart + 1 else add sa cart another item
-        // if ($cart) {
-        //     $cart->quantity += 1;
-        //     $cart->save();
-        // } else {
-        //     Cart::create([
-        //         'product_id' => $product->id,
-        //         'user_id' => $user_id,
-        //         'session_id' => $session_id,
-        //         'quantity' => $quantity,
-        //     ]);
-        // }
-
-            // check if ang unit is equal to kg ma add ka qunatity base sa weight else quantity
-        //$quantityAdd = ($product->prod_unit =='kg') ? $product->prod_weight : 1;
-        $quantityAdd = 1;
         if ($cart) {
-            if($cart->quantity + $quantityAdd > $product->prod_quantity){ // if stock cart quantity
-                                                          //mg lapaw sa product quantity throw error message
-                // session()->flash('error_message', 'Not enough stock available');
-                $this->alert('warning','', [
-                    'position' => 'top-end',
-                    'timer' => 3000,
-                    'toast' => true,
-                    'text' => 'Not enough stock available!',
-                ]);
-                
-                return;
-            }
-            $cart->quantity += $quantityAdd;
-            $cart->save();
+            $this->updateExistingCartItem($cart, $product);
         } else {
-            Cart::create([
-                'product_id' => $product->id,
-                 'user_id' => $user_id ?: null,
-                'session_id' => $user_id ? null : $session_id, // if si user naka login null ang value da session id else session_id
-                'quantity' => $quantityAdd,
-            ]);
-             
+            $this->createNewCartItem($product);
         }
 
-       
-
-        
         $this->dispatch('cartUpdated');
-       
-        // $this->emit('cartUpdated');
-        // Refresh cart items after adding
-        // session()->flash('message', 'Product added to cart!');
-        $this->alert('success','', [
-            'position' => 'top-end',
-            'timer' => 3000,
-            'toast' => true,
-            'text' => 'Product added to cart!',
-        ]);
-        
+        //$this->showSuccessAlert();
         $this->getCartItems();
     }
 
-    
-    public function getCartItems(){
-        // $this->cartItems = Cart::where('user_id',Auth::id())
-        //      ->orWhere('session_id',$this->session_id)  ara sa mount function to get session id
-        //      ->get();
-
-        $this->cartItems = Cart::where(function ($query) {
-                if (Auth::check()) {
-                    $query->where('user_id', $this->user_id);
-                } else {
-                    $query->where('session_id', $this->session_id);
-                }
-        })->get();
+    //get existing cart kng my ara
+    protected function getExistingCartItem(Product $product): ?Cart
+    {
+        return Cart::where('product_id', $product->id)
+            ->where(function ($query) {
+                $query->when($this->user_id, 
+                    fn($q) => $q->where('user_id', $this->user_id),
+                    fn($q) => $q->where('session_id', $this->session_id)
+                );
+            })
+            ->first();
     }
 
+    // if my existing cart update ang quantity
+    protected function updateExistingCartItem(Cart $cart, Product $product): void
+    {
+        $quantityToAdd = 1;
+        
+        if ($cart->quantity + $quantityToAdd > $product->prod_quantity) {
+            $this->showAlert('warning', 'Not enough stock available!');
+            return;
+        }
 
-   
+        $cart->increment('quantity', $quantityToAdd);
+        $this->showSuccessAlert();
+    }
 
+    //kng wala existing cart create new one
+    protected function createNewCartItem(Product $product): void
+    {
+        Cart::create([
+            'product_id' => $product->id,
+            'user_id' => $this->user_id ?: null,
+            'session_id' => $this->user_id ? null : $this->session_id,
+            'quantity' => 1,
+        ]);
+        $this->showSuccessAlert();
+    }
 
+    // get sng tanan na cart items login or guest user mana
+    public function getCartItems(): void
+    {
+        $this->cartItems = Cart::where(
+            $this->user_id ? 'user_id' : 'session_id',
+            $this->user_id ?: $this->session_id
+        )->get();
+    }
 
+    protected function showAlert(string $type, string $message): void
+    {
+        $this->alert($type, '', [
+            'position' => 'top-end',
+            'timer' => 3000,
+            'showConfirmButton' => false,
+            'showCloseButton' => true,
+            'toast' => true,
+            'text' => $message,
+        ]);
+    }
+
+    protected function showSuccessAlert(): void
+    {
+        $this->alert('success', '', [
+            'position' => 'top-end',
+            'timer' => 3000,
+            'toast' => true,
+            // 'showConfirmButton' => true,
+            'showCloseButton' => true,
+            'text' => 'Product added to cart',
+            //'html' => '<span>Product added to cart</span> <button onclick="Swal.close()" style="background:transparent;border:none;color:#999;font-weight:bold;margin-left:8px;cursor:pointer;">×</button>',
+            'showConfirmButton' => false
+        ]);
+    }
 
     #[Layout('layouts.app')]
     #[Title('Add to Cart')]
     public function render()
     {
-       
-        return view('livewire.ecommerce.add-to-cart-form',[
+        return view('livewire.ecommerce.add-to-cart-form', [
             'cartItems' => $this->cartItems
         ]);
     }
