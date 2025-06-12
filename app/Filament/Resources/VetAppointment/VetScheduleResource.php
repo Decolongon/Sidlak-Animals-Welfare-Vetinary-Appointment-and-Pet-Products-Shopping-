@@ -44,10 +44,12 @@ class VetScheduleResource extends Resource
 
                 DateTimePicker::make('vet_schedule_open')
                 ->required()
+                 ->minDate(now()->startOfDay())
                 //->displayFormat('F j, Y h:i A') //format full year, day, month, time
                 ->rule('after_or_equal:now')
-                 ->native(false)
-                 ->seconds(false)
+                ->live(onBlur: true)
+                //  ->native(false)
+                ->seconds(false)
                 ->date('F j, Y, g:i a')
                 ->hint('Must be today or later')
                 ->hintColor('warning')
@@ -56,7 +58,8 @@ class VetScheduleResource extends Resource
                 DateTimePicker::make('vet_schedule_close')
                 ->required()
                 ->seconds(false)
-                ->native(false) 
+                ->minDate(fn (callable $get) => $get('vet_schedule_open'))
+               // ->native(false) 
                   ->date('F j, Y, g:i a')
                 // ->displayFormat('F j, Y h:i A')
                 // ->rule(function ( $get) {
@@ -84,7 +87,7 @@ class VetScheduleResource extends Resource
                         }
                     };
                 })
-                ->hint('Must be after opening time, but not later than now.')
+                ->hint('After opening time, same day.')
                 ->hintColor('warning')
                 ->label('Closing Time'),
 

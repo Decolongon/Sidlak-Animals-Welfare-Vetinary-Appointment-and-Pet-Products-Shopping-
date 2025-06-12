@@ -3,7 +3,9 @@
 namespace App\Models\Appointment;
 
 use App\Models\User;
+use App\Models\Appointment\VetSchedule;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
@@ -20,8 +22,10 @@ class Appointment extends Model
         'pet_weight',
         'pet_age',
         'isPetVaccinated',
-        'advance_payment_method',
+        'payment_method',
+        'paymentIntent_id',
         'appointment_status',
+        'vet_schedule_id'
     ];
 
     /**
@@ -44,5 +48,10 @@ class Appointment extends Model
     public function user():BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function vetSchedules():belongsTo
+    {
+        return $this->belongsTo(VetSchedule::class);
     }
 }

@@ -8,6 +8,7 @@
 namespace App\Actions;
 
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\Session;
 use Laravel\Fortify\Contracts\LoginResponse as LoginResponseContract;
 
 class RoleBasedRedirect implements LoginResponseContract
@@ -27,13 +28,15 @@ class RoleBasedRedirect implements LoginResponseContract
         //     // Redirect to Filament admin panel
         //     return redirect()->intended(config('filament.path', 'admin'));
         // }
+       
 
         if($user->roles()->exists()){
             return redirect()->intended(config('filament.path', 'admin'));
         }
 
-      
+        
         // For non-admin users, redirect to regular dashboard
         return redirect()->intended(config('fortify.home', '/dashboard'));
+      
     }
 }

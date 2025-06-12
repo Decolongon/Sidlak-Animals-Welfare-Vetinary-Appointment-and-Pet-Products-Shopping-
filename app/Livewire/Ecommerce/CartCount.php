@@ -24,13 +24,14 @@ class CartCount extends Component
            //for guest users
             // return collect(Session::get('cart', []))->sum('quantity');
             // return array_sum(Session::get('cart', []));
+           // return collect(session()->get('cart', []))->count();
             return Cart::where('session_id', Session::getId())->count();
         }
     }
 
     public function refreshCartCount()
     {
-        $this->dispatchBrowserEvent('cart-updated');
+        $this->dispatch('cart-updated');
     }
 
     #[Layout('layouts.app')]

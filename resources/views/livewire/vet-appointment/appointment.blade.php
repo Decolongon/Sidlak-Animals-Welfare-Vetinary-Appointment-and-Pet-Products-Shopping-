@@ -166,8 +166,8 @@
               {{-- Dr. {{ ucwords($sched->user->name) ?? 'N/A' }} --}}
             </span>
             {{-- @if($sched->vet_schedule_open <= now() && $sched->vet_schedule_close >= now()) --}}
-            {{ \Carbon\Carbon::parse($sched->vet_schedule_open)->format('M d, g A') }} — 
-            {{ \Carbon\Carbon::parse($sched->vet_schedule_close)->format('M d, g A') }}
+            {{ \Carbon\Carbon::parse($sched->vet_schedule_open)->format('M d, Y g:i A') }} — 
+            {{ \Carbon\Carbon::parse($sched->vet_schedule_close)->format('M d, Y g:i A') }}
             {{-- @endif --}}
           
         @endforeach
@@ -191,8 +191,8 @@
       Pet & Appointment Details
     </h2>
 
-    @if( App\Models\Appointment\Appointment::count() < $num_customer_to_accomodate)
-    <form wire:submit.prevent="submit" >
+    {{-- @if( App\Models\Appointment\Appointment::whereDate('created_at', now()->toDateString())->count() != $num_customer_to_accomodate) --}}
+    <form wire:submit="submit" >
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6">
 
         <!-- user_id -->
@@ -218,6 +218,7 @@
 
           <select 
               x-ref="select"
+              name="appointment_category_id"
               id="appointment_category_id"
               multiple
               wire:model="appointment_category_id"
@@ -291,22 +292,34 @@
         <div>
           <label for="pet_weight" class="block mb-2 text-sm font-medium text-gray-700 dark:text-white">Pet Weight (kg)</label>
           <input type="number" id="pet_weight" name="pet_weight"
-            wire:model="pet_weight"
+            wire:model="pet_weight"  step="0.01"
             class="py-2.5 px-4 block w-full border border-gray-200 rounded-full sm:text-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-neutral-900 dark:border-neutral-700 dark:text-neutral-400 dark:placeholder-neutral-500 dark:focus:ring-neutral-600">
           @error('pet_weight')
             <span class="text-sm text-red-500">{{ $message }}</span>
           @enderror
-          </div>
+        </div>
 
         <!-- pet_age -->
-        <div>
-          <label for="pet_age" class="block mb-2 text-sm font-medium text-gray-700 dark:text-white">Pet Age (years)</label>
-          <input type="number" id="pet_age" name="pet_age"
-          wire:model="pet_age"
-            class="py-2.5 px-4 block w-full border border-gray-200 rounded-full sm:text-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-neutral-900 dark:border-neutral-700 dark:text-neutral-400 dark:placeholder-neutral-500 dark:focus:ring-neutral-600">
-        @error('pet_age')
-          <span><span class="text-sm text-red-500">{{ $message }}</span>
-        @enderror
+          <div>
+            <label for="pet_age" class="block mb-2 text-sm font-medium text-gray-700 dark:text-white">Pet Age</label>
+            <div class="flex items-center gap-2">
+              <input type="number" id="pet_age" name="pet_age"
+                wire:model="pet_age"
+                class="py-2.5 px-4 block w-full border border-gray-200 rounded-full sm:text-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-neutral-900 dark:border-neutral-700 dark:text-neutral-400 dark:placeholder-neutral-500 dark:focus:ring-neutral-600">
+              
+              <select name="pet_age_unit" id="pet_age_unit" wire:model="pet_age_unit"
+                class="py-2.5 px-4 border border-gray-200 rounded-full sm:text-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-neutral-900 dark:border-neutral-700 dark:text-neutral-400 dark:placeholder-neutral-500 dark:focus:ring-neutral-600">
+                <option value="">Select</option>
+                <option value="years old">Years</option>
+                <option value="months">Months</option>
+              </select>
+            </div>
+            @error('pet_age')
+              <span><span class="text-sm text-red-500">{{ $message }}</span>
+            @enderror
+            @error('pet_age_unit')
+              <span><span class="text-sm text-red-500">{{ $message }}</span>
+            @enderror
           </div>
 
         <!-- isPetVaccinated -->
@@ -325,18 +338,37 @@
             @enderror
         </div>
 
+        <div>
+          <label for="payment_method" class="block mb-2 text-sm font-medium text-gray-700 dark:text-white">Vaccinated?</label>
+          <select id="payment_method" name="payment_method"
+            wire:model="payment_method"
+            class="py-2.5 px-4 block w-full border border-gray-200 rounded-full sm:text-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-neutral-900 dark:border-neutral-700 dark:text-neutral-400 dark:focus:ring-neutral-600">
+            <option value="">Select</option>
+            <option value="Over The Counter">Over The Counter</option>
+            <option value="E-Wallets">E-Wallets</option>
+           
+          </select>
+           @error('payment_method')
+              <span class="text-sm text-red-500">{{ $message }}</span>
+            @enderror
+        </div>
+
+
+    @if ($payment_method == 'E-Wallets')
+      
+    
        <!-- Payment Method Section -->
 <div x-data="{ showPaymentOptions: false }" class="col-span-full py-6 border-t border-gray-200 first:pt-0 last:pb-0 first:border-transparent dark:border-neutral-700 dark:first:border-transparent">
-    <button type="button" 
-    @click="showPaymentOptions = !showPaymentOptions" class="inline-block mb-2 text-sm font-medium lg:mb-3 dark:text-white">
-        Payment Method
+    <button  type="button" 
+    @click="showPaymentOptions = !showPaymentOptions" class="inline-block mb-2 text-sm font-medium lg:mb-3 dark:text-white rounded-full ">
+        Show Payment Options
     </button>
 
     <div x-show="showPaymentOptions" 
     x-transition class="mt-2 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <!-- GCash -->
         <label class="relative block p-4 bg-white border border-gray-200 rounded-xl shadow-sm cursor-pointer transition hover:shadow-md dark:bg-neutral-800 dark:border-neutral-700">
-            <input type="radio" name="donor_payment_method" value="gcash" wire:model.live="donor_payment_method"
+            <input type="radio" name="payment_method" value="gcash" wire:model.live="payment_method"
                 class="absolute top-4 right-4 w-5 h-5 text-amber-600 border-gray-300 rounded-full focus:ring-amber-500 dark:bg-neutral-800 dark:border-neutral-600">
             <img src="{{ asset('imgs/gcash.png') }}" class="w-20 h-20 mx-auto mb-3 object-contain" />
             <p class="text-center text-sm font-semibold text-gray-800 dark:text-neutral-200">Pay using GCash</p>
@@ -345,7 +377,7 @@
 
         <!-- Card -->
         <label class="relative block p-4 bg-white border border-gray-200 rounded-xl shadow-sm cursor-pointer transition hover:shadow-md dark:bg-neutral-800 dark:border-neutral-700">
-            <input type="radio" name="donor_payment_method" value="card" wire:model.live="donor_payment_method"
+            <input type="radio" name="payment_method" value="card" wire:model.live="payment_method"
                 class="absolute top-4 right-4 w-5 h-5 text-amber-600 border-gray-300 rounded-full focus:ring-amber-500 dark:bg-neutral-800 dark:border-neutral-600">
             <img src="{{ asset('imgs/card.png') }}" class="w-20 h-20 mx-auto mb-3 object-contain" />
             <p class="text-center text-sm font-semibold text-gray-800 dark:text-neutral-200">Pay using Card</p>
@@ -354,7 +386,7 @@
 
         <!-- PayMaya -->
         <label class="relative block p-4 bg-white border border-gray-200 rounded-xl shadow-sm cursor-pointer transition hover:shadow-md dark:bg-neutral-800 dark:border-neutral-700">
-            <input type="radio" name="donor_payment_method" value="paymaya" wire:model.live="donor_payment_method"
+            <input type="radio" name="payment_method" value="paymaya" wire:model.live="payment_method"
                 class="absolute top-4 right-4 w-5 h-5 text-amber-600 border-gray-300 rounded-full focus:ring-amber-500 dark:bg-neutral-800 dark:border-neutral-600">
             <img src="{{ asset('imgs/paymaya.png') }}" class="w-20 h-20 mx-auto mb-3 object-contain" />
             <p class="text-center text-sm font-semibold text-gray-800 dark:text-neutral-200">Pay using PayMaya</p>
@@ -363,7 +395,7 @@
 
         <!-- GrabPay -->
         <label class="relative block p-4 bg-white border border-gray-200 rounded-xl shadow-sm cursor-pointer transition hover:shadow-md dark:bg-neutral-800 dark:border-neutral-700">
-            <input type="radio" name="donor_payment_method" value="grab_pay" wire:model.live="donor_payment_method"
+            <input type="radio" name="payment_method" value="grab_pay" wire:model.live="payment_method"
                 class="absolute top-4 right-4 w-5 h-5 text-amber-600 border-gray-300 rounded-full focus:ring-amber-500 dark:bg-neutral-800 dark:border-neutral-600">
             <img src="{{ asset('imgs/grabpay.png') }}"class="w-20 h-20 mx-auto mb-3 object-contain" />
             <p class="text-center text-sm font-semibold text-gray-800 dark:text-neutral-200">Pay using GrabPay</p>
@@ -371,11 +403,11 @@
         </label>
     </div>
 
-    @error('donor_payment_method') 
+    @error('ayment_method') 
         <span class="mt-4 text-sm text-red-500 block">{{ $message }}</span> 
     @enderror
 
-   @if($donor_payment_method === 'card')
+   @if($payment_method === 'card')
     <div class="p-4 mb-4 bg-white border border-gray-200 shadow-sm lg:mb-5 rounded-xl md:p-5 dark:bg-neutral-900 dark:border-neutral-700 dark:text-neutral-400">
         <h3 class="font-medium inline-block text-sm text-gray-800 mt-2.5 mb-3 dark:text-neutral-200">{{ 'Card Details' }}</h3>
 
@@ -431,7 +463,7 @@
 
 
 </div>
-
+ @endif
 
       </div>
 
@@ -458,6 +490,6 @@
   </div>
 </div>
 {{--end of Vet form --}}
-@endif
+{{-- @endif --}}
 
 </div>

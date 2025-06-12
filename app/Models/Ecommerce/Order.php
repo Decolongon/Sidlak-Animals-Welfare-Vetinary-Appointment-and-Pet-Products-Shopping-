@@ -25,6 +25,7 @@ class Order extends Model
         'notes',
         'shipping_price',
         'shipping_method',
+        'payment_intent_id'
 
     ];
     

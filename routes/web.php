@@ -1,6 +1,10 @@
 <?php
 
+use App\Livewire\TestPost;
+use Illuminate\Http\Request;
+use App\Livewire\Auth\Register;
 use App\Livewire\Pages\DogPage;
+use App\Http\Livewire\MergeCart;
 use App\Livewire\Ecommerce\Shop;
 use App\Livewire\Pages\BlogPage;
 use App\Livewire\Pages\HomePage;
@@ -8,15 +12,17 @@ use App\Livewire\Ecommerce\GetCart;
 use App\Livewire\Pages\ContactPage;
 use App\Livewire\Ecommerce\Checkout;
 use App\Livewire\Pages\DonationPage;
+use Illuminate\Support\Facades\Auth;
 use App\Livewire\Ecommerce\ViewOrder;
+
 use App\Livewire\Pages\Announcements;
 use App\Livewire\Pages\DogSinglePage;
 use App\Livewire\Pages\VolunteerPage;
 use Illuminate\Support\Facades\Route;
 use App\Livewire\Ecommerce\SingleProd;
-
 use App\Livewire\Adoption\AdoptionCart;
 use App\Livewire\Pages\ApplicationForm;
+use Illuminate\Support\Facades\Session;
 use App\Livewire\Pages\SingleBlogPostPage;
 use App\Livewire\VetAppointment\Appointment;
 use App\Livewire\Ecommerce\ProductReviewsForm;
@@ -40,10 +46,12 @@ Route::middleware([
     
 });
 
+Route::post('/custom-logout', [App\Http\Controllers\CustomLogout::class, 'logout'])->name('custom-logout');
+
 Route::get('/appointment',Appointment::class)->name('appointment'); // vet appointment
 
 Route::get('/singleProd/{prod_slug}',SingleProd::class)->name('page.singleProd'); // para sa long description and reviews of specific product
-
+//Route::get('/merge-cart', MergeCart::class)->name('merge-cart');
 Route::get('/shop', Shop::class)->name('page.shop');
 Route::get('/cart', GetCart::class)->name('page.get-cart'); // ecommerce cart
 
@@ -67,3 +75,6 @@ Route::get('/donation/redirect', [PaymentController::class, 'handleRedirect'])->
 
 Route::get('/announcements', Announcements::class)->name('page.announcements');
 Route::get('/announcement/{announcementId}', AnnouncementSinglePage::class)->name('page.announcement-single');
+
+
+Route::get('/payment/callback', [PaymentController::class, 'paymentCallback'])->name('payment.callback');

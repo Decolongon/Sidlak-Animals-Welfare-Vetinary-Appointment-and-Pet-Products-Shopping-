@@ -28,7 +28,7 @@
                 @endif
 
 
-                <form wire:submit.prevent="save">
+                <form wire:submit="save">
                     <!-- Section -->
                     <div class="py-6 border-t border-gray-200 first:pt-0 last:pb-0 first:border-transparent dark:border-neutral-700 dark:first:border-transparent">
                         <label class="inline-block mb-2 text-sm font-medium lg:mb-3 dark:text-white">

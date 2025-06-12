@@ -20,7 +20,8 @@ class GetCart extends Component
 
    
     // protected $listeners = ['refreshCartItem' => 'refreshCartItem', 'cartUpdated' => 'getCarts'];
-    protected $listeners = ['cartUpdated' => 'getCarts'];
+    // protected $listeners = ['cartUpdated' => 'getCarts'];
+    protected $listeners = ['cartUpdated' => 'getCarts', 'removeOutOfStockConfirmed' => 'handleRemoveOutOfStock'];
 
     public function mount()
     {
@@ -47,14 +48,17 @@ class GetCart extends Component
 
     public function increaseQuantity($cart_id)
     {
-        $cart = Cart::with('product')->find($cart_id);
-
+        //$cart = Cart::with('product')->find($cart_id);
+        $cart = $this->carts->where('id', $cart_id)->first();
         if ($cart && $cart->product && $cart->quantity < $cart->product->prod_quantity) {
             $cart->increment('quantity', 1);
+          
         } else {
             $this->alert('warning', '', [
                 'position' => 'top-end',
                 'timer' => 3000,
+                'showConfirmButton' => false,
+                'showCloseButton' => true,
                 'toast' => true,
                 'text' => 'Not enough stock available!',
             ]);
@@ -66,8 +70,8 @@ class GetCart extends Component
 
     public function decreaseQuantity($cart_id)
     {
-        $cart = Cart::find($cart_id);
-
+        // $cart = Cart::find($cart_id);
+        $cart = $this->carts->where('id', $cart_id)->first();
         if ($cart) {
             if ($cart->quantity > 1) {
                 $cart->decrement('quantity', 1);
@@ -77,6 +81,8 @@ class GetCart extends Component
                 $this->alert('success', '', [
                     'position' => 'top-end',
                     'timer' => 3000,
+                    'showConfirmButton' => false,
+                    'showCloseButton' => true,
                     'toast' => true,
                     'text' => 'Product removed from cart',
                 ]);
@@ -86,10 +92,7 @@ class GetCart extends Component
         $this->getCarts(); // Keep this if you need to recalculate totals
         //$this->dispatch('cartUpdated');
     }
-
-
-
-    
+   
 
     public function toggleSelectAll()
     {
@@ -120,6 +123,8 @@ class GetCart extends Component
             'position' => 'top-end',
             'timer' => 3000,
             'toast' => true,
+            'showConfirmButton' => false,
+            'showCloseButton' => true,
             'text' => 'Selected items removed from cart',
         ]);
     }
@@ -134,10 +139,10 @@ class GetCart extends Component
                 'toast' => true,
                 'text' => 'You must login first',
             ]);
-            return redirect()->route('login');
+            return redirect()->route('filament.auth.auth.login');
         }
-        //    dd($this->selectedItems);
-        if(empty($this->selectedItems)){
+        
+       if(empty($this->selectedItems)){
             $this->alert('warning','', [
                 'position' => 'top-end',
                 'timer' => 3000,
@@ -146,10 +151,53 @@ class GetCart extends Component
             ]);
             return;
         }
-        session()->put('selected_checkout_items', $this->selectedItems);
+
+    $outOfStockItems = Cart::with('product')
+        ->whereIn('id', $this->selectedItems)
+        ->get()
+        ->filter(fn($cart) => $cart->quantity > $cart->product->prod_quantity);
+
+        if ($outOfStockItems->isNotEmpty()) {
+            // Store them temporarily in session or Livewire property
+            session()->put('out_of_stock_items', $outOfStockItems->pluck('id')->toArray());
+            $this->dispatch('outOfStockDetected');
+            return;
+        }
+
+
+            session()->put('selected_checkout_items', $this->selectedItems);
     
             return redirect()->route('checkout');
+    }
+
+
+    public function handleRemoveOutOfStock()
+    {
+        $ids = session()->get('out_of_stock_items', []);
+        
+        if (!empty($ids)) {
+            Cart::whereIn('id', $ids)->delete();
+
+            // Update local state
+            $this->carts = $this->carts->reject(
+                fn($cart) => in_array($cart->id, $ids)
+            );
+
+            $this->selectedItems = array_diff($this->selectedItems, $ids);
+
+            $this->alert('success', '', [
+                'position' => 'top-end',
+                'timer' => 3000,
+                'toast' => true,
+                'text' => 'Out-of-stock items removed.',
+            ]);
         }
+
+        session()->forget('out_of_stock_items');
+
+        session()->put('selected_checkout_items', $this->selectedItems);
+        return redirect()->route('checkout');
+    }
 
     
     #[Layout('layouts.app')]

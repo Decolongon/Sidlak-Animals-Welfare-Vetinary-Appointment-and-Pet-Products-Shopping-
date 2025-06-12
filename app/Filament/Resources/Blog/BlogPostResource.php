@@ -163,6 +163,13 @@ class BlogPostResource extends Resource
                     Tables\Actions\DeleteBulkAction::make(),
                 ]),
             ])
+            ->modifyQueryUsing(function (Builder $query) {
+                if(auth()->user()->hasAnyRole(['super_admin','super-admin']))
+                {
+                    return $query;
+                }
+                return $query->where('author_id', auth()->user()->id);
+            })
             ->deferLoading()
             ->emptyStateActions([
                 Tables\Actions\CreateAction::make()

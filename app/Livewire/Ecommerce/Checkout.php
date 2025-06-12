@@ -9,6 +9,7 @@ use Livewire\Attributes\Title;
 use App\Models\Ecommerce\Order;
 use Livewire\Attributes\Layout;
 use App\Models\Ecommerce\Product;
+use Luigel\Paymongo\Traits\Request;
 use Illuminate\Support\Facades\Auth;
 use Luigel\Paymongo\Facades\Paymongo;
 use Woenel\Prpcmblmts\Models\PhilippineCity;
@@ -170,9 +171,8 @@ class Checkout extends Component
     }
    
     //place order
-    public function placeOrder()
+   public function placeOrder()
     {
-        
         $validatedData = $this->validate();
         if ($this->shipping_method === 'e-wallet' && !$this->payment_method) {
             $this->addError('payment_method', 'Please select a specific e-wallet.');
@@ -180,64 +180,78 @@ class Checkout extends Component
         }
 
         $sanitizedData = $this->sanitizeInput($validatedData);
-       
-        $orders = Order::create([
+    
+        $order = Order::create([
             'user_id' => Auth::id(),
-            // 'shipping_street' => $sanitizedData['shipping_street'],
-            // 'shipping_city' => $sanitizedData['shipping_city'],
-            // 'shipping_zip' => $sanitizedData['shipping_zip'],
             'shipping_method' => $sanitizedData['shipping_method'],
             'notes' => $sanitizedData['notes'],
             'shipping_price' => $this->totalShipping,
             'total' => $this->subtotal,
-           
+            'payment_status' => 'pending'
         ]);
 
-       
         if (in_array($this->shipping_method, ['gcash', 'paymaya', 'grab_pay', 'card'])) {
-            $this->paymentCreateIntent($this->subtotal);
-       
+            try {
 
-            $this->paymentIntent = Paymongo::paymentIntent()->find($this->paymentIntent_id)->getAttributes();
-            $this->paymentCreateMethod($sanitizedData);
+                $this->paymentCreateIntent($this->subtotal);
+                $this->paymentIntent = Paymongo::paymentIntent()->find($this->paymentIntent_id)->getAttributes();
+                $this->paymentCreateMethod($sanitizedData);
 
-            //dd($this->paymentIntent);
-            $attachedPaymentIntent = $this->createPaymentIntent->attach($this->paymentMethod->id, route('page.shop'));
-           
-            $this->processOrderItems($orders);
-            //   if($this->paymentIntent->status === 'succeeded'){
-            //     $orders->update([
-            //         'payment_status' => $this->paymentIntent
-            //     ]);
-            // }
-            
-              $orders->update([
-                    'payment_status' => 'completed'
+                $order->update([
+                    'payment_intent_id' => $this->paymentIntent_id
                 ]);
-          
-          
-            if (
-                isset($attachedPaymentIntent->next_action['redirect']['url']) &&
-                $attachedPaymentIntent->status === 'awaiting_next_action'
-            ) {
-                // Redirect user to complete payment
-                return redirect()->away($attachedPaymentIntent->next_action['redirect']['url']);
+
+                //webhooks ara sa payment controller
+                $attachedPaymentIntent = $this->createPaymentIntent->attach($this->paymentMethod->id, route('payment.callback'));
+                
+                $this->processOrderItems($order);
+                
+                // For redirect-based payments
+                if (isset($attachedPaymentIntent->next_action['redirect']['url'])) {
+                    return redirect()->away($attachedPaymentIntent->next_action['redirect']['url']);
+                }
+                
+                // For immediate payments (like cards)
+                if ($attachedPaymentIntent->status === 'succeeded') {
+                    $order->update(['payment_status' => 'completed']);
+                    $this->alert('success','', [
+                        'position' => 'top-end',
+                        'timer' => 3000,
+                        'toast' => true,
+                        'text' => 'Product ordered!',
+                    ]);
+                    return redirect()->route('page.shop');
+                }
+                
+            
+                $order->update(['payment_status' => 'failed']);
+                  $this->alert('warning','', [
+                        'position' => 'top-end',
+                        'timer' => 3000,
+                        'toast' => true,
+                        'text' => 'Payment processing failed. Please try again.',
+                    ]);
+                return redirect()->route('page.shop');
+
+            } catch (\Exception $e) {
+                $order->update(['payment_status' => 'failed']);
               
+                $this->alert('warning','', [
+                    'position' => 'top-end',
+                    'timer' => 3000,
+                    'toast' => true,
+                    'text' => 'Payment processing failed: '.$e->getMessage(),
+                ]);
+              
+               return redirect()->route('page.shop');
             }
-
-          
-          
-           
-
-        }        
-       
-       
-        $this->processOrderItems($orders);
-       
-        session()->forget('buy_now_product');
-     
-        $this->reset();
+        }
       
+        
+        // For non-payment method orders
+        $this->processOrderItems($order);
+        session()->forget('buy_now_product');
+        $this->reset();
         $this->alert('success','', [
             'position' => 'top-end',
             'timer' => 3000,
@@ -245,8 +259,9 @@ class Checkout extends Component
             'text' => 'Product ordered!',
         ]);
         return redirect()->route('page.shop');
-      
     }
+
+
 
 
 
@@ -283,17 +298,18 @@ class Checkout extends Component
     
         // Card logic
         if ($this->shipping_method === 'card') {
+             $cardNumber = preg_replace('/[^0-9]/', '', $this->card_number);
            $this->paymentMethod = Paymongo::paymentMethod()->create([
                 'type' => 'card',
                 'details' => [
-                    'card_number' => preg_replace('/\D/', '', (string) $sanitizedData['card_number']),
-                    'exp_month' => (int)$sanitizedData['expiration_month'],
+                    'card_number' => (string)$cardNumber,
+                    'exp_month' =>(int)$sanitizedData['expiration_month'],
                     'exp_year' => (int)$sanitizedData['expiration_year'],
                     'cvc' => $sanitizedData['cvv'],
                 ],
                 'billing' => [
                     'email' => Auth::user()->email,
-                    'name' => $sanitizedData['card_name'], // optional, but helpful
+                    'name' => $sanitizedData['card_name'], 
                 ],
             ]);
         }
@@ -338,64 +354,65 @@ class Checkout extends Component
     }
 
 
-    public function increaseQuantity($id = null)
-{
-    if ($this->itemId) {
-        // Buy Now mode
-        if (isset($this->checkoutItems[0]) && $this->checkoutItems[0]->product->prod_quantity > $this->checkoutItems[0]->quantity) {
-            $this->checkoutItems[0]->quantity += 1;
-            $this->calculateSubtotal();
-        } else {
-            $this->alert('warning', '', [
-                'position' => 'top-end',
-                'timer' => 3000,
-                'toast' => true,
-                'text' => 'Not enough stock available!',
-            ]);
-        }
-    } else {
-        // Cart mode
-        $cartItem = Cart::where('user_id', Auth::id())->where('id', $id)->first();
 
-        if ($cartItem && $cartItem->quantity < $cartItem->product->prod_quantity) {
-            $cartItem->quantity += 1;
-            $cartItem->save();
-            $this->getCheckoutItems();
-            $this->calculateSubtotal();
+    public function increaseQuantity($id = null)
+    {
+        if ($this->itemId) {
+            // Buy Now mode
+            if (isset($this->checkoutItems[0]) && $this->checkoutItems[0]->product->prod_quantity > $this->checkoutItems[0]->quantity) {
+                $this->checkoutItems[0]->quantity += 1;
+                $this->calculateSubtotal();
+            } else {
+                $this->alert('warning', '', [
+                    'position' => 'top-end',
+                    'timer' => 3000,
+                    'toast' => true,
+                    'text' => 'Not enough stock available!',
+                ]);
+            }
         } else {
-            $this->alert('warning', '', [
-                'position' => 'top-end',
-                'timer' => 3000,
-                'toast' => true,
-                'text' => 'Not enough stock available!',
-            ]);
+            // Cart mode
+            $cartItem = Cart::where('user_id', Auth::id())->where('id', $id)->first();
+
+            if ($cartItem && $cartItem->quantity < $cartItem->product->prod_quantity) {
+                $cartItem->quantity += 1;
+                $cartItem->save();
+                $this->getCheckoutItems();
+                $this->calculateSubtotal();
+            } else {
+                $this->alert('warning', '', [
+                    'position' => 'top-end',
+                    'timer' => 3000,
+                    'toast' => true,
+                    'text' => 'Not enough stock available!',
+                ]);
+            }
         }
     }
-}
 
  
 
-public function decreaseQuantity($id = null)
-{
-    if ($this->itemId) {
-        // Buy Now mode
-        if (isset($this->checkoutItems[0]) && $this->checkoutItems[0]->quantity > 1) {
-            $this->checkoutItems[0]->quantity -= 1;
+    public function decreaseQuantity($id = null)
+    {
+        if ($this->itemId) {
+            // Buy Now mode
+            if (isset($this->checkoutItems[0]) && $this->checkoutItems[0]->quantity > 1) {
+                $this->checkoutItems[0]->quantity -= 1;
+                $this->calculateSubtotal();
+            }
+        } else {
+            // Cart mode
+            $cartItem = Cart::where('user_id', Auth::id())->where('id', $id)->first();
+
+            if ($cartItem && $cartItem->quantity > 1) {
+                $cartItem->quantity -= 1;
+                $cartItem->save();
+            }
+
+            $this->getCheckoutItems();
             $this->calculateSubtotal();
         }
-    } else {
-        // Cart mode
-        $cartItem = Cart::where('user_id', Auth::id())->where('id', $id)->first();
-
-        if ($cartItem && $cartItem->quantity > 1) {
-            $cartItem->quantity -= 1;
-            $cartItem->save();
-        }
-
-        $this->getCheckoutItems();
-        $this->calculateSubtotal();
     }
-}
 
 
 

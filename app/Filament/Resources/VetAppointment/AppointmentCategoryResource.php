@@ -100,9 +100,10 @@ class AppointmentCategoryResource extends Resource
             ])->emptyStateActions([
                 Tables\Actions\CreateAction::make()
                 ->icon('heroicon-m-plus')
-                ->label(__('Create Appointment Category')),
-            ])->emptyStateIcon('heroicon-m-folder')
-            ->emptyStateHeading('No Appointment Categories');
+                ->label(__('Create New Service')),
+            ])->emptyStateIcon('heroicon-o-folder')
+            ->emptyStateHeading('No Services Found')
+            ->emptyStateDescription('Get started by creating a new service.');
     }
 
     public static function getRelations(): array
@@ -155,10 +156,11 @@ class AppointmentCategoryResource extends Resource
                         TextEntry::make('appoint_cat_description')
                             ->label('')
                             ->size(TextEntry\TextEntrySize::Large)
-                            ->formatStateUsing(fn ($state) => strip_tags($state))
+                            ->html()
+                            // ->formatStateUsing(fn ($state) => strip_tags($state))
                             ->weight(FontWeight::ExtraBold),
                         
-                    ]),
+                    ])->collapsible(),
 
                 ])
             ]);

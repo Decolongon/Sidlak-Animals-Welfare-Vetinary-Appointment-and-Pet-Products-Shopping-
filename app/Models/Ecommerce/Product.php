@@ -28,7 +28,6 @@ class Product extends Model
         'prod_requires_shipping',
         'prod_weight', // pila ka kilo ang eh baligya
         'prod_short_description',
-        'prod_old_price',
         'is_visible_to_market',
         'shipping_cost',
     ];

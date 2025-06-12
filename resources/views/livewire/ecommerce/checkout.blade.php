@@ -72,7 +72,7 @@
     </div>
         <div>
              <h3 class="text-xl mt-3 font-semibold text-gray-700 dark:text-neutral-400">Personal Information</h3>
-            <form wire:submit.prevent="placeOrder">
+            <form wire:submit="placeOrder">
                 <div class="max-w-full space-y-4">
                     <label for="input-username" class="sr-only">Username</label>
                     <input type="text" id="input-username"  value="{{ auth()->user()->name }}" class="py-2.5 sm:py-3 px-4 block w-full border-gray-200 rounded-lg sm:text-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-neutral-900 dark:border-neutral-700 dark:text-neutral-400 dark:placeholder-neutral-500" placeholder="Username" readonly>
@@ -92,20 +92,20 @@
                         </label> --}}
 
                         <label for="shipping_street" class="sr-only">Street</label>
-                        <input type="text" id="shipping_street" wire:model="shipping_street"
+                        <input type="text" id="shipping_street" name="shipping_street" wire:model="shipping_street"
                             class="py-2.5 sm:py-3 px-4 block w-full border-gray-200 rounded-lg sm:text-sm
                                    focus:border-blue-500 focus:ring-blue-500 dark:bg-neutral-900
                                    dark:border-neutral-700 dark:text-neutral-400 dark:placeholder-neutral-500"
                             placeholder="Street: Example: 123 Main Street" >
 
                         <label for="shipping_city" class="sr-only">City</label>
-                        <input type="text" id="shipping_city" wire:model = "shipping_city"
+                        <input type="text" id="shipping_city"name="shipping_city" wire:model = "shipping_city"
                             class="py-2.5 sm:py-3 px-4 block w-full border-gray-200 rounded-lg sm:text-sm
                                    focus:border-blue-500 focus:ring-blue-500 dark:bg-neutral-900
                                    dark:border-neutral-700 dark:text-neutral-400 dark:placeholder-neutral-500"
                             placeholder="City Example: Victorias City" >
 
-                        <label for="shipping_state" class="sr-only">State</label>
+                        <label for="shipping_state" name="shipping_state" class="sr-only">State</label>
                         <input type="text" id="shipping_state" wire:model="shipping_state"
                             class="py-2.5 sm:py-3 px-4 block w-full border-gray-200 rounded-lg sm:text-sm
                                    focus:border-blue-500 focus:ring-blue-500 dark:bg-neutral-900
@@ -113,14 +113,14 @@
                             placeholder="State" >
 
                         <label for="shipping_zip" class="sr-only">ZIP Code</label>
-                        <input type="text" id="shipping_zip"  wire:model="shipping_zip"
+                        <input type="text" name="shipping_zip" id="shipping_zip"  wire:model="shipping_zip"
                             class="py-2.5 sm:py-3 px-4 block w-full border-gray-200 rounded-lg sm:text-sm
                                    focus:border-blue-500 focus:ring-blue-500 dark:bg-neutral-900
                                    dark:border-neutral-700 dark:text-neutral-400 dark:placeholder-neutral-500"
                             placeholder="ZIP Code Example: 6119" >
 
                         <div class="flex  items-start">
-                            <input type="checkbox" wire:model="same_as_billing"
+                            <input type="checkbox" id="same_as_billing" name="same_as_billing" wire:model="same_as_billing"
                                 class="shrink-0 mt-1 me-2 border-gray-200 rounded-sm text-blue-600 dark:bg-neutral-800 dark:border-neutral-700">
                             <span class="text-xs mt-1 text-black-500 dark:text-neutral-400">Is Billing Address same as Shipping Address?</span>
                         </div>
@@ -129,21 +129,21 @@
 
                 <div>
                      <h3 class="text-lg mt-2 mb-2 font-semibold text-gray-700 dark:text-neutral-400">Payment Method</h3>
-                    <div x-data="{ paymentMethod: @entangle('payment_method').defer }">
+                    <div x-data="{ paymentMethod: @entangle('payment_method') }">
                         <!-- Payment Method Selection -->
                         <div class="grid sm:grid-cols-2 gap-2">
                             <!-- Cash on Delivery -->
                             <label class="flex p-3 w-full bg-white border border-gray-200 rounded-lg text-sm dark:bg-neutral-900 dark:border-neutral-700 dark:text-neutral-400">
-                                <input type="radio" wire:model="shipping_method"
+                                <input type="radio" id="payment-cod" name="shipping_method" wire:model="shipping_method"
                                         value="COD"
                                        class="shrink-0 mt-0.5 border-gray-200 rounded-sm text-blue-600 dark:bg-neutral-800 dark:border-neutral-700"
                                        @change="paymentMethod = 'cod'"
-                                       :checked="payment_method === 'cod'">
+                                       :checked="paymentMethod === 'cod'">
                                 <span class="text-sm text-gray-500 ms-3 dark:text-neutral-400">Cash on Delivery</span>
                             </label>
 
                             <label class="flex p-3 w-full bg-white border border-gray-200 rounded-lg text-sm dark:bg-neutral-900 dark:border-neutral-700 dark:text-neutral-400">
-                                    <input type="radio" wire:model="shipping_method"
+                                    <input type="radio" name ="shipping_method" id="payment-ewallet" wire:model="shipping_method"
                                         value="e-wallet"
                                         class="shrink-0 mt-0.5 border-gray-200 rounded-sm text-blue-600 dark:bg-neutral-800 dark:border-neutral-700"
                                         @change="paymentMethod = 'ewallet'"

@@ -10,7 +10,7 @@
       <!-- Card -->
       <div class="relative z-10 p-4 mt-5 bg-white border rounded-xl sm:mt-10 md:p-10 dark:bg-neutral-900 dark:border-neutral-700">
         @if(auth()->check())
-        <form wire:submit.prevent="submitComment" class="mb-4">
+        <form wire:submit="submitComment" class="mb-4">
           <div class="mb-4 sm:mb-8">
           <div>
             <label for="content" class="block mb-2 text-sm font-medium dark:text-white">{{'Comment'}}</label>

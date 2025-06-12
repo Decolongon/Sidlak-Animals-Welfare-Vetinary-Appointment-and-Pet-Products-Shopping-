@@ -9,11 +9,13 @@ use Filament\PanelProvider;
 
 
 use Filament\Support\Colors\Color;
+use App\Filament\Pages\Auth\EditProfile;
 use Filament\Navigation\NavigationGroup;
 use Filament\Http\Middleware\Authenticate;
 use App\Http\Middleware\CheckPaymentStatus;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\Cookie\Middleware\EncryptCookies;
+use App\Filament\AdminPanel\Pages\ShopAppDashboard;
 use BezhanSalleh\FilamentShield\FilamentShieldPlugin;
 use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\AuthenticateSession;
@@ -22,7 +24,7 @@ use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
 use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
-use App\Filament\AdminPanel\Pages\ShopAppDashboard;
+
 class AdminPanelProvider extends PanelProvider
 {
     public function panel(Panel $panel): Panel
@@ -32,7 +34,7 @@ class AdminPanelProvider extends PanelProvider
             ->default()
             ->id('admin')
             ->path('admin')
-            //->login()
+            // ->login()
             ->sidebarCollapsibleOnDesktop()
             // ->sidebarFullyCollapsibleOnDesktop()
             ->colors([
@@ -85,9 +87,27 @@ class AdminPanelProvider extends PanelProvider
                 DispatchServingFilamentEvent::class,
                 // CheckPaymentStatus::class,
             ])
-            ->plugins([
-                FilamentShieldPlugin::make(),
+             ->plugins([
+                FilamentShieldPlugin::make()
+                    ->gridColumns([
+                        'default' => 1,
+                        'sm' => 2,
+                        'lg' => 3
+                    ])
+                    ->sectionColumnSpan(1)
+                    ->checkboxListColumns([
+                        'default' => 1,
+                        'sm' => 2,
+                        'lg' => 4,
+                    ])
+                    ->resourceCheckboxListColumns([
+                        'default' => 1,
+                        'sm' => 2,
+                    ]),
             ]);
+            // ->plugins([
+            //     FilamentShieldPlugin::make(),
+            // ]);
             // ->databaseNotifications();
     }
 }

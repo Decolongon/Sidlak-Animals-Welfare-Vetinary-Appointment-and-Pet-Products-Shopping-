@@ -1,7 +1,7 @@
 <?php
 
-namespace App\Filament\Resources\Animal\AdoptionResource\Widgets;
-
+// namespace App\Filament\Resources\Animal\AdoptionResource\Widgets;
+namespace App\Filament\Resources\Adoption\AdoptionResource\Widgets;
 use App\Models\Adoption\Adoption;
 use Filament\Widgets\StatsOverviewWidget as BaseWidget;
 use Filament\Widgets\StatsOverviewWidget\Stat;

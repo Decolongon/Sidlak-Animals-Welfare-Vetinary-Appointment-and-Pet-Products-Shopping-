@@ -2,12 +2,14 @@
 
 namespace App\Models\Appointment;
 
-use App\Models\User;
 use Carbon\Carbon;
+use App\Models\User;
+use App\Models\Appointment\Appointment;
 use Guava\Calendar\Contracts\Eventable;
 use Illuminate\Database\Eloquent\Model;
 use Guava\Calendar\ValueObjects\CalendarEvent;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class VetSchedule extends Model implements Eventable
 {
@@ -30,11 +32,15 @@ class VetSchedule extends Model implements Eventable
     {
         return $this->belongsTo(User::class);
     }
+    public function appointments(): HasMany
+    {
+        return $this->hasMany(Appointment::class);
+    }
 
      public function toCalendarEvent(): CalendarEvent|array {
 
         return CalendarEvent::make($this)
-            ->title("Available Slots: {$this->num_customers}")
+            ->title("Appointment Slot: {$this->num_customers}")
             ->start(Carbon::parse($this->vet_schedule_open)->timezone('Asia/Manila')->toIso8601String())
             ->end(Carbon::parse($this->vet_schedule_close)->timezone('Asia/Manila')->toIso8601String())
             ->displayAuto();

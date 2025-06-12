@@ -69,15 +69,20 @@ class ProductDiscountResource extends Resource
                 ->schema([
                     DateTimePicker::make('start_at')
                     ->label('Start Date')
-                    ->native(false)
+                    // ->native(false)
                     ->seconds(false)
+                    ->live()
+                    ->minDate(now()->startOfDay()) // allow today
+                    ->rules(['after_or_equal:now' ]) // must be today or later
                     ->date('F j, Y, g:i a')
                     ->required(),
 
                     DateTimePicker::make('end_at')
                     ->label('End Date')
-                    ->native(false)
+                    //->native(false)
                     ->seconds(false)
+                    ->minDate(fn (callable $get) => $get('start_at')) // live binding
+                    ->rules(['after:start_at']) // must be after start_at
                     ->date('F j, Y, g:i a')
                     ->required(),
                 ])
@@ -92,6 +97,7 @@ class ProductDiscountResource extends Resource
             ->columns([
                 Tables\Columns\TextColumn::make('discount_name')
                 ->label('Discount Name')
+                ->formatStateUsing(fn ($state) => Str::title($state))
                 ->sortable()
                 ->searchable(),
 

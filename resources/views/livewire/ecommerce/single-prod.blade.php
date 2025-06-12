@@ -44,10 +44,15 @@
 
                 <!-- Add to Cart & Buy Now Buttons -->
                 <div class="flex items-center space-x-4 mt-4">
-                    <livewire:ecommerce.add-to-cart-form :product_id="$product->id" wire:key="add-to-cart-{{ $product->id }}" />
-                    <x-button wire:click="buyNow({{ $product->id }})" class="bg-blue-600 text-white px-4 py-2 rounded-lg">
-                        Buy Now
-                    </x-button>
+                    @if ($product->prod_quantity > 0)
+                         <livewire:ecommerce.add-to-cart-form :product_id="$product->id" wire:key="add-to-cart-{{ $product->id }}" />
+                        <x-button wire:click="buyNow({{ $product->id }})" class="bg-blue-600 text-white px-4 py-2 rounded-lg">
+                            Buy Now
+                        </x-button>
+                    @else
+                        <p class="text-red-600 dark:text-red-400">{{__('Out of stock')}}</p>
+                    @endif
+                   
                 </div>
 
                 <!-- Category -->
@@ -119,40 +124,48 @@
             </div>
 
             <!-- Description Tab Content -->
-            @if ($activeTab == 'description')
+           @if ($activeTab == 'description')
+            <div wire:ignore.self> 
                 <div x-data="{
                         expanded: true,
-                        fullText: @js($product->prod_description),
-                        shortText: @js(Str::limit($product->prod_description, 300, '...'))
-                    }" class="mt-2 text-gray-800 dark:text-white">
+                        fullText: @js($product->prod_description ?? ''),
+                        shortText: @js(Str::limit($product->prod_description ?? '', 300, '...'))
+                    }" x-init class="mt-2 text-gray-800 dark:text-white">
                     <div :class="expanded ? '' : 'line-clamp-4'" class="text-gray-800 dark:text-white" x-html="expanded ? fullText : shortText"></div>
-                    <div class="mt-2" x-if="fullText.length > shortText.length">
-                        <button class="text-blue-500 underline" @click="expanded = !expanded">
-                            <span x-text="expanded ? 'Show Less' : 'Show More'"></span>
-                        </button>
-                    </div>
+                    <template x-if="fullText && shortText && fullText.length > shortText.length">
+                        <div class="mt-2">
+                            <button class="text-blue-500 underline" @click="expanded = !expanded">
+                                <span x-text="expanded ? 'Show Less' : 'Show More'"></span>
+                            </button>
+                        </div>
+                    </template>
                 </div>
+            </div>
             @endif
 
             <!-- Reviews Tab Content -->
             @if ($activeTab == 'reviews')
-                @livewire('ecommerce.get-prod-reviews', ['product_id' => $product->id])
+                <div wire:ignore.self>
+                     @livewire('ecommerce.get-prod-reviews', ['product_id' => $product->id])
+                </div>
             @endif
 
             <!-- Post Review Tab Content -->
             @if ($activeTab == 'post_reviews')
-                @livewire('ecommerce.product-reviews-form', ['product_id' => $product->id])
+                <div wire:ignore.self>
+                    @livewire('ecommerce.product-reviews-form', ['product_id' => $product->id])
+                </div>
             @endif
         </div>
     </div>
 
- @if($activeTab == 'description')   
+ @if($activeTab == 'description'  && isset($relatedProducts) && $relatedProducts->isNotEmpty())   
     <!-- Related Products Section -->
-    @if($relatedProducts->isNotEmpty())
+    {{-- @if($relatedProducts->isNotEmpty()) --}}
         <div class="col-span-full text-center py-10">
             <p class="text-gray-500 dark:text-neutral-400 text-lg">{{ __('----You may also like----') }}</p>
         </div>
-    @endif
+    {{-- @endif --}}
 
     <!-- Related Products Grid -->
     <div class="max-w-[85rem] px-4 py-10 sm:px-6 lg:px-8 lg:py-14 mx-auto scroll-visible">

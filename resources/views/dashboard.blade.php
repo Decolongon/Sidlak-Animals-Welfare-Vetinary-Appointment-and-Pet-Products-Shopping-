@@ -84,7 +84,7 @@
             <div class="overflow-hidden bg-white border border-gray-200 shadow-sm lg:shadow-xl rounded-xl dark:bg-neutral-900 dark:border-neutral-700 sm:rounded-lg">
                 <x-welcome />
             </div>
-
+         
         </div>
     </div>
 </x-app-layout>

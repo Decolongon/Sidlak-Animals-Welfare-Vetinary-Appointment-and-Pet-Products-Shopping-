@@ -27,9 +27,9 @@
             {{ $slot }}
         </main>
 
-        @livewire('ecommerce.get-cart')
+       @livewire('ecommerce.get-cart')
          <livewire:partials.footer />
-
+       
         @stack('modals')
 
         @livewireScripts
@@ -59,12 +59,25 @@
                 });
             }
 
-           
+        //pop up confirmation for checkout btn nga outofstock
+           Livewire.on('outOfStockDetected', () => {
+                Swal.fire({
+                    title: 'Some items are out of stock',
+                    text: 'Do you want to remove them from the cart and proceed?',
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonText: 'Yes',
+                    cancelButtonText: 'Cancel',
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        Livewire.dispatch('removeOutOfStockConfirmed');
+                    }
+                });
+            });
 
         </script>
 
-
-            
-
+     
+      
     </body>
 </html>

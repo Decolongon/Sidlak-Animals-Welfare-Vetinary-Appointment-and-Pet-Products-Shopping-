@@ -55,11 +55,16 @@ class AppServiceProvider extends ServiceProvider
     /**
      * Register any application services.
      */
+     protected $listen = [];
    
     public function register(): void
     {
          $this->registerPolicies();
-         
+        //  $this->registerEvent();
+        // $this->app->bind(
+        //     LogoutContractResponse::class,
+        //     LogoutResponse::class,
+        // );
        
     }
 
@@ -70,11 +75,8 @@ class AppServiceProvider extends ServiceProvider
     {
        
         Announcement::observe(AnnouncementObserver::class);
-        //$this->registerPolicies();
-         $this->app->bind(
-            LogoutContractResponse::class,
-            LogoutResponse::class,
-        );
+      
+      
        
     }
 
@@ -115,6 +117,15 @@ class AppServiceProvider extends ServiceProvider
        ];
 
        $this->inBulkPolicies($policies);
+   }
+
+   protected function registerEvent(): void
+   {
+       $this->listen = [
+            \Illuminate\Auth\Events\Registered::class => [
+                \App\Listeners\MergeCart::class,
+            ],
+        ];
    }
 
   

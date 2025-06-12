@@ -17,9 +17,8 @@ return new class extends Migration
             $table->string('prod_name');
             $table->string('prod_slug')->nullable()->unique();
             $table->string('prod_sku')->nullable()->unique();
-            $table->decimal('prod_quantity',10,2)->default(1); // quantity in stock dependi pa datatype kng
+            $table->integer('prod_quantity')->default(1)->nullable(); // quantity in stock dependi pa datatype kng
             $table->decimal('prod_price', 10, 2)->nullable();
-            $table->decimal('prod_old_price', 10, 2)->nullable();
             $table->text('prod_short_description')->nullable();
             $table->boolean('prod_requires_shipping')->nullable()->default(false);                // ang shop is naga baligya per kilo na mga dog food
             $table->longText('prod_description')->nullable();

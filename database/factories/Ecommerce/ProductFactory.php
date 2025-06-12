@@ -81,7 +81,6 @@ class ProductFactory extends Factory
         'prod_requires_shipping' => $this->faker->boolean(80),
         'prod_weight' => $this->faker->randomFloat(2, 0.2, 5),
         'prod_short_description' => $this->faker->sentence(10),
-        'prod_old_price' => $this->faker->randomFloat(2, 100, 2000),
         'is_visible_to_market' => $this->faker->boolean(90),
     ];
 }

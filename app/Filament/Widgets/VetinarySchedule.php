@@ -52,7 +52,7 @@ class VetinarySchedule extends CalendarWidget
                 DateTimePicker::make('vet_schedule_open')
                 ->required()
                 ->rule('after_or_equal:now')
-                ->native(false)
+               // ->native(false)
                  ->seconds(false)
                 ->date('F j, Y, g:i a')
                
@@ -63,7 +63,7 @@ class VetinarySchedule extends CalendarWidget
                 DateTimePicker::make('vet_schedule_close')
                 ->required()
                 ->seconds(false)
-                ->native(false) 
+                //->native(false) 
                 ->date('F j, Y, g:i a')
                 ->rule(function ($get) {
                     $open = $get('vet_schedule_open');
@@ -184,7 +184,7 @@ class VetinarySchedule extends CalendarWidget
                 DateTimePicker::make('vet_schedule_close')
                 ->required()
                 ->seconds(false)
-                ->native(false) 
+               // ->native(false) 
                   ->date('F j, Y, g:i a')
                 // ->displayFormat('F j, Y h:i A')
                 // ->rule(function ( $get) {

@@ -119,7 +119,7 @@ class OrderResource extends Resource
     
                     ToggleButtons::make('order_status')
                         ->options(OrderStatusEnum::class)
-                        ->default(OrderStatusEnum::New)
+                        ->default(OrderStatusEnum::Pending)
                         ->dehydrated()
                         ->inline()
                         ->required()

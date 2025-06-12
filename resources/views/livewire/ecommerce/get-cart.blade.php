@@ -1,4 +1,4 @@
-<div id="hs-offcanvas-custom-backdrop-color" class="hs-overlay hs-overlay-open:translate-x-0 hs-overlay-backdrop-open:bg-black/50 dark:hs-overlay-backdrop-open:bg-black/30 hidden -translate-x-full fixed top-0 start-0 transition-all duration-300 transform h-full max-w-xs w-full z-[80] bg-white border-e dark:bg-neutral-800 dark:border-neutral-700" role="dialog" tabindex="-1" aria-labelledby="hs-offcanvas-custom-backdrop-color-label" wire:ignore.self>
+<div id="hs-offcanvas-custom-backdrop-color" class="hs-overlay hs-overlay-open:translate-x-0 hs-overlay-backdrop-open:bg-black/50 dark:hs-overlay-backdrop-open:bg-black/30 hidden translate-x-full fixed top-0 end-0 transition-all duration-300 transform h-full max-w-xs w-full z-[80] bg-white border-s dark:bg-neutral-800 dark:border-neutral-700" role="dialog" tabindex="-1" aria-labelledby="hs-offcanvas-custom-backdrop-color-label" wire:ignore.self>
   <div class="flex justify-between items-center py-3 px-4 border-b dark:border-neutral-700">
       <h3 id="hs-offcanvas-custom-backdrop-color-label" class="font-bold text-gray-800 dark:text-white">
           Shopping Cart
@@ -16,8 +16,8 @@
        <!-- Select All Checkbox -->
        @if (count($carts) > 0)
         <div class="flex items-center mb-4">
-          <input type="checkbox" wire:model="selectAll" wire:click="toggleSelectAll" class="mr-2 rounded border-gray-300 text-indigo-600 shadow-sm focus:ring focus:ring-indigo-200">
-          <label class="text-gray-700 dark:text-white text-sm font-medium">Select All</label>
+          <input type="checkbox" name="selectAll" wire:model="selectAll" wire:click="toggleSelectAll" class="mr-2 rounded border-gray-300 text-indigo-600 shadow-sm focus:ring focus:ring-indigo-200">
+          <p class="text-gray-700 dark:text-white text-sm font-medium">Select All</p>
         </div>
        @endif
      
@@ -28,30 +28,38 @@
           <div class="p-4 border rounded-lg shadow dark:border-neutral-700 dark:shadow-gray-900">
               <div class="flex items-center justify-between">
                   <div class="flex items-center gap-3">
-                      <input type="checkbox" class="rounded border-gray-300 text-indigo-600 shadow-sm focus:ring focus:ring-indigo-200" wire:model="selectedItems" value="{{ $cart->id }}">
+                      <input type="checkbox" class="rounded border-gray-300 text-indigo-600 shadow-sm focus:ring focus:ring-indigo-200" name="selectedItems" wire:model="selectedItems" value="{{ $cart->id }}">
                       <img src="{{ asset(Storage::url($cart->product->images[0]->url)) }}" alt="{{ $cart->product->prod_slug }}" class="w-[40px] h-[40px] object-cover rounded-full">
                       <div>
                           <div class="font-medium text-gray-800 dark:text-neutral-200">{{ ucwords($cart->product->prod_name) }}</div>
-                          <div class="text-sm text-gray-600 dark:text-neutral-400">₱{{ number_format($cart->quantity * $cart->product->prod_price, 2) }}</div>
+                          <div class="text-sm text-gray-600 dark:text-neutral-400">
+                                {{-- @if($cart->product->current_price < $cart->product->prod_price)
+                                 
+                                   ₱{{ number_format($cart->quantity * $cart->product->current_price, 2). ' On Sale'}}
+                                @else
+                                    ₱{{ number_format($cart->quantity * $cart->product->prod_price, 2) }}
+                                @endif --}}
+                            
+                                ₱{{ number_format($cart->quantity * $cart->product->prod_price, 2) }}
+                            </div>
                       </div>
                   </div>
               </div>
 
               <div class="mt-3 flex items-center justify-end gap-2">
               
-
-                  <button type="button" wire:click="decreaseQuantity({{ $cart->id }})" wire:loading.attr="disabled"
+                {{-- {{ Auth::check() ? $cart->id : 'guest_'.$cart->product_id }} --}}
+                  <button type="button"  wire:click="decreaseQuantity('{{ $cart->id }}')"  wire:loading.attr="disabled"  wire:target="decreaseQuantity('{{ $cart->id }}')"
                       class="px-3 py-1 text-sm font-semibold rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-100 dark:border-neutral-700 dark:text-white dark:hover:bg-neutral-700">
                       -
                   </button>
 
                   <span class="text-lg font-semibold text-gray-900 dark:text-white">
                       {{ number_format($cart->quantity,0) }}
+                    
                   </span>
 
-                
-
-                  <button type="button" wire:click="increaseQuantity({{ $cart->id }})" wire:loading.attr="disabled"
+                  <button type="button" wire:click="increaseQuantity('{{ $cart->id }}')" wire:loading.attr="disabled"  wire:target="increaseQuantity('{{ $cart->id }}')"
                       class="px-3 py-1 text-sm font-semibold rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-100 dark:border-neutral-700 dark:text-white dark:hover:bg-neutral-700">
                       +
                   </button>
@@ -77,4 +85,6 @@
         </div>
     @endif
   </div>
+
+
 </div>

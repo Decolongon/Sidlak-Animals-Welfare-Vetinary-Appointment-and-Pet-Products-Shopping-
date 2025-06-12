@@ -2,6 +2,7 @@
 
 use App\Models\User;
 use Illuminate\Support\Facades\Schema;
+use App\Models\Appointment\Appointment;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
@@ -16,6 +17,7 @@ return new class extends Migration
             $table->id();
             $table->foreignIdFor(User::class, 'user_id')->constrained()->cascadeOnDelete();
             $table->dateTime('vet_schedule_open')->nullable();
+            // $table->foreignIdFor(Appointment::class, 'appointment_id')->nullable()->constrained()->cascadeOnDelete();
             $table->dateTime('vet_schedule_close')->nullable();
             $table->integer('num_customers')->nullable();
             $table->boolean('is_the_same_schedule')->default(true);

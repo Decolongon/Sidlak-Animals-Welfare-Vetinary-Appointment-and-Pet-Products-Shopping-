@@ -17,9 +17,10 @@ return new class extends Migration
             $table->foreignIdFor(Product::class, 'product_id')->constrained()->cascadeOnDelete();
             // $table->json('product_img');
             $table->string('url');
-            $table->string('alt_text')->nullable();
+            $table->string('sizes')->nullable();
             $table->boolean('is_primary')->default(false);
-            $table->integer('display_order')->default(0);
+            $table->integer('quantity')->nullable();
+            $table->decimal('price', 10, 2)->nullable();
             $table->timestamps();
         });
     }

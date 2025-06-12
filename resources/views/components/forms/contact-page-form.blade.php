@@ -5,7 +5,7 @@
     </div>
 @endif
 
-<form wire:submit.prevent='submit'>
+<form wire:submit='submit'>
     <div class="grid gap-4">
     <!-- Grid -->
     <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">

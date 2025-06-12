@@ -6,7 +6,7 @@
                 <p class="mt-2 text-sm text-gray-600 dark:text-neutral-400">
                   {{ __("Don't have an account yet?") }}
                   @if (Route::has('register'))
-                  <a class="font-medium text-amber-600 decoration-2 hover:underline dark:text-amber-500"  wire:navigate href="{{ route('register') }}">
+                  <a class="font-medium text-amber-600 decoration-2 hover:underline dark:text-amber-500"   href="{{ route('register') }}">
                     {{ __('Sign up here') }}
                   </a>
                   @endif

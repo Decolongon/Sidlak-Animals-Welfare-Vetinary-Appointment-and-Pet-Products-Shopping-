@@ -29,7 +29,7 @@ use BezhanSalleh\FilamentShield\Traits\HasPanelShield;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
-
+use Filament\Facades\Filament;
 class User extends Authenticatable 
 {
    // implements FilamentUser
@@ -178,5 +178,19 @@ class User extends Authenticatable
     public function addresses(): HasMany
     {
         return $this->hasMany(Address::class);
+    }
+
+
+     public function userPanel(): string
+    {
+        // Check if the user has any role
+         if ($this->getRoleNames()->isNotEmpty()) {
+        // Redirect to Filament Admin panel
+        return url(Filament::getPanel('admin')->getPath());
+      
+        }
+
+    // Default redirect to normal dashboard
+        return route('dashboard');
     }
 }

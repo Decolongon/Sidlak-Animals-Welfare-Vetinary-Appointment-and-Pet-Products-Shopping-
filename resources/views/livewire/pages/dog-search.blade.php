@@ -10,7 +10,7 @@
                 <path d="m21 21-4.3-4.3"></path>
               </svg>
             </div>
-            <input wire:model.live="query"  class="block w-full py-3 text-sm border-gray-200 rounded-lg ps-10 pe-4 focus:border-amber-400 focus:ring-amber-400 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-900 dark:border-neutral-700 dark:text-neutral-400 dark:placeholder-neutral-500 dark:focus:ring-neutral-600" type="text" placeholder="Search available dog for adoption" value="" data-hs-combo-box-input="">
+            <input wire:model.live="query" name="query" id="query"  class="block w-full py-3 text-sm border-gray-200 rounded-lg ps-10 pe-4 focus:border-amber-400 focus:ring-amber-400 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-900 dark:border-neutral-700 dark:text-neutral-400 dark:placeholder-neutral-500 dark:focus:ring-neutral-600" type="text" placeholder="Search available dog for adoption" value="" data-hs-combo-box-input="">
           </div>
           @if(!empty($query))
           <!-- SearchBox Dropdown -->

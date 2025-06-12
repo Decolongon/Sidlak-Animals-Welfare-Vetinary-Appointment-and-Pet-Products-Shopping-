@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 use App\Models\Appointment\AppointmentCategory;
+use App\Models\Appointment\VetSchedule;
 
 return new class extends Migration
 {
@@ -16,6 +17,7 @@ return new class extends Migration
         Schema::create('appointments', function (Blueprint $table) {
             $table->id();
             $table->foreignIdFor(User::class, 'user_id')->constrained()->cascadeOnDelete();
+           
             // $table->foreignId('appoint_cat_id')->constrained('appointment_categories')->onDelete('cascade');
            // $table->foreignIdFor(AppointmentCategory::class, 'appointment_category_id')->constrained()->cascadeOnDelete();
             $table->string('pet_name');
@@ -24,7 +26,8 @@ return new class extends Migration
             $table->enum('pet_gender', ['male', 'female'])->default('male');
             $table->enum('appointment_status', ['pending', 'approved', 'rejected'])->default('pending');
             $table->string('pet_age');
-            $table->string('advance_payment_method')->nullable();
+            $table->string('payment_method')->nullable();
+            $table->string('paymentIntent_id')->nullable();
             $table->string('pet_weight');
             $table->boolean('isPetVaccinated')->default(false)->nullable();
             $table->timestamps();

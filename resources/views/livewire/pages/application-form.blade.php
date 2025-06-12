@@ -68,7 +68,7 @@
                 </div>
             @endif
 
-            <form wire:submit.prevent="submit" class="w-full">
+            <form wire:submit="submit" class="w-full">
                 <div class="mb-4">
                     <label class="block mb-4 text-sm text-gray-500 dark:text-neutral-400">{{ __('What type of home do you live in?') }} <span class="text-sm text-red-600">*</span></label>
                     <select wire:model.blur="type_of_home" class="block w-full px-4 py-3 text-sm border-gray-200 rounded-lg focus:border-amber-500 focus:ring-amber-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-900 dark:border-neutral-700 dark:text-neutral-400 dark:placeholder-neutral-500 dark:focus:ring-neutral-600 bg-slate-100" >

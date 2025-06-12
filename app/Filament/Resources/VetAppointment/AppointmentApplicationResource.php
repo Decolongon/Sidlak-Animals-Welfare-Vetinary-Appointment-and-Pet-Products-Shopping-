@@ -185,6 +185,12 @@ class AppointmentApplicationResource extends Resource
                 ->label('Pet Owner')
                 ->formatStateUsing(fn ($state) => ucfirst($state)),
 
+                Tables\Columns\TextColumn::make('user.email')
+                ->searchable()
+                ->sortable()
+                ->label('Email')
+                ->formatStateUsing(fn ($state) => $state),
+
                 Tables\Columns\TextColumn::make('categories.appoint_cat_name')
                 ->searchable()
                 ->label('Service')
@@ -204,11 +210,11 @@ class AppointmentApplicationResource extends Resource
                 ->icon(fn ($state) => AppointmentStatusEnum::tryFrom($state)?->getIcon() ?? null),
 
                 TextColumn::make('created_at')
-                ->label('Date')
+                ->label('Created At')
                 ->dateTime('M d, Y')
                 ->sortable()
                 ->searchable()
-                ->formatStateUsing(fn ($state) => Carbon::parse($state)->format('M d, Y'))
+                ->formatStateUsing(fn ($state) => Carbon::parse($state)->format('M d, Y g:i A'))
             ])
             ->filters([
 

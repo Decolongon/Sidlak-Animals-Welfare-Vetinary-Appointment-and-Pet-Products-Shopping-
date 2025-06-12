@@ -19,9 +19,10 @@ return new class extends Migration
            // $table->foreignIdFor(Product::class, 'product_id')->constrained('products')->cascadeOnDelete();
             $table->decimal('total',10,2)->nullable();
             $table->text('notes')->nullable();
-            $table->enum('order_status',['new','processing','shipped','delivered','cancelled'])->default('new');
+            $table->enum('order_status',['pending','processing','shipped','delivered','cancelled'])->default('pending');
             //notes dependi pa if my cancelation of order same mn sa refunded.
             $table->enum('payment_status', ['pending', 'completed', 'failed','refunded'])->default('pending')->nullable();
+            $table->string('payment_intent_id')->nullable();
             $table->foreignId('shipping_address_id')->nullable()->constrained('addresses')->onDelete('set null');
             $table->foreignId('billing_address_id')->nullable()->constrained('addresses')->onDelete('set null');
             $table->boolean('is_billing_same_as_shipping')->default(false);

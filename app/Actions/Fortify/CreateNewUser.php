@@ -3,10 +3,15 @@
 namespace App\Actions\Fortify;
 
 use App\Models\User;
+use App\Models\Ecommerce\Cart;
+use Laravel\Jetstream\Jetstream;
+use Illuminate\Auth\Events\Login;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Auth\Events\Registered;
+use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Validator;
 use Laravel\Fortify\Contracts\CreatesNewUsers;
-use Laravel\Jetstream\Jetstream;
 
 class CreateNewUser implements CreatesNewUsers
 {
@@ -25,11 +30,20 @@ class CreateNewUser implements CreatesNewUsers
             'password' => $this->passwordRules(),
             'terms' => Jetstream::hasTermsAndPrivacyPolicyFeature() ? ['accepted', 'required'] : '',
         ])->validate();
-
-        return User::create([
+            
+            //  $cart = session()->get('cart', []);
+            //  session()->put('cart', $cart);
+             
+             
+        $user = User::create([
             'name' => $input['name'],
             'email' => $input['email'],
             'password' => Hash::make($input['password']),
         ]);
+        
+      
+        return $user;
+        
+          
     }
 }

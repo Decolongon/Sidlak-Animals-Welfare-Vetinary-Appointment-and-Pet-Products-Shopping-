@@ -14,15 +14,16 @@ class ProductImage extends Model
         'product_id',
         // 'product_img',
         'url',
-        'alt_text',
+        'sizes',
         'is_primary',
-        'display_order',
+        'quantity',
+        'price',
     ];
      /**
      * @var array<string, string>
      */
     protected $casts = [
-        'display_order' => 'integer',
+        'quantity' => 'integer',
         'is_primary' => 'boolean'
     ];
 
