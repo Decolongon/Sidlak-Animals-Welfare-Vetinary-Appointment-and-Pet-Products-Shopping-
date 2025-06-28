@@ -263,7 +263,7 @@
 </div>
 
 <div class="mt-2 flex justify-start ml-6">
-    {{ $products->links() }}
+    {{ $products->links('vendor.pagination.shop-pagination') }}
 </div>
 
 

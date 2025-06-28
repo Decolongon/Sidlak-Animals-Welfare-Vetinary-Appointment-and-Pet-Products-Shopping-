@@ -25,7 +25,8 @@ class Appointment extends Model
         'payment_method',
         'paymentIntent_id',
         'appointment_status',
-        'vet_schedule_id'
+        'vet_schedule_id',
+        'payment_status',
     ];
 
     /**

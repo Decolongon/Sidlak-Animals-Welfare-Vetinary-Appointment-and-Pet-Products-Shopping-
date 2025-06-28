@@ -52,6 +52,7 @@ use Filament\Infolists\Components\Section as InfoSection;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Filament\Infolists\Components\TextEntry\TextEntrySize;
 use App\Filament\Resources\Ecommerce\ProductResource\Pages;
+use Filament\Forms\Components\Actions\Action as FormAction;
 use Filament\Infolists\Components\Group as ComponentsGroup;
 use Filament\Infolists\Components\Section as ComponentsSection;
 use App\Filament\Resources\Ecommerce\ProductResource\RelationManagers;
@@ -108,7 +109,18 @@ class ProductResource extends Resource
                                 })
                                 ->disabled()
                                 ->dehydrated()
-                                ->unique(Product::class, 'prod_sku', ignoreRecord: true),
+                                ->unique(Product::class, 'prod_sku', ignoreRecord: true)
+                                ->suffixAction(
+                                    FormAction::make('regenerateSku')
+                                        ->label('Regenerate SKU')
+                                        ->icon('heroicon-s-arrow-path')
+                                        ->action(function (Set $set) {
+                                            do {
+                                                $sku = 'SKU-' . rand(1000, 9999) . '-' . strtoupper(Str::random(4));
+                                            } while (Product::where('prod_sku', $sku)->exists());
+                                            $set('prod_sku', $sku);
+                                        })
+                                ),
 
                             Select::make('prod_unit')
                                 ->label('Product Unit')
@@ -132,12 +144,15 @@ class ProductResource extends Resource
                                 ->label('Product Quantity')
                                 ->required()
                                 ->numeric()
+                                ->minValue(0)
                                 ->hidden(fn ($get) => $get('prod_unit') === 'diff_size')
                                 ->default(1),
 
                             TextInput::make('prod_price')
                                 ->label('Product Price')
+                                ->minValue(1)
                                 ->required()
+                                ->prefix('PHP')
                                 ->numeric()
                                 ->hidden(fn ($get) => $get('prod_unit') === 'diff_size')
                                 ->default(0),
@@ -196,6 +211,7 @@ class ProductResource extends Resource
                             TextInput::make('shipping_cost')
                                 ->label('Shipping Cost')
                                 ->numeric()
+                                ->prefix('PHP')
                                 ->minValue(20)
                                 ->maxValue(100)
                                 ->required(fn ($get) => $get('prod_requires_shipping') == true)
@@ -269,6 +285,7 @@ class ProductResource extends Resource
                             TextInput::make('price')
                             ->label('Price')
                             ->numeric()
+                            ->prefix('PHP')
                             ->minValue(1)
                             ->required()
                             ->hint('Price may vary in size')
@@ -466,30 +483,30 @@ class ProductResource extends Resource
                 '0' => 'Not Visible to Market',
             ]),
 
-            SelectFilter::make('prod_stock')
-            ->label('Product Stock')
-            ->options([
-                'out_of_stock' => 'Out of Stock',
-                'low_stock' => 'Low in Stock',
-                'in_stock' => 'In Stock',
-            ])
-            ->query(function ($query, $state) {
-                $value = $state['value'] ?? null;
+            // SelectFilter::make('prod_stock')
+            // ->label('Product Stock')
+            // ->options([
+            //     'out_of_stock' => 'Out of Stock',
+            //     'low_stock' => 'Low in Stock',
+            //     'in_stock' => 'In Stock',
+            // ])
+            // ->query(function ($query, $state) {
+            //     $value = $state['value'] ?? null;
 
-                if ($value === 'out_of_stock') {
-                     return $query->where('prod_quantity', 0);
-                }
+            //     if ($value === 'out_of_stock') {
+            //          return $query->where('prod_quantity', 0);
+            //     }
 
-                if ($value === 'low_stock') {
-                    return $query->whereBetween('prod_quantity', [1, 10]);
-                }
+            //     if ($value === 'low_stock') {
+            //         return $query->whereBetween('prod_quantity', [1, 10]);
+            //     }
 
-                if ($value === 'in_stock') {
-                    return $query->where('prod_quantity', '>', 10);
-                }
+            //     if ($value === 'in_stock') {
+            //         return $query->where('prod_quantity', '>', 10);
+            //     }
 
-                return $query;
-            }),
+            //     return $query;
+            // }),
                 
          
         ])

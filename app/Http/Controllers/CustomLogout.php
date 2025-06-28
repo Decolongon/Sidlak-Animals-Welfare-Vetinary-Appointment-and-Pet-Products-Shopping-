@@ -16,10 +16,9 @@ class CustomLogout extends FortifyAuthenticatedSessionController
      */ 
     public function logout(Request $request)
     {
-        //$this->guard()->logout();
-        // $request->session()->invalidate();
-        // $request->session()->regenerateToken();
         Auth::logout();
-        return redirect()->route('page.home'); // Customize response
+       
+        return redirect()->route('page.home');
+    
     }
 }

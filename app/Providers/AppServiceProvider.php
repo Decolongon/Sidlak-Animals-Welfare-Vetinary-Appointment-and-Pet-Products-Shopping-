@@ -35,13 +35,14 @@ use Illuminate\Support\ServiceProvider;
 use Filament\Navigation\NavigationGroup;
 use App\Models\Ecommerce\ProductCategory;
 use App\Models\Ecommerce\ProductDiscount;
+use App\Observers\VetAppointmentObserver;
 use App\Policies\Adoption\AdoptionPolicy;
 use App\Policies\Donation\DonationPolicy;
 use App\Policies\Ecommerce\ProductPolicy;
 use App\Policies\Volunteer\VolunteerPolicy;
 use App\Models\Appointment\AppointmentCategory;
-use App\Policies\Appointment\AppointmentPolicy;
 // use Filament\Http\Responses\Auth\Contracts\LogoutResponse as LogoutResponseContract;
+use App\Policies\Appointment\AppointmentPolicy;
 use App\Policies\Appointment\VetSchedulePolicy;
 use App\Policies\Ecommerce\ProductReviewPolicy;
 use App\Policies\Ecommerce\ProductCategoryPolicy;
@@ -75,7 +76,7 @@ class AppServiceProvider extends ServiceProvider
     {
        
         Announcement::observe(AnnouncementObserver::class);
-      
+        Appointment::observe(VetAppointmentObserver::class);
       
        
     }

@@ -134,6 +134,7 @@ class AddToCartForm extends Component
         )->get();
     }
 
+
     protected function showAlert(string $type, string $message): void
     {
         $this->alert($type, '', [

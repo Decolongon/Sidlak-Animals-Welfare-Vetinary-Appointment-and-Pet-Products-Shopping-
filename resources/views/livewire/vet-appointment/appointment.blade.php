@@ -160,17 +160,22 @@
     <div x-show="showSchedule" x-transition class="p-4 w-full max-w-xl text-center rounded-lg bg-gray-50 dark:bg-neutral-800 border border-gray-200 dark:border-neutral-600">
       <h2 class="text-md font-semibold text-gray-700 dark:text-neutral-100 mb-2">Veterinary Opening Time</h2>
       <ul class="space-y-1 list-disc list-inside text-gray-600 dark:text-neutral-300 text-left">
-        @foreach ($schedules as $sched)
+        {{-- @foreach ($schedules as $sched) --}}
         
-            <span class="font-medium text-gray-800 dark:text-white">
+            {{-- <span class="font-medium text-gray-800 dark:text-white"> --}}
               {{-- Dr. {{ ucwords($sched->user->name) ?? 'N/A' }} --}}
-            </span>
+            {{-- </span> --}}
             {{-- @if($sched->vet_schedule_open <= now() && $sched->vet_schedule_close >= now()) --}}
-            {{ \Carbon\Carbon::parse($sched->vet_schedule_open)->format('M d, Y g:i A') }} — 
-            {{ \Carbon\Carbon::parse($sched->vet_schedule_close)->format('M d, Y g:i A') }}
+            {{-- {{ \Carbon\Carbon::parse($sched->vet_schedule_open)->format('M d, Y g:i A') }} — 
+            {{ \Carbon\Carbon::parse($sched->vet_schedule_close)->format('M d, Y g:i A') }} --}}
             {{-- @endif --}}
           
-        @endforeach
+        {{-- @endforeach --}}
+        <span class="font-medium text-gray-800 dark:text-white">
+    {{-- Dr. {{ ucwords($schedules['schedules']?->user?->name) ?? 'N/A' }} --}}
+      </span>
+      {{ $schedules['schedules']?->vet_schedule_open?->format('M d, Y g:i A')  }}
+      {{ $schedules['schedules']?->vet_schedule_close?->format('M d, Y g:i A')  }}
       </ul>
     </div>
   </div>
@@ -192,6 +197,8 @@
     </h2>
 
     {{-- @if( App\Models\Appointment\Appointment::whereDate('created_at', now()->toDateString())->count() != $num_customer_to_accomodate) --}}
+   @if ($schedules['schedules'] && $schedules['appointmentsCount'] < $schedules['schedules']->num_customers)
+
     <form wire:submit="submit" >
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6">
 
@@ -339,9 +346,9 @@
         </div>
 
         <div>
-          <label for="payment_method" class="block mb-2 text-sm font-medium text-gray-700 dark:text-white">Vaccinated?</label>
+          <label for="payment_method" class="block mb-2 text-sm font-medium text-gray-700 dark:text-white">Payment Method</label>
           <select id="payment_method" name="payment_method"
-            wire:model="payment_method"
+            wire:model.live="payment_method"
             class="py-2.5 px-4 block w-full border border-gray-200 rounded-full sm:text-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-neutral-900 dark:border-neutral-700 dark:text-neutral-400 dark:focus:ring-neutral-600">
             <option value="">Select</option>
             <option value="Over The Counter">Over The Counter</option>
@@ -354,21 +361,13 @@
         </div>
 
 
-    @if ($payment_method == 'E-Wallets')
-      
-    
-       <!-- Payment Method Section -->
-<div x-data="{ showPaymentOptions: false }" class="col-span-full py-6 border-t border-gray-200 first:pt-0 last:pb-0 first:border-transparent dark:border-neutral-700 dark:first:border-transparent">
-    <button  type="button" 
-    @click="showPaymentOptions = !showPaymentOptions" class="inline-block mb-2 text-sm font-medium lg:mb-3 dark:text-white rounded-full ">
-        Show Payment Options
-    </button>
-
-    <div x-show="showPaymentOptions" 
-    x-transition class="mt-2 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        @if ($payment_method === 'E-Wallets' || $this->isEWalletMethod)
+<!-- Payment Method Section -->
+<div class="col-span-full py-6 border-t border-gray-200 first:pt-0 last:pb-0 first:border-transparent dark:border-neutral-700 dark:first:border-transparent">
+    <div class="mt-2 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <!-- GCash -->
         <label class="relative block p-4 bg-white border border-gray-200 rounded-xl shadow-sm cursor-pointer transition hover:shadow-md dark:bg-neutral-800 dark:border-neutral-700">
-            <input type="radio" name="payment_method" value="gcash" wire:model.live="payment_method"
+            <input type="radio" name="e_wallet_method" value="gcash" wire:click="$set('payment_method', 'gcash')"
                 class="absolute top-4 right-4 w-5 h-5 text-amber-600 border-gray-300 rounded-full focus:ring-amber-500 dark:bg-neutral-800 dark:border-neutral-600">
             <img src="{{ asset('imgs/gcash.png') }}" class="w-20 h-20 mx-auto mb-3 object-contain" />
             <p class="text-center text-sm font-semibold text-gray-800 dark:text-neutral-200">Pay using GCash</p>
@@ -377,7 +376,7 @@
 
         <!-- Card -->
         <label class="relative block p-4 bg-white border border-gray-200 rounded-xl shadow-sm cursor-pointer transition hover:shadow-md dark:bg-neutral-800 dark:border-neutral-700">
-            <input type="radio" name="payment_method" value="card" wire:model.live="payment_method"
+            <input type="radio" name="e_wallet_method" value="card" wire:click="$set('payment_method', 'card')"
                 class="absolute top-4 right-4 w-5 h-5 text-amber-600 border-gray-300 rounded-full focus:ring-amber-500 dark:bg-neutral-800 dark:border-neutral-600">
             <img src="{{ asset('imgs/card.png') }}" class="w-20 h-20 mx-auto mb-3 object-contain" />
             <p class="text-center text-sm font-semibold text-gray-800 dark:text-neutral-200">Pay using Card</p>
@@ -386,7 +385,7 @@
 
         <!-- PayMaya -->
         <label class="relative block p-4 bg-white border border-gray-200 rounded-xl shadow-sm cursor-pointer transition hover:shadow-md dark:bg-neutral-800 dark:border-neutral-700">
-            <input type="radio" name="payment_method" value="paymaya" wire:model.live="payment_method"
+            <input type="radio" name="e_wallet_method" value="paymaya" wire:click="$set('payment_method', 'paymaya')"
                 class="absolute top-4 right-4 w-5 h-5 text-amber-600 border-gray-300 rounded-full focus:ring-amber-500 dark:bg-neutral-800 dark:border-neutral-600">
             <img src="{{ asset('imgs/paymaya.png') }}" class="w-20 h-20 mx-auto mb-3 object-contain" />
             <p class="text-center text-sm font-semibold text-gray-800 dark:text-neutral-200">Pay using PayMaya</p>
@@ -395,7 +394,7 @@
 
         <!-- GrabPay -->
         <label class="relative block p-4 bg-white border border-gray-200 rounded-xl shadow-sm cursor-pointer transition hover:shadow-md dark:bg-neutral-800 dark:border-neutral-700">
-            <input type="radio" name="payment_method" value="grab_pay" wire:model.live="payment_method"
+            <input type="radio" name="e_wallet_method" value="grab_pay" wire:click="$set('payment_method', 'grab_pay')"
                 class="absolute top-4 right-4 w-5 h-5 text-amber-600 border-gray-300 rounded-full focus:ring-amber-500 dark:bg-neutral-800 dark:border-neutral-600">
             <img src="{{ asset('imgs/grabpay.png') }}"class="w-20 h-20 mx-auto mb-3 object-contain" />
             <p class="text-center text-sm font-semibold text-gray-800 dark:text-neutral-200">Pay using GrabPay</p>
@@ -403,11 +402,11 @@
         </label>
     </div>
 
-    @error('ayment_method') 
+    @error('payment_method') 
         <span class="mt-4 text-sm text-red-500 block">{{ $message }}</span> 
     @enderror
 
-   @if($payment_method === 'card')
+    @if($payment_method === 'card')
     <div class="p-4 mb-4 bg-white border border-gray-200 shadow-sm lg:mb-5 rounded-xl md:p-5 dark:bg-neutral-900 dark:border-neutral-700 dark:text-neutral-400">
         <h3 class="font-medium inline-block text-sm text-gray-800 mt-2.5 mb-3 dark:text-neutral-200">{{ 'Card Details' }}</h3>
 
@@ -459,17 +458,23 @@
             </div>
         </div>
     </div>
- @endif
-
-
+    @endif
 </div>
- @endif
+@endif
 
       </div>
 
       <div class="mt-6 flex justify-center w-full max-w-md mx-auto">
         <button type="submit" wire:target="submit"
+          wire:loading.attr="disabled"
           class="py-3 px-4 inline-flex justify-center items-center gap-x-2 text-sm font-medium rounded-full border border-transparent bg-amber-400 text-black hover:bg-amber-500 focus:outline-none focus:bg-amber-500 w-full">
+            <span wire:loading.flex wire:target="submit" class="items-center">
+                <svg class="animate-spin h-4 w-4 mr-2 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                      <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
+                </svg>
+            </span>
+          
           Book Appointment
         </button>
       </div>
@@ -490,6 +495,6 @@
   </div>
 </div>
 {{--end of Vet form --}}
-{{-- @endif --}}
+@endif
 
 </div>

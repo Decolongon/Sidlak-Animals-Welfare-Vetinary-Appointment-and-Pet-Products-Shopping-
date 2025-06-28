@@ -2,31 +2,35 @@
 
 namespace App\Filament\Resources\Ecommerce;
 
+use Carbon\Carbon;
 use Filament\Forms;
 use Filament\Tables;
 use Filament\Forms\Get;
 use Filament\Forms\Form;
 use Filament\Pages\Page;
 use Filament\Tables\Table;
+use Illuminate\Support\Str;
 use App\Enums\OrderStatusEnum;
+// use Filament\Resources\Pages\Page;
 use App\Models\Ecommerce\Order;
 use App\Enums\PaymentStatusEnum;
-// use Filament\Resources\Pages\Page;
 use Filament\Infolists\Infolist;
 use Filament\Resources\Resource;
 use App\Models\Ecommerce\Product;
 use App\Ecommerce\Models\OrderItem;
 use Filament\Tables\Actions\Action;
+use Filament\Tables\Filters\Filter;
 use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Toggle;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Textarea;
+
 use Filament\Tables\Actions\BulkAction;
 use Filament\Tables\Columns\TextColumn;
+use Illuminate\Support\Facades\Storage;
 use Filament\Forms\Components\TextInput;
-
 use Filament\Notifications\Notification;
 use Filament\Tables\Columns\ImageColumn;
 use Filament\Pages\SubNavigationPosition;
@@ -35,6 +39,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Filament\Forms\Components\ToggleButtons;
 use Filament\Infolists\Components\IconEntry;
 use Filament\Infolists\Components\TextEntry;
+use Filament\Infolists\Components\ImageEntry;
 use Filament\Infolists\Components\RepeatableEntry;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use App\Filament\Resources\UserResource\Pages\EditUser;
@@ -367,43 +372,64 @@ class OrderResource extends Resource
                 TextColumn::make('orderItems.product.prod_name')
                     ->label('Product Ordered')
                     ->sortable()
-                    ->limit(20)
-                    ->searchable()
-                    ->formatStateUsing(fn (string $state) : string => ucwords($state)),
+                    ->formatStateUsing(function ($record) {
+                        return $record->orderItems->map(function ($item) {
+                            return "<div style='min-height: 50px; display: flex; align-items: center;'>" . 
+                                  ucwords(Str::limit($item->product->prod_name, 20)) . 
+                                "</div>";
+                        })->join('<br>');
+                    })
+                    ->html()
+                    ->searchable(),
+                    // ->limit(20)
+                    // ->searchable()
+                    // ->formatStateUsing(fn (string $state) : string => ucwords($state)),
 
               
-                ImageColumn::make('images.url')
+                TextColumn::make('images.url')
                     ->label('Product Image')
-                    ->circular()
-                    ->height(50)
-                    ->width(50)
-                    ->limit(1)
-                    ->getStateUsing(fn ($record) => 
-                    $record->orderItems->first()?->product->images()
-                        ->where('is_primary', true)
-                        ->value('url')
-                        
-                    ?? 
+                    // ->circular()
+                    // ->height(50)
+                    // ->width(50)
+                    // ->limit(1)
+                    ->getStateUsing(function ($record) {
+                    return $record->orderItems->map(function ($item) {
+                        $imagePath = $item->product->images()
+                            ->where('is_primary', true)
+                            ->value('url')
+                            ??
+                            $item->product->images()->value('url');
 
-                    $record->orderItems->first()?->product->images()
-                        ->orderBy('created_at')
-                        ->value('url')
-                )->toggleable(isToggledHiddenByDefault: true),
+                         if ($imagePath) {
+                            $imageUrl = asset(Storage::url($imagePath));
+                            return "<div style='display: flex; align-items: center; justify-content: center;'><img src='{$imageUrl}' style='width:50px;height:50px;object-fit:cover;border-radius:50%;'></div>";
+                        }
+
+                        return null;
+                    })->filter()->join('<br>');
+                })
+                ->html()
+                  ->toggleable(isToggledHiddenByDefault: true),
 
 
                  TextColumn::make('orderItems')
                     ->label('Quantity')
                     ->formatStateUsing(function ($record) {
                         return $record->orderItems->map(function ($item) {
-                            $qty = number_format($item->quantity,0) ?? 0;
+                            $qty = number_format($item->quantity, 0) ?? 0;
                             $unit = $item->product->prod_unit ?? '';
                             $weight = $item->product->prod_weight ?? 0;
 
-                            return $unit === 'pcs'
+                            $quantityText = $unit === 'pcs'
                                 ? "{$qty}"
                                 : "{$qty} × " . number_format($weight, 2) . $unit;
-                        })->join(', ');
+
+                            return "<div style='min-height: 50px; display: flex; align-items: center;'>" . 
+                                $quantityText . 
+                                "</div>";
+                        })->join('<br>');
                     })
+                    ->html()
                     ->toggleable(isToggledHiddenByDefault: true),
 
 
@@ -419,14 +445,6 @@ class OrderResource extends Resource
                     ->color(fn ($state) => OrderStatusEnum::tryFrom($state)?->getColor() ?? 'gray') 
                     ->icon(fn ($state) => OrderStatusEnum::tryFrom($state)?->getIcon() ?? null),
                 
-                    TextColumn::make('shipping_price')
-                        ->label('Shipping Cost')
-                        ->sortable()
-                        ->formatStateUsing(function ($state) {
-                            return $state == 0 ? 'Free Shipping' : number_format($state, 2);
-                        })
-                        ->badge()
-                        ->color(fn ($record) => $record->shipping_price == 0 ? 'success' : 'gray'),
 
                  TextColumn::make('payment_status')
                     ->label('Payment Status')
@@ -443,7 +461,19 @@ class OrderResource extends Resource
                     strtoupper($state))
                     ->color(fn ($state) => $state == 'gcash' || $state == 'paymaya' || $state == 'grab_pay' || $state == 'card' ? 'success' : 'primary'),
                    
-                 
+                 TextColumn::make('created_at')
+                 ->sortable()
+                 ->formatStateUsing(fn ($state) => Carbon::parse($state)->format('M d, Y g:i A'))
+                 ->label('Ordered At'),
+
+                TextColumn::make('shipping_price')
+                    ->label('Shipping Cost')
+                    ->sortable()
+                    ->formatStateUsing(function ($state) {
+                        return $state == 0 ? 'Free Shipping' : number_format($state, 2);
+                    })
+                    ->badge()
+                    ->color(fn ($record) => $record->shipping_price == 0 ? 'success' : 'gray'),
 
                 TextColumn::make('total')
                     ->label('Total')
@@ -463,12 +493,19 @@ class OrderResource extends Resource
                         'refunded' => 'Refunded',
                     ]),
 
+    
                    
             ])
             ->actions([
                 Tables\Actions\ViewAction::make(),
                 Tables\Actions\ActionGroup::make([
                     Tables\Actions\EditAction::make(),
+                            // ->hidden(function() {
+                            //     if(auth()->user()->hasAnyRole(['super-admin','super_admin'])) {
+                            //         return false;
+                            //     }
+                            //     return true;
+                            // }),
 
                     Action::make('update_order_status')
                     ->label('Update Status')
@@ -561,6 +598,7 @@ class OrderResource extends Resource
                 ->icon('heroicon-m-plus')
                 ->label(__('New Order')),
             ])
+            ->defaultSort('created_at', 'desc')
             ->emptyStateIcon('heroicon-o-shopping-cart')
             ->emptyStateHeading('No Orders are created');
     }
@@ -648,6 +686,7 @@ public static function infolist(Infolist $infolist): Infolist
                         ->label('Items')
                         ->schema([
                             TextEntry::make('product.prod_name')->label('Product Name'),
+                            ImageEntry::make('product.images.0.url')->label('Product Image')->width(50)->height(50)->extraAttributes(['style' => 'object-fit: cover; border-radius: 0.5rem;']),
                             TextEntry::make('price')->label('Price')->money('PHP')
                             ->badge()
                             ->formatStateUsing(fn ($state) => number_format($state, 2)),
@@ -664,13 +703,14 @@ public static function infolist(Infolist $infolist): Infolist
                             ->badge(),
                            
                         ])
-                        // ->collapsible()
+                        //->collapsible()
                         ->columns(2)
                         ->columnSpanFull(),
                         
                     TextEntry::make('shipping_price')->label('Total Shipping Cost')->money('PHP')
                     ->badge()
-                    ->formatStateUsing(fn ($state) => number_format($state, 2)),
+                    ->color(fn ($state) => $state == 0 ? 'success' : 'primary')
+                    ->formatStateUsing(fn ($state) => $state == 0 ? 'Free Shipping' : number_format($state, 2)),
                     TextEntry::make('total')->label('Grand Total')->money('PHP')
                      ->badge()
                     ->formatStateUsing(fn ($state) => number_format($state, 2)),

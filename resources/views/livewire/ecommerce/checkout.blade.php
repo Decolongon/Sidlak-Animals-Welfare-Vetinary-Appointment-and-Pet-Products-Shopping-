@@ -35,7 +35,17 @@
                                                 </div>
                                             </td>
                                             <td class="px-3 py-4 text-sm text-gray-800 dark:text-neutral-200 text-right">
-                                                ₱{{ number_format($item->product->prod_price, 2) }}
+                                                {{-- ₱{{ number_format($item->product->prod_price, 2) }} --}}
+                                                 @if($item->product->discounted_price)
+                                                    <del class="text-gray-500 dark:text-neutral-400">
+                                                         ₱{{ number_format( $item->product->prod_price, 2).' ' }}
+                                                    </del>
+                                                    <span class="text-green-600 dark:text-green-400">
+                                                        ₱{{ number_format($item->product->discounted_price, 2) }}
+                                                    </span>
+                                                @else
+                                                    ₱{{ number_format($item->product->prod_price, 2) }}
+                                                @endif
                                             </td>
                                             <td class="px-3 py-4 text-sm text-gray-800 dark:text-neutral-200 text-right">
                                                 <div class="flex items-center justify-end space-x-2" >
@@ -53,7 +63,17 @@
                                                 </div>
                                             </td>
                                             <td class="px-3 py-4 text-sm text-gray-800 dark:text-neutral-200 text-right">
-                                                ₱{{ number_format($item->product->prod_price * $item->quantity, 2) }}
+                                                {{-- ₱{{ number_format($item->product->prod_price * $item->quantity, 2) }} --}}
+                                                @if($item->product->discounted_price)
+                                                    {{-- <span class="line-through text-gray-500 dark:text-neutral-500 mr-1">
+                                                        ₱{{ number_format($item->product->prod_price, 2) }}
+                                                    </span> --}}
+                                                    <span class="text-green-600 dark:text-green-400">
+                                                        ₱{{ number_format($item->product->discounted_price * $item->quantity, 2) }}
+                                                    </span>
+                                                @else
+                                                    ₱{{ number_format($item->product->prod_price * $item->quantity, 2) }}
+                                                @endif
                                             </td>
                                         </tr>
                                         @endforeach

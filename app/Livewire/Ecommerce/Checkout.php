@@ -52,6 +52,9 @@ class Checkout extends Component
 
     public $itemsTotal;
     public $itemId;
+    public $totalDiscount = 0;
+    public $discountPrice = 0;
+    public $isDiscounted;
     public function mount()
     {
          $this->itemId =  session('buy_now_product');
@@ -78,17 +81,57 @@ class Checkout extends Component
         
     }
 
+    // public function getCheckoutItems()
+    // {
+    //     if (!Auth::check()) {
+    //         return redirect()->route('login');
+    //     }
+
+    //     // Handle single product checkout
+    //     if ($singleProductId = session('buy_now_product')) {
+    //         $product = Product::find($singleProductId);
+
+    //       session()->forget('buy_now_product');
+
+    //         if ($product) {
+    //             $this->checkoutItems = collect([
+    //                 (object)[
+    //                     'product' => $product,
+    //                     'quantity' => 1,
+    //                     'id' => null,
+    //                 ]
+    //             ]);
+    //         }
+
+    //         return;
+    //     }
+
+    //     // Handle cart checkout
+    //     $selectedItemIds = (array) session('selected_checkout_items', []);
+
+    //     $this->checkoutItems = Cart::with('product')
+    //         ->where('user_id', Auth::id())
+    //         ->whereIn('id', $selectedItemIds)
+    //         ->get();
+    // }
+   
+
+
     public function getCheckoutItems()
     {
         if (!Auth::check()) {
-            return redirect()->route('login');
+            return redirect()->route('filament.auth.auth.login');
         }
 
-        // Handle single product checkout
+        // Handle single product checkout ((buy now)
         if ($singleProductId = session('buy_now_product')) {
-            $product = Product::find($singleProductId);
+            $product = Product::with(['productDiscounts' => function($query) {
+                $query->select('product_discounts.id', 'discount_name', 'start_at', 'end_at')
+                     ->where('start_at', '<=', now())
+                     ->where('end_at', '>=', now());
+            }])->find($singleProductId);
 
-          session()->forget('buy_now_product');
+            session()->forget('buy_now_product');
 
             if ($product) {
                 $this->checkoutItems = collect([
@@ -99,27 +142,63 @@ class Checkout extends Component
                     ]
                 ]);
             }
-
             return;
         }
 
         // Handle cart checkout
         $selectedItemIds = (array) session('selected_checkout_items', []);
 
-        $this->checkoutItems = Cart::with('product')
+        $this->checkoutItems = Cart::with(['product' => function($query) {
+            $query->with(['productDiscounts' => function($subQuery) {
+                $subQuery->select('product_discounts.id', 'discount_name', 'start_at', 'end_at')
+                         ->where('start_at', '<=', now())
+                         ->where('end_at', '>=', now());
+            }]);
+        }])
             ->where('user_id', Auth::id())
             ->whereIn('id', $selectedItemIds)
             ->get();
     }
-   
 
     //calculate subtotal
-    public function calculateSubtotal(){
+    // public function calculateSubtotal(){
        
+    //     $this->itemsTotal = $this->checkoutItems->sum(function($item) {
+    //           $product = $item->product;
+    //           $price = $product->prod_price;
+
+    //           $this->discountPrice = $this->getDiscountedPrice($product);
+
+    //           if($this->discountPrice !== null){
+    //             $price = $this->discountPrice;
+    //           }
+    //           return $price * $item->quantity;
+    //         // return $item->product->prod_price * $item->quantity;
+    //     });
+    //   $this->subtotal = $this->itemsTotal + $this->totalShipping;
+    // }
+
+     //calculate subtotal
+    public function calculateSubtotal(){
+        $this->itemsTotal = 0;
+        $this->totalDiscount = 0; // Initialize discount total
+        
         $this->itemsTotal = $this->checkoutItems->sum(function($item) {
-            return $item->product->prod_price * $item->quantity;
+            $product = $item->product;
+            $originalPrice = $product->prod_price;
+            $discountedPrice = $this->getDiscountedPrice($product);
+            $finalPrice = $discountedPrice ?? $originalPrice;
+            $this->isDiscounted = $finalPrice;
+            
+            // Calculate discount amount for this item (if my discount)
+            if ($discountedPrice !== null) {
+                $this->totalDiscount += ($originalPrice - $discountedPrice) * $item->quantity;
+            }
+            
+            return $finalPrice * $item->quantity;
         });
-      $this->subtotal = $this->itemsTotal + $this->totalShipping;
+        
+        $this->subtotal = $this->itemsTotal + $this->totalShipping;
     }
 
     //calculate total shipping
@@ -137,6 +216,40 @@ class Checkout extends Component
            
         }
     }
+    //calculate discounted price
+    public function getDiscountedPrice($product)
+    {
+        $product->discounted_price = null;
+        $product->discount_amount = null;
+        $product->discount_label = null;
+
+        // Get the first active discount
+        $discount = $product->productDiscounts->first();
+
+        if (!$discount || !$discount->pivot) {
+            return;
+        }
+
+        $type = $discount->pivot->discount_type;
+        $value = floatval($discount->pivot->discounted_price);
+
+        if ($type === 'fixed') {
+            $product->discount_amount = $value;
+            $product->discounted_price = $product->prod_price - $value;
+            $product->discount_label = '₱' . number_format($value, 0) . ' off';
+        }
+        if ($type === 'percent') {
+            $discountValue = $product->prod_price * ($value / 100);
+            $product->discount_amount = $discountValue;
+            $product->discounted_price = $product->prod_price - $discountValue;
+            $product->discount_label = number_format($value, 0) . '% off';
+        }
+
+        return $product->discounted_price;
+       
+    }
+
+
 
     //sanitization
     protected function sanitizeInput(array $data): array
@@ -208,6 +321,7 @@ class Checkout extends Component
                 
                 // For redirect-based payments
                 if (isset($attachedPaymentIntent->next_action['redirect']['url'])) {
+                    
                     return redirect()->away($attachedPaymentIntent->next_action['redirect']['url']);
                 }
                 
@@ -336,6 +450,7 @@ class Checkout extends Component
     {
         foreach ($this->checkoutItems as $item) {
             $product = $item->product;
+            // $finalPrice = $this->getDiscountedPrice($product) ?? $product->prod_price;
 
             // Deduct quantity from product stock
             $product->prod_quantity -= $item->quantity;
@@ -344,7 +459,7 @@ class Checkout extends Component
             $orders->orderItems()->create([
                 'product_id' => $item->product->id,
                 'quantity' => $item->quantity,
-                'price' => $item->product->prod_price,
+                'price' => $this->isDiscounted
             ]);
 
             Cart::where('id', $item->id)
@@ -434,7 +549,8 @@ class Checkout extends Component
            'totalShipping' => $this->totalShipping,
            'barangays' => $this->barangays,
            'cities' => $this->cities,
-           'itemsTotal' => $this->itemsTotal
+           'itemsTotal' => $this->itemsTotal,
+           'totalDiscount' => $this->totalDiscount,
         ]);
     }
 }

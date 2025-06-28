@@ -7,16 +7,17 @@ use Livewire\WithPagination;
 use App\Models\Ecommerce\Cart;
 use Livewire\Attributes\Layout;
 use App\Models\Ecommerce\Product;
-use App\Models\Ecommerce\ProductCategory;
-use App\Models\Ecommerce\ProductDiscount;
-Use Livewire\Attributes\Title;
+use Livewire\WithoutUrlPagination;
 use Illuminate\Support\Facades\Log;
+Use Livewire\Attributes\Title;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Session;
+use App\Models\Ecommerce\ProductCategory;
+use App\Models\Ecommerce\ProductDiscount;
 
 class Shop extends Component
 {
-    use WithPagination;
+    use WithPagination, WithoutUrlPagination;
    
     public $query = ''; // search for products
     public $searchCat = ''; // search for prod categories
@@ -42,7 +43,7 @@ class Shop extends Component
         $this->getProducts();
        
         // $this->query = trim($this->query);
-        // $this->resetPage();
+        $this->resetPage();
     }
 
      // Update category search dynamically
@@ -84,7 +85,6 @@ class Shop extends Component
                 $q->where('prod_name', 'Like', '%' . $this->query . '%')
                 ->orWhere('prod_sku', 'Like', '%' . $this->query . '%');
              });
-            //  ->paginate(6);
 
              //filter product base sa category
             if($this->selectedCat){
@@ -94,15 +94,21 @@ class Shop extends Component
 
             }
             $query->orderBy('prod_price', $this->sortBy);
-            // if (in_array($this->sortBy, ['asc', 'desc'])) {
-            //     $query->orderBy('prod_price', $this->sortBy);
-            // }
-            // $this->products = $query->paginate(4);
+            
             
             $products = $query->paginate(12);
 
             // Calculate discounted prices for each product
-           foreach ($products as $product) {
+          $this->calculateDiscountedPrice($products);
+        
+        return $products;
+           
+          
+    }
+
+    protected function calculateDiscountedPrice($products)
+    {
+         foreach ($products as $product) {
                 $product->discounted_price = null;
                 $product->discount_amount = null;
                 $product->discount_label = null;
@@ -127,13 +133,11 @@ class Shop extends Component
                     $product->discounted_price = $product->prod_price - $discountValue;
                     $product->discount_label = number_format($value, 0) . ' % off';
                 }
-            }       
 
-            return $products;
-           
-          
+               
+
+            }
     }
-
 
     // //default sorting asc 
     // public function filterByCategory($id)

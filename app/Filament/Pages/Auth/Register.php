@@ -116,4 +116,7 @@ class Register extends RegistrationPage
          // if you store cart in session manually
     }
 }
+ 
+
+
 }

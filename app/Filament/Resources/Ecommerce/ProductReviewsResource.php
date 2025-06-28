@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Ecommerce;
 
+use Carbon\Carbon;
 use Filament\Forms;
 use Filament\Tables;
 use Filament\Forms\Form;
@@ -17,8 +18,8 @@ use Filament\Forms\Components\Textarea;
 use Filament\Tables\Columns\TextColumn;
 use App\Models\Ecommerce\ProductReviews;
 use Filament\Tables\Columns\ImageColumn;
-use Filament\Forms\Components\FileUpload;
 // use IbrahimBougaoua\FilamentRatingStar\Columns\Components\RatingStar;
+use Filament\Forms\Components\FileUpload;
 use Filament\Tables\Filters\SelectFilter;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
@@ -135,8 +136,9 @@ class ProductReviewsResource extends Resource
 
                 TextColumn::make('created_at')
                 ->label('Created At')
-                ->sortable()
-                ->dateTime(),
+                ->formatStateUsing(fn ($state) => Carbon::parse($state)->format('M d, Y g:i A'))
+                ->sortable(),
+                
             ])
             ->filters([
                 SelectFilter::make('product.prod_name')

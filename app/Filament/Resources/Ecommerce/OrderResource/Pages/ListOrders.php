@@ -3,8 +3,9 @@
 namespace App\Filament\Resources\Ecommerce\OrderResource\Pages;
 
 use Filament\Actions;
-use Filament\Resources\Pages\ListRecords;
+use App\Models\Ecommerce\Order;
 use Filament\Resources\Components\Tab;
+use Filament\Resources\Pages\ListRecords;
 use App\Filament\Resources\Ecommerce\OrderResource;
 
 class ListOrders extends ListRecords
@@ -14,7 +15,13 @@ class ListOrders extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
-            Actions\CreateAction::make()->label('New Order')->icon('heroicon-m-plus-circle'),
+            Actions\CreateAction::make()->label('New Order')->icon('heroicon-m-plus-circle')
+            // ->hidden(function() {
+            //     if(auth()->user()->hasAnyRole(['super-admin','super_admin'])) {
+            //         return false;
+            //     }
+            //     return true;
+            // }),
         ];
     }
 
@@ -22,17 +29,36 @@ class ListOrders extends ListRecords
     public function getTabs(): array
     {
         return [
-            null => Tab::make('All'),
-            'Pending' => Tab::make()->query(fn ($query) => $query->where('order_status', 'pending')),
-            'Processing' => Tab::make()->query(fn ($query) => $query->where('order_status', 'processing')),
-            'Shipped' => Tab::make()->query(fn ($query) => $query->where('order_status', 'shipped')),
-            'Delivered' => Tab::make()->query(fn ($query) => $query->where('order_status', 'delivered')),
-            'Cancelled' => Tab::make()->query(fn ($query) => $query->where('order_status', 'cancelled')),
+            'All' => Tab::make()
+                    ->badge(Order::count()),
+
+            'Pending' => Tab::make()
+                    ->query(fn ($query) => $query->where('order_status', 'pending'))
+                    ->badge(Order::where('order_status', 'pending')->count()),
+
+            'Processing' => Tab::make()
+                            ->query(fn ($query) => $query->where('order_status', 'processing'))
+                            ->badge(Order::where('order_status', 'processing')->count()),
+
+            'Shipped' => Tab::make()
+                        ->query(fn ($query) => $query->where('order_status', 'shipped'))
+                        ->badge(Order::where('order_status', 'shipped')->count()),
+
+            'Delivered' => Tab::make()
+                            ->query(fn ($query) => $query->where('order_status', 'delivered'))
+                            ->badge(Order::where('order_status', 'delivered')->count()),
+
+
+            'Cancelled' => Tab::make()
+                            ->query(fn ($query) => $query->where('order_status', 'cancelled'))
+                            ->badge(Order::where('order_status', 'cancelled')->count()),
         ];
     }
 
-    protected function getHeaderWidgets(): array
-    {
-        return OrderResource::getWidgets();
-    }
+    // protected function getHeaderWidgets(): array
+    // {
+    //    return [
+    //         OrderResource\Widgets\OrderStatsOverview::class,
+    //     ];  
+    // }
 }

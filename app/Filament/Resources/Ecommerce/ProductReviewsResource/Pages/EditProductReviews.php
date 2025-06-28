@@ -17,7 +17,7 @@ class EditProductReviews extends EditRecord
         ];
     }
 
-    public function getRedirectUrl(): string
+    protected function getRedirectUrl(): string
     {
         return $this->getResource()::getUrl('index');
     }

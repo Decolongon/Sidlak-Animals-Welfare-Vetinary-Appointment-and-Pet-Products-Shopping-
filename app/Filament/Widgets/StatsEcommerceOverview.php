@@ -22,16 +22,16 @@ class StatsEcommerceOverview extends BaseWidget
             Stat::make('Total Orders', Order::count())
                 ->descriptionIcon('heroicon-m-shopping-cart', IconPosition::Before)
                 ->description('Total orders')
-                 ->chart([1,3,5,7,9,12,13,15])
-                ->url(route('filament.admin.resources.ecommerce.orders.index', [
-                    'tableFilters[order_status][value]' => 'new'
-                ]))
+                //  ->chart([1,3,5,7,9,12,13,15])
+                ->chart([3,1,5,2,7,3,9,8,10])
+                ->url(route('filament.admin.resources.ecommerce.orders.index'))
                 ->color('success'),
 
-                Stat::make('Total Products In Stock', Product::where('prod_quantity', '>', 0)->count())
+                Stat::make('Total Products', Product::count())
                 ->descriptionIcon('heroicon-o-squares-plus', IconPosition::Before)
-                ->description('Total products in stock')
-                ->chart([1,3,5,7,9,12,13,15])
+                ->description('Total products')
+                // ->chart([1,3,5,7,9,12,13,15])
+                ->chart([3,1,5,2,7,3,9,8,10])
                 ->url(route('filament.admin.resources.ecommerce.products.index'))
                 ->color('primary'),
 

@@ -33,37 +33,66 @@
                       <div>
                           <div class="font-medium text-gray-800 dark:text-neutral-200">{{ ucwords($cart->product->prod_name) }}</div>
                           <div class="text-sm text-gray-600 dark:text-neutral-400">
-                                {{-- @if($cart->product->current_price < $cart->product->prod_price)
-                                 
-                                   ₱{{ number_format($cart->quantity * $cart->product->current_price, 2). ' On Sale'}}
-                                @else
-                                    ₱{{ number_format($cart->quantity * $cart->product->prod_price, 2) }}
-                                @endif --}}
-                            
+                           
+                               @if($cart->product->discounted_price !== null)
+                                {{-- <span class="original-price text-muted text-decoration-line-through">
+                                    ₱{{ number_format($cart->product->prod_price, 2) }}
+                                </span> --}}
+                                  <del class="text-gray-500 dark:text-neutral-400">
+                                    ₱{{ number_format( $cart->product->prod_price, 2).' ' }}
+                                </del>
+                                <span class="discounted-price text-danger">
+                                    ₱{{ number_format($cart->quantity * $cart->product->discounted_price, 2) }}
+                                </span>
+                                <small class="text-success d-block">{{ $cart->product->discount_label }}</small>
+                            @else
                                 ₱{{ number_format($cart->quantity * $cart->product->prod_price, 2) }}
+                            @endif
+                                {{-- ₱{{ number_format($cart->quantity * $cart->product->prod_price, 2) }} --}}
                             </div>
                       </div>
                   </div>
               </div>
 
-              <div class="mt-3 flex items-center justify-end gap-2">
-              
-                {{-- {{ Auth::check() ? $cart->id : 'guest_'.$cart->product_id }} --}}
-                  <button type="button"  wire:click="decreaseQuantity('{{ $cart->id }}')"  wire:loading.attr="disabled"  wire:target="decreaseQuantity('{{ $cart->id }}')"
-                      class="px-3 py-1 text-sm font-semibold rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-100 dark:border-neutral-700 dark:text-white dark:hover:bg-neutral-700">
-                      -
-                  </button>
+             <div x-data="{ loading: false }"
+                x-on:livewire:start.decreaseQuantity="loading = true"
+                x-on:livewire:finish.decreaseQuantity="loading = false"
+                x-on:livewire:start.increaseQuantity="loading = true"
+                x-on:livewire:finish.increaseQuantity="loading = false"
+             
+                class="mt-3 flex items-center justify-end gap-2">
+                
+                {{-- <span wire:loading wire:target="decreaseQuantity({{ $cart->id }}), increaseQuantity({{ $cart->id }})" class="inline-block">
+                        <svg class="animate-spin -ml-1 mr-1 h-4 w-4 text-gray-700 dark:text-white inline" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                </span>
+                <span wire:loading.remove wire:target="decreaseQuantity({{ $cart->id }}),increaseQuantity({{ $cart->id }})"></span> --}}
 
-                  <span class="text-lg font-semibold text-gray-900 dark:text-white">
-                      {{ number_format($cart->quantity,0) }}
-                    
-                  </span>
 
-                  <button type="button" wire:click="increaseQuantity('{{ $cart->id }}')" wire:loading.attr="disabled"  wire:target="increaseQuantity('{{ $cart->id }}')"
-                      class="px-3 py-1 text-sm font-semibold rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-100 dark:border-neutral-700 dark:text-white dark:hover:bg-neutral-700">
-                      +
-                  </button>
-              </div>
+                <button type="button" 
+                        wire:click="decreaseQuantity('{{ $cart->id }}')"
+                        x-bind:disabled="loading"
+                        wire:loading.attr="disabled"
+                        wire:target="decreaseQuantity,increaseQuantity"
+                        class="px-3 py-1 text-sm font-semibold rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed dark:border-neutral-700 dark:text-white dark:hover:bg-neutral-700">
+                    <span x-show="!loading">-</span>
+                </button>
+
+                <span class="text-lg font-semibold text-gray-900 dark:text-white">
+                    {{ number_format($cart->quantity,0) }}
+                </span>
+
+                <button type="button" 
+                        wire:click="increaseQuantity('{{ $cart->id }}')"
+                        x-bind:disabled="loading"
+                        wire:loading.attr="disabled"
+                        wire:target="increaseQuantity,decreaseQuantity"
+                        class="px-3 py-1 text-sm font-semibold rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed dark:border-neutral-700 dark:text-white dark:hover:bg-neutral-700">
+                    <span x-show="!loading">+</span>
+                </button>
+            </div>
           </div>
           @empty
           <div class="text-center py-10 text-gray-500 dark:text-neutral-400 text-lg">

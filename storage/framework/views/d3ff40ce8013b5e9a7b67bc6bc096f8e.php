@@ -271,7 +271,7 @@ if (isset($__slots)) unset($__slots);
 </div>
 
 <div class="mt-2 flex justify-start ml-6">
-    <?php echo e($products->links()); ?>
+    <?php echo e($products->links('vendor.pagination.shop-pagination')); ?>
 
 </div>
 

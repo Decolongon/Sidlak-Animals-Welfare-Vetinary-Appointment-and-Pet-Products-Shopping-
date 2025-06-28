@@ -78,3 +78,4 @@ Route::get('/announcement/{announcementId}', AnnouncementSinglePage::class)->nam
 
 
 Route::get('/payment/callback', [PaymentController::class, 'paymentCallback'])->name('payment.callback');
+Route::get('/payment_vet', [PaymentController::class, 'vetWebHook'])->name('payment_vet');

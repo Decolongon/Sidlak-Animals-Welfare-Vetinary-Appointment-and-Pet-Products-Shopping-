@@ -33,34 +33,62 @@
                       <div>
                           <div class="font-medium text-gray-800 dark:text-neutral-200"><?php echo e(ucwords($cart->product->prod_name)); ?></div>
                           <div class="text-sm text-gray-600 dark:text-neutral-400">
+                           
+                               <!--[if BLOCK]><![endif]--><?php if($cart->product->discounted_price !== null): ?>
                                 
-                            
+                                  <del class="text-gray-500 dark:text-neutral-400">
+                                    ₱<?php echo e(number_format( $cart->product->prod_price, 2).' '); ?>
+
+                                </del>
+                                <span class="discounted-price text-danger">
+                                    ₱<?php echo e(number_format($cart->quantity * $cart->product->discounted_price, 2)); ?>
+
+                                </span>
+                                <small class="text-success d-block"><?php echo e($cart->product->discount_label); ?></small>
+                            <?php else: ?>
                                 ₱<?php echo e(number_format($cart->quantity * $cart->product->prod_price, 2)); ?>
 
+                            <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
+                                
                             </div>
                       </div>
                   </div>
               </div>
 
-              <div class="mt-3 flex items-center justify-end gap-2">
-              
+             <div x-data="{ loading: false }"
+                x-on:livewire:start.decreaseQuantity="loading = true"
+                x-on:livewire:finish.decreaseQuantity="loading = false"
+                x-on:livewire:start.increaseQuantity="loading = true"
+                x-on:livewire:finish.increaseQuantity="loading = false"
+             
+                class="mt-3 flex items-center justify-end gap-2">
                 
-                  <button type="button"  wire:click="decreaseQuantity('<?php echo e($cart->id); ?>')"  wire:loading.attr="disabled"  wire:target="decreaseQuantity('<?php echo e($cart->id); ?>')"
-                      class="px-3 py-1 text-sm font-semibold rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-100 dark:border-neutral-700 dark:text-white dark:hover:bg-neutral-700">
-                      -
-                  </button>
+                
 
-                  <span class="text-lg font-semibold text-gray-900 dark:text-white">
-                      <?php echo e(number_format($cart->quantity,0)); ?>
 
-                    
-                  </span>
+                <button type="button" 
+                        wire:click="decreaseQuantity('<?php echo e($cart->id); ?>')"
+                        x-bind:disabled="loading"
+                        wire:loading.attr="disabled"
+                        wire:target="decreaseQuantity,increaseQuantity"
+                        class="px-3 py-1 text-sm font-semibold rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed dark:border-neutral-700 dark:text-white dark:hover:bg-neutral-700">
+                    <span x-show="!loading">-</span>
+                </button>
 
-                  <button type="button" wire:click="increaseQuantity('<?php echo e($cart->id); ?>')" wire:loading.attr="disabled"  wire:target="increaseQuantity('<?php echo e($cart->id); ?>')"
-                      class="px-3 py-1 text-sm font-semibold rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-100 dark:border-neutral-700 dark:text-white dark:hover:bg-neutral-700">
-                      +
-                  </button>
-              </div>
+                <span class="text-lg font-semibold text-gray-900 dark:text-white">
+                    <?php echo e(number_format($cart->quantity,0)); ?>
+
+                </span>
+
+                <button type="button" 
+                        wire:click="increaseQuantity('<?php echo e($cart->id); ?>')"
+                        x-bind:disabled="loading"
+                        wire:loading.attr="disabled"
+                        wire:target="increaseQuantity,decreaseQuantity"
+                        class="px-3 py-1 text-sm font-semibold rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed dark:border-neutral-700 dark:text-white dark:hover:bg-neutral-700">
+                    <span x-show="!loading">+</span>
+                </button>
+            </div>
           </div>
           <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
           <div class="text-center py-10 text-gray-500 dark:text-neutral-400 text-lg">

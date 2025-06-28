@@ -30,6 +30,8 @@ class Appointment extends Component
 
 
     public $payment_method;
+    public $payment_status;
+    public $e_wallet_method;
     public $card_name;
     public $card_number;
     public $expiration_month;
@@ -68,7 +70,7 @@ class Appointment extends Component
             'pet_name' => 'required|string|max:255',
             'pet_type' => 'required|string|max:255',
             'pet_breed' => 'required',
-            'pet_age' => 'required|max:20|min:1',
+            'pet_age' => 'required|max:20|min:1|numeric',
             'pet_gender' => 'required',
             'pet_age_unit' => 'required',
             'pet_weight' => 'required|numeric|max:30',
@@ -77,6 +79,7 @@ class Appointment extends Component
             'payment_method' => 'required',
         ];
 
+       
         if ($this->payment_method === 'card') {
             $rules['card_name'] = 'required|string|min:3|max:100';
             $rules['card_number'] = 'required|numeric|digits:16';
@@ -92,30 +95,57 @@ class Appointment extends Component
         return AppointmentCategory::get(['id', 'appoint_cat_name']);
     }
 
-    public function getVetSchedule()
-    {
-        $schedules= VetSchedule::with('user')
-        // ->where('vet_schedule_open', '<=', now())
-        // ->where('vet_schedule_close', '>=', now())
-        ->get();
+    // public function getVetSchedule()
+    // {
+    //     $schedules= VetSchedule::with('user')
+    //     ->where('vet_schedule_open', '<=', now())
+    //     ->where('vet_schedule_close', '>=', now())
+    //     ->get();
 
-        // if ($schedules->isNotEmpty()) {
-        //     $this->num_customer_to_accomodate = $schedules->first()->num_customers;
-        // } 
+    //     if ($schedules->isNotEmpty()) {
+    //         $this->num_customer_to_accomodate = $schedules->first()->num_customers;
+    //     } 
       
-        return $schedules;
+    //     return $schedules;
 
-        
+    // }
 
 
+    public function getVetSchedule()
+{
+    $now = now();
+
+    $activeSchedule = VetSchedule::with('user')
+        ->where('vet_schedule_open', '<=', $now)
+        ->where('vet_schedule_close', '>=', $now)
+        ->first();
+
+    if ($activeSchedule) {
+        $appointmentsCount = \App\Models\Appointment\Appointment::whereDate('created_at', $now->toDateString())
+            ->whereTime('created_at', '>=', $activeSchedule->vet_schedule_open->format('H:i:s'))
+            ->whereTime('created_at', '<=', $activeSchedule->vet_schedule_close->format('H:i:s'))
+            ->count();
+
+        return [
+            'schedules' => $activeSchedule,
+            'appointmentsCount' => $appointmentsCount,
+        ];
     }
 
-   
+    return [
+        'schedules' => null,
+        'appointmentsCount' => 0,
+    ];
+}
+
+
 
     public function submit()
     {
         $validatedData = $this->validate();
-
+        // ($validatedData['payment_method'] == 'Over The Counter') 
+        //                             ? 'Over The Counter' 
+        //                             : ($this->payment_method === 'card' ? 'card' : $this->e_wallet_method),
        $sanitizedData = $this->sanitizeInput([
             'pet_name' => $validatedData['pet_name'],
             'pet_type' => $validatedData['pet_type'],
@@ -126,29 +156,98 @@ class Appointment extends Component
             'pet_weight' => $validatedData['pet_weight'],
             'isPetVaccinated' => $validatedData['isPetVaccinated'],
             'appointment_category_id' => $validatedData['appointment_category_id'],
+            'payment_method' =>  $validatedData['payment_method'],
             'user_id' => Auth::user()->id
         ]);
 
-        $insertCat = VetAppointment::create([
-            'pet_name' => $sanitizedData['pet_name'],
-            'pet_type' => $sanitizedData['pet_type'],
-            'pet_breed' => $sanitizedData['pet_breed'],
-            'pet_age' => $sanitizedData['pet_age'] . ' ' . $sanitizedData['pet_age_unit'],
-            'pet_gender' => $sanitizedData['pet_gender'],
-            'pet_weight' => $sanitizedData['pet_weight'],
-            'isPetVaccinated' => $sanitizedData['isPetVaccinated'],
-            'user_id' => $sanitizedData['user_id']
-        ]);
+         if ($this->payment_method === 'card') {
+            $sanitizedData['card_name'] = $validatedData['card_name'];
+            $sanitizedData['expiration_month'] = $validatedData['expiration_month'];
+            $sanitizedData['expiration_year'] = $validatedData['expiration_year'];
+            $sanitizedData['cvv'] = $validatedData['cvv'];
+        }
 
-        $insertCat->categories()->attach($sanitizedData['appointment_category_id']);
+
+        try{
+            $insertCat = VetAppointment::create([
+                'pet_name' => $sanitizedData['pet_name'],
+                'pet_type' => $sanitizedData['pet_type'],
+                'pet_breed' => $sanitizedData['pet_breed'],
+                'pet_age' => $sanitizedData['pet_age'] . ' ' . ucwords($sanitizedData['pet_age_unit']),
+                'pet_gender' => $sanitizedData['pet_gender'],
+                'pet_weight' => $sanitizedData['pet_weight'],
+                'isPetVaccinated' => $sanitizedData['isPetVaccinated'],
+                'user_id' => $sanitizedData['user_id'],
+                'payment_method' =>  $sanitizedData['payment_method']
+            ]);
+       
+            $insertCat->categories()->attach($sanitizedData['appointment_category_id']);
+
+            if($this->payment_method !== 'Over The Counter'){
+                $this->paymentCreateIntent($this->amount);
+                 $this->paymentIntent = Paymongo::paymentIntent()->find($this->paymentIntent_id)->getAttributes();
+           
+                
+                $this->paymentCreateMethod($sanitizedData);
+                
+                $insertCat->update([
+                    'paymentIntent_id' => $this->paymentIntent_id
+                ]);
+                 $attachedPaymentIntent = $this->createPaymentIntent->attach($this->paymentMethod->id, route('payment_vet'));
+                  if (isset($attachedPaymentIntent->next_action['redirect']['url'])) {
+                      $insertCat->update([
+                        'payment_status' => 'pending'
+                    ]);
+                    return redirect()->away($attachedPaymentIntent->next_action['redirect']['url']);
+                }
+                
+                // For immediate payments (like cards)
+                if ($attachedPaymentIntent->status === 'succeeded') {
+                    $insertCat->update([
+                        'payment_status' => 'completed'
+                    ]);
+                    $this->alert('success','', [
+                        'position' => 'top-end',
+                        'timer' => 5000,
+                        'toast' => true,
+                        'text' => 'Successfully Booked Appointment!',
+                    ]);
+                    return redirect()->route('appointment');
+                }
+
+              
+
+
+            }
+                $this->alert('success','', [
+                    'position' => 'top-end',
+                    'timer' => 3000,
+                    'toast' => true,
+                    'text' => 'Successfully Booked Appointment!',
+                    ]);
+              return redirect()->route('appointment');
+        }catch(\Exception $e){
+                $insertCat->update([
+                    'payment_status' => 'failed'
+                ]);
+                  $this->alert('warning','', [
+                    'position' => 'top-end',
+                    'timer' => 10000,
+                    'toast' => true,
+                    'text' => 'Payment processing failed: '.$e->getMessage(),
+                ]);
+              
+               return redirect()->route('appointment');
+              
+        }
         
-          $this->alert('success','', [
-            'position' => 'top-end',
-            'timer' => 3000,
-            'toast' => true,
-            'text' => 'Successfully Booked Appointment',
-        ]);
-        return redirect()->route('appointment');
+        //   $this->alert('success','', [
+        //     'position' => 'top-end',
+        //     'timer' => 3000,
+        //     'toast' => true,
+        //     'text' => 'Successfully Booked Appointment',
+        // ]);
+        // return redirect()->route('appointment');
     }
 
     #[Layout('layouts.app')]
@@ -176,6 +275,7 @@ class Appointment extends Component
         $this->paymentIntent_id = $paymentIntent->id;
         $this->createPaymentIntent = $paymentIntent;
         // dd($this->createPaymentIntent);
+        // dd($this->paymentIntent_id);
 
     }
 
@@ -186,7 +286,7 @@ class Appointment extends Component
       
         if (in_array($this->payment_method, ['gcash', 'paymaya', 'grab_pay'])) {
             $this->paymentMethod = Paymongo::paymentMethod()->create([
-                'type' => $this->shipping_method,
+                'type' => $this->payment_method,
                 'amount' => $this->amount * 100,
                 'currency' => 'PHP',
                 
@@ -201,9 +301,9 @@ class Appointment extends Component
                 'type' => 'card',
                 'details' => [
                     'card_number' => (string)$cardNumber,
-                    'exp_month' =>(int)$sanitizedData['expiration_month'],
-                    'exp_year' => (int)$sanitizedData['expiration_year'],
-                    'cvc' => $sanitizedData['cvv'],
+                    'exp_month' =>(int)$sanitizedData['expiration_month'] ?? 0,
+                    'exp_year' => (int)$sanitizedData['expiration_year'] ?? 0,
+                    'cvc' => $sanitizedData['cvv'] ?? '',
                 ],
                 'billing' => [
                     'email' => Auth::user()->email,
@@ -213,6 +313,10 @@ class Appointment extends Component
         }
     }
 
+    public function getIsEWalletMethodProperty()
+    {
+        return in_array($this->payment_method, ['gcash', 'card', 'paymaya', 'grab_pay']);
+    }
 
 
 }

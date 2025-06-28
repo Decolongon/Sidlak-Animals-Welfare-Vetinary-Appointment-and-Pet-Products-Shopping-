@@ -10,7 +10,7 @@ class CreateProductCategory extends CreateRecord
 {
     protected static string $resource = ProductCategoryResource::class;
 
-    public function getRedirectUrl(): string
+    protected function getRedirectUrl(): string
     {
         return $this->getResource()::getUrl('index');
     }

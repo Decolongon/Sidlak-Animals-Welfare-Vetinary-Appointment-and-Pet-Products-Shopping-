@@ -68,7 +68,8 @@
                 "loadingClasses": "opacity-0",
                 "dotsItemClasses": "hs-carousel-active:bg-blue-700 hs-carousel-active:border-blue-700 size-3 border border-gray-400 rounded-full cursor-pointer dark:border-neutral-600 dark:hs-carousel-active:bg-blue-400 dark:hs-carousel-active:border-blue-400",
                 "slidesQty": { "xs": 1, "lg": 3 },
-                "isDraggable": true
+                "isDraggable": false,
+                "passiveListeners": false
             }' wire:ignore class="relative mt-10">
                 <!-- Carousel Container -->
                 <div class="hs-carousel w-full overflow-hidden bg-white dark:bg-[#1f1f1f] rounded-lg shadow-lg">
@@ -78,7 +79,7 @@
                             @foreach ($product->images as $image)
                                 <div class="hs-carousel-slide px-1">
                                     <div class="flex justify-center items-center h-full bg-gray-100 dark:bg-neutral-900 p-3 rounded-md">
-                                        <img src="{{ asset(Storage::url($image->url)) }}" alt="{{ $product->prod_slug }}" class="max-h-40 object-contain rounded-md shadow-md border dark:border-neutral-700 bg-white dark:bg-neutral-900 p-2" />
+                                        <img loading="lazy" src="{{ asset(Storage::url($image->url)) }}" alt="{{ $product->prod_slug }}" class="max-h-40 object-contain rounded-md shadow-md border dark:border-neutral-700 bg-white dark:bg-neutral-900 p-2" />
                                     </div>
                                 </div>
                             @endforeach

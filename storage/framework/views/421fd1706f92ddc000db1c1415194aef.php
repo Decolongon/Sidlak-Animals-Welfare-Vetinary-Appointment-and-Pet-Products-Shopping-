@@ -160,18 +160,23 @@
     <div x-show="showSchedule" x-transition class="p-4 w-full max-w-xl text-center rounded-lg bg-gray-50 dark:bg-neutral-800 border border-gray-200 dark:border-neutral-600">
       <h2 class="text-md font-semibold text-gray-700 dark:text-neutral-100 mb-2">Veterinary Opening Time</h2>
       <ul class="space-y-1 list-disc list-inside text-gray-600 dark:text-neutral-300 text-left">
-        <!--[if BLOCK]><![endif]--><?php $__currentLoopData = $schedules; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $sched): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
         
-            <span class="font-medium text-gray-800 dark:text-white">
-              
-            </span>
+        
             
-            <?php echo e(\Carbon\Carbon::parse($sched->vet_schedule_open)->format('M d, Y g:i A')); ?> — 
-            <?php echo e(\Carbon\Carbon::parse($sched->vet_schedule_close)->format('M d, Y g:i A')); ?>
-
+              
+            
+            
+            
             
           
-        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><!--[if ENDBLOCK]><![endif]-->
+        
+        <span class="font-medium text-gray-800 dark:text-white">
+    
+      </span>
+      <?php echo e($schedules['schedules']?->vet_schedule_open?->format('M d, Y g:i A')); ?>
+
+      <?php echo e($schedules['schedules']?->vet_schedule_close?->format('M d, Y g:i A')); ?>
+
       </ul>
     </div>
   </div>
@@ -193,6 +198,8 @@
     </h2>
 
     
+   <!--[if BLOCK]><![endif]--><?php if($schedules['schedules'] && $schedules['appointmentsCount'] < $schedules['schedules']->num_customers): ?>
+
     <form wire:submit="submit" >
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6">
 
@@ -399,7 +406,7 @@ unset($__errorArgs, $__bag); ?><!--[if ENDBLOCK]><![endif]-->
         </div>
 
         <div>
-          <label for="payment_method" class="block mb-2 text-sm font-medium text-gray-700 dark:text-white">Vaccinated?</label>
+          <label for="payment_method" class="block mb-2 text-sm font-medium text-gray-700 dark:text-white">Payment Method</label>
           <select id="payment_method" name="payment_method"
             wire:model.live="payment_method"
             class="py-2.5 px-4 block w-full border border-gray-200 rounded-full sm:text-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-neutral-900 dark:border-neutral-700 dark:text-neutral-400 dark:focus:ring-neutral-600">
@@ -421,13 +428,13 @@ unset($__errorArgs, $__bag); ?><!--[if ENDBLOCK]><![endif]-->
         </div>
 
 
-        <!--[if BLOCK]><![endif]--><?php if($payment_method === 'E-Wallets'): ?>
+        <!--[if BLOCK]><![endif]--><?php if($payment_method === 'E-Wallets' || $this->isEWalletMethod): ?>
 <!-- Payment Method Section -->
 <div class="col-span-full py-6 border-t border-gray-200 first:pt-0 last:pb-0 first:border-transparent dark:border-neutral-700 dark:first:border-transparent">
     <div class="mt-2 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <!-- GCash -->
         <label class="relative block p-4 bg-white border border-gray-200 rounded-xl shadow-sm cursor-pointer transition hover:shadow-md dark:bg-neutral-800 dark:border-neutral-700">
-            <input type="radio" name="e_wallet_method" value="gcash" wire:model="payment_method"
+            <input type="radio" name="e_wallet_method" value="gcash" wire:click="$set('payment_method', 'gcash')"
                 class="absolute top-4 right-4 w-5 h-5 text-amber-600 border-gray-300 rounded-full focus:ring-amber-500 dark:bg-neutral-800 dark:border-neutral-600">
             <img src="<?php echo e(asset('imgs/gcash.png')); ?>" class="w-20 h-20 mx-auto mb-3 object-contain" />
             <p class="text-center text-sm font-semibold text-gray-800 dark:text-neutral-200">Pay using GCash</p>
@@ -436,7 +443,7 @@ unset($__errorArgs, $__bag); ?><!--[if ENDBLOCK]><![endif]-->
 
         <!-- Card -->
         <label class="relative block p-4 bg-white border border-gray-200 rounded-xl shadow-sm cursor-pointer transition hover:shadow-md dark:bg-neutral-800 dark:border-neutral-700">
-            <input type="radio" name="e_wallet_method" value="card" wire:model.live="payment_method"
+            <input type="radio" name="e_wallet_method" value="card" wire:click="$set('payment_method', 'card')"
                 class="absolute top-4 right-4 w-5 h-5 text-amber-600 border-gray-300 rounded-full focus:ring-amber-500 dark:bg-neutral-800 dark:border-neutral-600">
             <img src="<?php echo e(asset('imgs/card.png')); ?>" class="w-20 h-20 mx-auto mb-3 object-contain" />
             <p class="text-center text-sm font-semibold text-gray-800 dark:text-neutral-200">Pay using Card</p>
@@ -445,7 +452,7 @@ unset($__errorArgs, $__bag); ?><!--[if ENDBLOCK]><![endif]-->
 
         <!-- PayMaya -->
         <label class="relative block p-4 bg-white border border-gray-200 rounded-xl shadow-sm cursor-pointer transition hover:shadow-md dark:bg-neutral-800 dark:border-neutral-700">
-            <input type="radio" name="e_wallet_method" value="paymaya" wire:model="payment_method"
+            <input type="radio" name="e_wallet_method" value="paymaya" wire:click="$set('payment_method', 'paymaya')"
                 class="absolute top-4 right-4 w-5 h-5 text-amber-600 border-gray-300 rounded-full focus:ring-amber-500 dark:bg-neutral-800 dark:border-neutral-600">
             <img src="<?php echo e(asset('imgs/paymaya.png')); ?>" class="w-20 h-20 mx-auto mb-3 object-contain" />
             <p class="text-center text-sm font-semibold text-gray-800 dark:text-neutral-200">Pay using PayMaya</p>
@@ -454,7 +461,7 @@ unset($__errorArgs, $__bag); ?><!--[if ENDBLOCK]><![endif]-->
 
         <!-- GrabPay -->
         <label class="relative block p-4 bg-white border border-gray-200 rounded-xl shadow-sm cursor-pointer transition hover:shadow-md dark:bg-neutral-800 dark:border-neutral-700">
-            <input type="radio" name="e_wallet_method" value="grab_pay" wire:model="payment_method"
+            <input type="radio" name="e_wallet_method" value="grab_pay" wire:click="$set('payment_method', 'grab_pay')"
                 class="absolute top-4 right-4 w-5 h-5 text-amber-600 border-gray-300 rounded-full focus:ring-amber-500 dark:bg-neutral-800 dark:border-neutral-600">
             <img src="<?php echo e(asset('imgs/grabpay.png')); ?>"class="w-20 h-20 mx-auto mb-3 object-contain" />
             <p class="text-center text-sm font-semibold text-gray-800 dark:text-neutral-200">Pay using GrabPay</p>
@@ -462,7 +469,7 @@ unset($__errorArgs, $__bag); ?><!--[if ENDBLOCK]><![endif]-->
         </label>
     </div>
 
-    <!--[if BLOCK]><![endif]--><?php $__errorArgs = ['e_wallet_method'];
+    <!--[if BLOCK]><![endif]--><?php $__errorArgs = ['payment_method'];
 $__bag = $errors->getBag($__errorArgs[1] ?? 'default');
 if ($__bag->has($__errorArgs[0])) :
 if (isset($message)) { $__messageOriginal = $message; }
@@ -597,7 +604,7 @@ unset($__errorArgs, $__bag); ?><!--[if ENDBLOCK]><![endif]-->
   </div>
 </div>
 
-
+<?php endif; ?><!--[if ENDBLOCK]><![endif]-->
 
 </div>
 <?php /**PATH C:\laragon\www\sidlak-vet-appointment-and-pet-shop\resources\views/livewire/vet-appointment/appointment.blade.php ENDPATH**/ ?>

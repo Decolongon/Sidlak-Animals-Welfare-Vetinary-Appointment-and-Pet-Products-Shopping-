@@ -10,6 +10,7 @@ use App\Filament\Resources\VetAppointment\AppointmentApplicationResource;
 class ViewRecords extends ViewRecord
 {
     protected static string $resource = AppointmentApplicationResource::class;
+    protected static ?string $navigationLabel = 'View Pet Record';
 
     public function getTitle(): string | Htmlable
     {

@@ -29,6 +29,7 @@ return new class extends Migration
             $table->string('payment_method')->nullable();
             $table->string('paymentIntent_id')->nullable();
             $table->string('pet_weight');
+            $table->enum('payment_status', ['pending', 'completed', 'failed'])->default('pending');
             $table->boolean('isPetVaccinated')->default(false)->nullable();
             $table->timestamps();
         });

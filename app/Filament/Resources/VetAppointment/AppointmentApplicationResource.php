@@ -10,6 +10,7 @@ use Filament\Pages\Page;
 use Filament\Tables\Table;
 use Illuminate\Support\Str;
 use Illuminate\Support\Carbon;
+use App\Enums\PaymentStatusEnum;
 use Filament\Infolists\Infolist;
 use Filament\Resources\Resource;
 use Filament\Tables\Actions\Action;
@@ -18,7 +19,7 @@ use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Section;
 use Filament\Support\Enums\FontWeight;
 use App\Models\Appointment\Appointment;
-
+use Filament\Tables\Actions\BulkAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Forms\Components\TextInput;
 use Filament\Notifications\Notification;
@@ -34,7 +35,6 @@ use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Filament\Infolists\Components\Section as InfoSection;
 use Filament\Infolists\Components\TextEntry\TextEntrySize;
 use Filament\Infolists\Components\Group as ComponentsGroup;
-use Filament\Tables\Actions\BulkAction;
 use Filament\Infolists\Components\Section as ComponentsSection;
 use App\Filament\Resources\VetAppointment\AppointmentApplicationResource\Pages;
 use App\Filament\Resources\VetAppointment\AppointmentApplicationResource\RelationManagers;
@@ -110,6 +110,14 @@ class AppointmentApplicationResource extends Resource
                     ->required()
                     ->label('Appointment Status'),
 
+                    ToggleButtons::make('payment_status')
+                    ->options(PaymentStatusEnum::class)
+                    ->default(PaymentStatusEnum::Pending)
+                    ->dehydrated()
+                    ->inline()
+                    ->required()
+                    ->label('Payment Status'),
+
                     TextInput::make('pet_name')
                     ->label('Pet Name')
                     ->required()
@@ -149,6 +157,16 @@ class AppointmentApplicationResource extends Resource
                     ->label('Pet Age')
                     ->required()
                     ->numeric(),
+
+                    Select::make('pet_age_unit')
+                    ->options([
+                        'years old' => 'Years',
+                        'months' => 'Months',
+                    ])
+                    ->required()
+                    ->label('Age (Years/Months)'),
+
+
                     ToggleButtons::make('isPetVaccinated')
                     ->label('Is Pet Vaccinated?')
                     ->boolean()
@@ -163,6 +181,14 @@ class AppointmentApplicationResource extends Resource
                         true => 'heroicon-m-check-circle', 
                     ])
                     ->default(false),
+
+                    Select::make('payment_method')
+                    ->label('Payment Method')
+                    ->default('Over the Counter')
+                    ->required()
+                    ->options([
+                        'Over the Counter' => 'Over the Counter',
+                    ])
 
                 // TextInput::make('advance_payment_method')
                 //     ->label('Advance Payment'),
@@ -209,6 +235,19 @@ class AppointmentApplicationResource extends Resource
                 ->color(fn ($state) => AppointmentStatusEnum::tryFrom($state)?->getColor() ?? 'gray') 
                 ->icon(fn ($state) => AppointmentStatusEnum::tryFrom($state)?->getIcon() ?? null),
 
+                TextColumn::make('payment_status')
+                ->label('Payment Status')
+                ->formatStateUsing(fn ($state) => PaymentStatusEnum::tryFrom($state)?->getLabel() ?? 'Unknown') // display label halin sa AppointmentStatusEnum
+                ->color(fn ($state) => PaymentStatusEnum::tryFrom($state)?->getColor() ?? 'gray') 
+                ->icon(fn ($state) =>PaymentStatusEnum::tryFrom($state)?->getIcon() ?? null),
+
+                TextColumn::make('payment_method')
+                ->label('Payment Method')
+                ->badge()
+                ->color('success')
+                ->toggleable(isToggledHiddenByDefault: true)
+                ->formatStateUsing(fn ($state) => ($state !== 'Over the Counter') ? 'E-wallets/ '. ucfirst($state) : ucwords($state)),
+
                 TextColumn::make('created_at')
                 ->label('Created At')
                 ->dateTime('M d, Y')
@@ -238,7 +277,7 @@ class AppointmentApplicationResource extends Resource
                     ->requiresConfirmation() 
                     ->tooltip('Update Appointment status')
                     ->modalHeading(fn ($record) => 'Confirm Status Update')
-                    ->modalDescription(fn ($record) => 'Are you sure you want to update the status of ' . $record->user->name . '?')
+                    ->modalDescription(fn ($record) => 'Are you sure you want to update the status of ' . ucwords($record->user->name) . '?')
                     ->color('warning') 
                     ->modalSubmitActionLabel('Confirm Update') 
                     ->modalWidth('2xl')
@@ -249,7 +288,16 @@ class AppointmentApplicationResource extends Resource
                         ->dehydrated()
                         ->inline()
                         ->required()
-                        ->label('Appointment Status')
+                        ->label('Appointment Status'),
+
+                          ToggleButtons::make('payment_status')
+                            ->options(PaymentStatusEnum::class)
+                            ->default(fn ($record) => $record->payment_status)
+                            ->dehydrated()
+                            ->inline()
+                            ->required()
+                            ->label('Payment Status'),
+
                     ])
                     ->action(function ($record, array $data) {
                         $record->update([
@@ -280,7 +328,15 @@ class AppointmentApplicationResource extends Resource
                         ->options(AppointmentStatusEnum::class)
                         ->inline()
                         ->required()
-                        ->label('Appointment Status')
+                        ->label('Appointment Status'),
+
+                        ToggleButtons::make('payment_status')
+                        ->options(PaymentStatusEnum::class)
+                        // ->default(PaymentStatusEnum::Pending)
+                        ->dehydrated()
+                        ->inline()
+                        ->required()
+                        ->label('Payment Status'),
 
                     ])
                     ->action(function (Collection $records, array $data) {
@@ -302,6 +358,7 @@ class AppointmentApplicationResource extends Resource
                 ->icon('heroicon-m-plus')
                 ->label(__('Create new Application')),
             ])->emptyStateIcon('heroicon-o-rectangle-stack')
+             ->defaultSort('created_at', 'desc')
             ->emptyStateHeading('No Appointments');
     }
 

@@ -11,7 +11,7 @@ class CreateVetSchedule extends CreateRecord
 {
     protected static string $resource = VetScheduleResource::class;
 
-    public function getRedirectUrl(): string
+    protected function getRedirectUrl(): string
     {
         return $this->getResource()::getUrl('index');
     }
