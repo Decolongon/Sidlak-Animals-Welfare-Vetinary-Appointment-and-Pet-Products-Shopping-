@@ -26,31 +26,43 @@ class ListProducts extends ListRecords
 
     public function getTabs(): array
     {
+        return $this->getProductTab();
+    }
+   
+    protected function getProductTab():array
+    {
         return [
             'All' => Tab::make()
                     ->badge(Product::count()),
                     
 
             'In Stock' => Tab::make()
-                        ->query(fn ($query)=> $query->where('prod_quantity', '>', 10))
-                        ->badge(Product::where('prod_quantity', '>',10)->count()),
+                        ->modifyQueryUsing(fn ($query)=> $query->where('prod_quantity', '>', 10)
+                                                             ->where('prod_unit', '!=', 'diff_size')
+                        )
+                        ->badge(Product::where('prod_quantity', '>',10)->where('prod_unit', '!=', 'diff_size')->count()),
 
             'Low In Stock' => Tab::make()
-                        ->query(fn ($query)=> $query->where('prod_quantity', '>', 0)
+                        ->modifyQueryUsing(fn ($query)=> $query->where('prod_quantity', '>', 0)
                                                      ->where('prod_quantity', '<=', 10)
+                                                     ->where('prod_unit', '!=', 'diff_size')
                                                   
                         )
                         ->badge(Product::where('prod_quantity', '>',0)
                             ->where('prod_quantity', '<=', 10)
+                            ->where('prod_unit', '!=', 'diff_size')
                             ->count()
                         ),
 
             'Out of Stock' => Tab::make()
-                        ->query(fn ($query)=> $query->where('prod_quantity', 0))
-                        ->badge(Product::where('prod_quantity', 0)->count()),   
+                        ->modifyQueryUsing(fn ($query)=> $query->where('prod_quantity', 0)
+                                                                ->where('prod_unit', '!=', 'diff_size')
+                        )
+                        ->badge(Product::where('prod_quantity', 0)->where('prod_unit', '!=', 'diff_size')->count()), 
+                        
+            'With Variants' => Tab::make()
+                        ->modifyQueryUsing(fn ($query)=> $query->where('prod_unit', '=', 'diff_size'))
+                        ->badge(Product::where('prod_unit', '=', 'diff_size')->count()), 
         ];
     }
-   
-
-
 }

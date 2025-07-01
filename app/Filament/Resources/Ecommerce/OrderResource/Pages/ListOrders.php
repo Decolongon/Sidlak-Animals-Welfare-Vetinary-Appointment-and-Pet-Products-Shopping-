@@ -28,29 +28,34 @@ class ListOrders extends ListRecords
 
     public function getTabs(): array
     {
-        return [
+       return $this->getOrderTab();
+    }
+
+    protected function getOrderTab(): array
+    {
+         return [
             'All' => Tab::make()
                     ->badge(Order::count()),
 
             'Pending' => Tab::make()
-                    ->query(fn ($query) => $query->where('order_status', 'pending'))
+                    ->modifyQueryUsing(fn ($query) => $query->where('order_status', 'pending'))
                     ->badge(Order::where('order_status', 'pending')->count()),
 
             'Processing' => Tab::make()
-                            ->query(fn ($query) => $query->where('order_status', 'processing'))
+                            ->modifyQueryUsing(fn ($query) => $query->where('order_status', 'processing'))
                             ->badge(Order::where('order_status', 'processing')->count()),
 
             'Shipped' => Tab::make()
-                        ->query(fn ($query) => $query->where('order_status', 'shipped'))
+                        ->modifyQueryUsing(fn ($query) => $query->where('order_status', 'shipped'))
                         ->badge(Order::where('order_status', 'shipped')->count()),
 
             'Delivered' => Tab::make()
-                            ->query(fn ($query) => $query->where('order_status', 'delivered'))
+                            ->modifyQueryUsing(fn ($query) => $query->where('order_status', 'delivered'))
                             ->badge(Order::where('order_status', 'delivered')->count()),
 
 
             'Cancelled' => Tab::make()
-                            ->query(fn ($query) => $query->where('order_status', 'cancelled'))
+                            ->modifyQueryUsing(fn ($query) => $query->where('order_status', 'cancelled'))
                             ->badge(Order::where('order_status', 'cancelled')->count()),
         ];
     }

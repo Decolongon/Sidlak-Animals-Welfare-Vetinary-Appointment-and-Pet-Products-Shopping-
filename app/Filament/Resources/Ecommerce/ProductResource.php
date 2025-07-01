@@ -515,58 +515,61 @@ class ProductResource extends Resource
            //Tables\Actions\ActionGroup::make([
                 // Tables\Actions\ViewAction::make()->icon('heroicon-m-eye')->label(''),
                 // Tables\Actions\EditAction::make()->icon('heroicon-m-pencil')->label(''),
-           Tables\Actions\Action::make('show_diff_sizes')
-                ->label('Show Sizes')
-                ->icon('heroicon-m-eye')
-                ->color('success')
-                ->hidden(fn ($record) => $record?->prod_unit !== 'diff_size')
-                ->modalHeading(fn ($record) => $record->prod_name . ' - Available Sizes')
-                ->modalSubmitAction(false)
-                ->modalCancelAction(fn (StaticAction $action) => $action->label('Close'))
-                ->modalContent(function ($record) {
-    if ($record?->prod_unit !== 'diff_size') return null;
-    
-    $sizesHtml = $record->images
-        ->filter(fn ($image) => !empty($image->sizes))
-        ->map(function ($image) {
-            $cleanSize = str_replace('_', ' ', $image->sizes);
-            $cleanSize = preg_replace('/[^\w\s]/', '', $cleanSize);
-            $cleanSize = ucwords($cleanSize);
+        Tables\Actions\Action::make('show_diff_sizes')
+        ->label('Show Sizes')
+        ->icon('heroicon-m-eye')
+        ->color('success')
+        ->hidden(fn ($record) => $record?->prod_unit !== 'diff_size')
+        ->modalHeading(fn ($record) => $record->prod_name . ' - Available Sizes')
+        ->modalSubmitAction(false)
+        ->modalCancelAction(fn (StaticAction $action) => $action->label('Close'))
+        ->modalContent(function ($record) {
+            //if prod unit is not diff size retuirn null 
+            if ($record?->prod_unit !== 'diff_size') return null;
             
-            $quantity = $image->quantity ?? 0;
-            $price = number_format($image->price, 2);
-            
-            $statusBadge = match(true) {
-                $quantity === 0 => '<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200">Out of Stock</span>',
-                $quantity < 10 => '<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200">Low Stock ('.$quantity.')</span>',
-                default => '<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">In Stock ('.$quantity.')</span>'
-            };
-            
-            return '
-                <div class="mb-4 p-3 bg-gray-50 rounded-lg dark:bg-gray-800/50 flex items-center space-x-4">
-                  <img src="' . e(\Illuminate\Support\Facades\Storage::url($image->url)) . '" class="w-16 h-16 rounded-full object-cover flex-shrink-0">
-                    <div class="flex-1">
-                        <div class="flex justify-between items-center mb-2">
-                            <span class="font-bold text-lg text-gray-900 dark:text-gray-100">'.$cleanSize.'</span>
-                            <span class="font-bold text-indigo-600 dark:text-indigo-400 text-lg">₱'.$price.'</span>
+            //get product images
+            $sizesHtml = $record->images
+                //kwaun lng ang my sizes like small medium large etc.
+                ->filter(fn ($image) => !empty($image->sizes))
+                ->map(function ($image) {
+                    //remove special characters
+                    $cleanSize = str_replace('_', ' ', $image->sizes);
+                    $cleanSize = preg_replace('/[^\w\s]/', '', $cleanSize);
+                    $cleanSize = ucwords($cleanSize);
+                    
+                    $quantity = $image->quantity ?? 0;
+                    $price = number_format($image->price, 2); // format price 2 decimal places lang
+                    
+                    // quantity checker
+                    $statusBadge = match(true) {
+                        $quantity === 0 => '<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200">Out of Stock</span>',
+                        $quantity < 10 => '<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200">Low Stock ('.$quantity.')</span>',
+                        default => '<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">In Stock ('.$quantity.')</span>'
+                    };
+                    
+                    //output price, img and sizes
+                    return '
+                        <div class="mb-4 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg flex items-center space-x-4">
+                            <img src="' . e(\Illuminate\Support\Facades\Storage::url($image->url)) . '" class="w-16 h-16 rounded-full object-cover flex-shrink-0">
+                            <div class="flex-1">
+                                <div class="flex justify-between items-center mb-2">
+                                    <span class="font-bold text-lg text-gray-900 dark:text-gray-100">'.$cleanSize.'</span>
+                                    <span class="font-bold text-indigo-600 dark:text-indigo-400 text-lg">₱'.$price.'</span>
+                                </div>
+                                <div>'.$statusBadge.'</div>
+                            </div>
                         </div>
-                        <div>'.$statusBadge.'</div>
-                    </div>
+                    ';
+                })
+                ->unique()
+                ->implode('');
+            //output all 
+            return new HtmlString('
+                <div class="space-y-4">
+                    '.$sizesHtml.'
                 </div>
-            ';
+            ');
         })
-        ->unique()
-        ->implode('');
-
-    return new HtmlString('
-        <div class="space-y-4">
-            <div class="p-4 bg-white rounded-lg shadow-sm dark:bg-gray-800">
-                <!-- optional header content if needed -->
-            </div>
-            '.$sizesHtml.'
-        </div>
-    ');
-})
 
                 // Tables\Actions\DeleteAction::make()->icon('heroicon-m-trash')->label(''),
             //])->tooltip('Actions')
@@ -719,10 +722,10 @@ ComponentsSection::make('Size Variants')
                                 ->hiddenLabel()
                                  ->width('100%')
                                 ->height(120) 
-                                ->extraAttributes([
-                                    'style' => 'object-fit: cover; border-radius: 0.5rem;',
-                                    'class' => 'border border-gray-200 dark:border-gray-600' // Dark mode border
-                                ])
+                                // ->extraAttributes([
+                                //     'style' => 'object-fit: cover; border-radius: 0.5rem;',
+                                //     'class' => 'border border-gray-200 dark:border-gray-600' // Dark mode border
+                                // ])
                                 ->hidden(fn ($state) => empty($state)),
                             
                             // Size variant details - redesigned layout
@@ -833,7 +836,7 @@ ComponentsSection::make('Size Variants')
                     })
                     ->badge()
                     ->color('gray'),
-            ])->columns(2)->collapsible(),
+            ])->columns(2)->collapsible()->hidden(fn ($record) => $record->prod_unit === 'diff_size'),
 
         // Shipping Section
         ComponentsSection::make('Shipping Info')
