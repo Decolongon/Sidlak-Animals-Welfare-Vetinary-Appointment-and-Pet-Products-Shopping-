@@ -18,4 +18,9 @@ class ViewAppointmentCategory extends ViewRecord
 
         return ucwords($record->appoint_cat_name);
     }
+
+    // public function hasCombinedRelationManagerTabsWithContent(): bool
+    // {
+    //     return true;
+    // }
 }

@@ -38,25 +38,25 @@ class ListOrders extends ListRecords
                     ->badge(Order::count()),
 
             'Pending' => Tab::make()
-                    ->modifyQueryUsing(fn ($query) => $query->where('order_status', 'pending'))
-                    ->badge(Order::where('order_status', 'pending')->count()),
+                    ->modifyQueryUsing(fn ($query) => $query->OrderStatus('pending'))
+                    ->badge(Order::OrderStatus('pending')->count()),
 
             'Processing' => Tab::make()
-                            ->modifyQueryUsing(fn ($query) => $query->where('order_status', 'processing'))
-                            ->badge(Order::where('order_status', 'processing')->count()),
+                            ->modifyQueryUsing(fn ($query) => $query->OrderStatus('processing'))
+                            ->badge(Order::OrderStatus('processing')->count()),
 
             'Shipped' => Tab::make()
-                        ->modifyQueryUsing(fn ($query) => $query->where('order_status', 'shipped'))
-                        ->badge(Order::where('order_status', 'shipped')->count()),
+                        ->modifyQueryUsing(fn ($query) => $query->OrderStatus('shipped'))
+                        ->badge(Order::OrderStatus('shipped')->count()),
 
             'Delivered' => Tab::make()
-                            ->modifyQueryUsing(fn ($query) => $query->where('order_status', 'delivered'))
-                            ->badge(Order::where('order_status', 'delivered')->count()),
+                            ->modifyQueryUsing(fn ($query) => $query->OrderStatus('delivered'))
+                            ->badge(Order::OrderStatus('delivered')->count()),
 
 
             'Cancelled' => Tab::make()
-                            ->modifyQueryUsing(fn ($query) => $query->where('order_status', 'cancelled'))
-                            ->badge(Order::where('order_status', 'cancelled')->count()),
+                            ->modifyQueryUsing(fn ($query) => $query->OrderStatus('cancelled'))
+                            ->badge(Order::OrderStatus('cancelled')->count()),
         ];
     }
 

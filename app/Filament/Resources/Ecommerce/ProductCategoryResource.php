@@ -12,6 +12,8 @@ use Filament\Facades\Filament;
 use Filament\Infolists\Infolist;
 use Filament\Resources\Resource;
 use Filament\Resources\Pages\Page;
+use Filament\Forms\Components\Card;
+use Filament\Forms\Components\Grid;
 use Filament\Tables\Actions\Action;
 use Filament\Forms\Components\Section;
 use Filament\Support\Enums\FontWeight;
@@ -38,40 +40,46 @@ class ProductCategoryResource extends Resource
     protected static ?string $navigationGroup = 'Ecommerce';
     protected static ?string $navigationIcon = 'heroicon-o-folder';
     protected static SubNavigationPosition $subNavigationPosition = SubNavigationPosition::Top;
-   
+
     public static function form(Form $form): Form
     {
         return $form
             ->schema([
-                Section::make('Product Category Information')
-                ->schema([
-                    TextInput::make('prod_cat_name')
-                    ->label('Product Category Name')
-                    ->required()
-                    ->live(onBlur: true)
-                    ->maxLength(255)
-                    ->unique(ProductCategory::class, 'prod_cat_name', ignoreRecord: true)
-                    ->afterStateUpdated(fn (Set $set, ?string $state) => $set('prod_cat_slug', Str::slug($state)))
-                    ->maxLength(255)
-                    ->columnSpan(1),
+                Card::make()
+                    ->schema([
+                        Section::make('Category Details')
+                            ->icon('heroicon-o-tag')
+                            ->schema([
+                                Grid::make(2)
+                                    ->schema([
+                                        TextInput::make('prod_cat_name')
+                                            ->label('Category Name')
+                                            ->required()
+                                            ->live(onBlur: true)
+                                            ->maxLength(255)
+                                            ->unique(ProductCategory::class, 'prod_cat_name', ignoreRecord: true)
+                                            ->afterStateUpdated(fn(Set $set, ?string $state) => $set('prod_cat_slug', Str::slug($state)))
+                                            ->columnSpan(1),
 
-                    TextInput::make('prod_cat_slug')
-                    ->label('Product Category Slug')
-                    ->disabled()
-                    ->dehydrated()
-                    ->required()
-                    ->unique(ProductCategory::class, 'prod_cat_slug', ignoreRecord: true)
-                    ->columnSpan(1),
+                                        TextInput::make('prod_cat_slug')
+                                            ->label('Category Slug')
+                                            ->disabled()
+                                            ->dehydrated()
+                                            ->required()
+                                            ->unique(ProductCategory::class, 'prod_cat_slug', ignoreRecord: true)
+                                            ->placeholder('auto-generated-slug')
+                                            ->columnSpan(1),
+                                    ]),
 
-                    MarkdownEditor::make('prod_cat_description')
-                    ->label('Product Category Description')
-                    ->maxLength(65535)
-                    ->columnSpanFull(),
-                ])
-                
-
-              
-                
+                                MarkdownEditor::make('prod_cat_description')
+                                    ->label('Category Description')
+                                    ->maxLength(65535)
+                                    ->placeholder('Describe this product category...')
+                                    ->columnSpanFull(),
+                            ])
+                            //->collapsible()
+                            ->compact(),
+                    ])
             ]);
     }
 
@@ -80,20 +88,20 @@ class ProductCategoryResource extends Resource
         return $table
             ->columns([
                 TextColumn::make('prod_cat_name')->label('Name')
-                ->sortable()
-                ->searchable()
-                ->formatStateUsing(fn ($state) => ucwords($state)),
+                    ->sortable()
+                    ->searchable()
+                    ->formatStateUsing(fn($state) => ucwords($state)),
 
                 TextColumn::make('prod_cat_slug')
-                ->label('Slug')
-                ->sortable()
-                ->searchable(),
+                    ->label('Slug')
+                    ->sortable()
+                    ->searchable(),
 
                 TextColumn::make('prod_cat_description')
-                ->label('Description')
-                ->sortable()
-                ->searchable()
-                ->formatStateUsing(fn ($state) => ucfirst(Str::limit(strip_tags($state), 50, '...'))),
+                    ->label('Description')
+                    ->sortable()
+                    ->searchable()
+                    ->formatStateUsing(fn($state) => ucfirst(Str::limit(strip_tags($state), 50, '...'))),
             ])
             ->filters([
                 //
@@ -104,7 +112,7 @@ class ProductCategoryResource extends Resource
                     Tables\Actions\EditAction::make(),
                     Tables\Actions\DeleteAction::make(),
                 ])->tooltip('Actions')
-                
+
 
             ])
 
@@ -112,12 +120,14 @@ class ProductCategoryResource extends Resource
                 Tables\Actions\BulkActionGroup::make([
                     Tables\Actions\DeleteBulkAction::make(),
                 ]),
-            ])  ->emptyStateActions([
+            ])->emptyStateActions([
                 Tables\Actions\CreateAction::make()
-                ->icon('heroicon-m-plus')
-                ->label(__('New Product Category')),
+                    ->icon('heroicon-m-plus')
+                    ->label(__('New Product Category')),
             ])
-            ->emptyStateIcon('heroicon-o-swatch')  
+            ->deferLoading()
+            ->defaultSort('created_at', 'desc')
+            ->emptyStateIcon('heroicon-o-swatch')
             ->emptyStateHeading('No Product Categories');
     }
 
@@ -134,31 +144,31 @@ class ProductCategoryResource extends Resource
         return $infolist
             ->schema([
                 InfoSection::make()
-                ->schema([
-                    TextEntry::make('prod_cat_name')
-                    ->label('Product Category Name')
-                    ->formatStateUsing(fn (string $state) : string => ucwords($state))
-                    ->size(TextEntry\TextEntrySize::Large)
-                    ->weight(FontWeight::ExtraBold),
-
-                    
-
-                    ComponentsSection::make('Product Category Details')
-                    ->icon('heroicon-o-information-circle')
                     ->schema([
-                      
-                        TextEntry::make('prod_cat_description')
-                            ->label('')
+                        TextEntry::make('prod_cat_name')
+                            ->label('Product Category Name')
+                            ->formatStateUsing(fn(string $state): string => ucwords($state))
                             ->size(TextEntry\TextEntrySize::Large)
-                            ->formatStateUsing(fn ($state) => strip_tags($state))
                             ->weight(FontWeight::ExtraBold),
-                        
-                    ]),
 
-                ])
+
+
+                        ComponentsSection::make('Product Category Details')
+                            ->icon('heroicon-o-information-circle')
+                            ->schema([
+
+                                TextEntry::make('prod_cat_description')
+                                    ->label('')
+                                    ->size(TextEntry\TextEntrySize::Large)
+                                    ->formatStateUsing(fn($state) => strip_tags($state))
+                                    ->weight(FontWeight::ExtraBold),
+
+                            ]),
+
+                    ])
             ]);
     }
-    
+
 
     public static function getRelations(): array
     {
@@ -176,6 +186,4 @@ class ProductCategoryResource extends Resource
             'view' => Pages\ViewProductCategory::route('/{record}'),
         ];
     }
-
-   
 }

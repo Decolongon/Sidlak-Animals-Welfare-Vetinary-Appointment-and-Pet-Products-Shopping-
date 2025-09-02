@@ -10,77 +10,121 @@ use Filament\Tables\Table;
 use Illuminate\Support\Str;
 use Filament\Infolists\Infolist;
 use Filament\Resources\Resource;
+use Filament\Resources\Pages\Page;
+use Filament\Forms\Components\Grid;
+use Filament\Forms\Components\Hidden;
+use Filament\Forms\Components\Section;
 use Filament\Support\Enums\FontWeight;
+use Filament\Navigation\NavigationItem;
+use Filament\Tables\Columns\TextColumn;
 use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\FileUpload;
 use Filament\Pages\SubNavigationPosition;
 use Illuminate\Database\Eloquent\Builder;
-use Filament\Navigation\NavigationItem;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Forms\Components\MarkdownEditor;
 use App\Models\Appointment\AppointmentCategory;
-use Filament\Resources\Pages\Page;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Filament\Infolists\Components\Section as InfoSection;
 use Filament\Infolists\Components\TextEntry\TextEntrySize;
 use Filament\Infolists\Components\Group as ComponentsGroup;
 use Filament\Infolists\Components\Section as ComponentsSection;
 use App\Filament\Resources\VetAppointment\AppointmentCategoryResource\Pages;
-use App\Filament\Resources\VetAppointment\AppointmentCategoryResource\RelationManagers;
+use App\Filament\Resources\VetAppointment\AppointmentCategoryResource\RelationManagers\DoctorschedulesRelationManager;
+
 
 class AppointmentCategoryResource extends Resource
 {
     protected static ?string $model = AppointmentCategory::class;
     protected static ?string $navigationGroup = 'Vetinary Appointment';
-     protected static ?string $navigationLabel = 'Services Offered';
+    protected static ?string $modelLabel = 'Service'; // Singular name para sa form
+    protected static ?string $pluralModelLabel = 'Services Offered'; // Plural name para sa table
+    protected static ?string $navigationLabel = 'Services Offered';
     protected static ?int $navigationSort = 2;
     protected static ?string $navigationIcon = 'heroicon-o-square-3-stack-3d';
     protected static SubNavigationPosition $subNavigationPosition = SubNavigationPosition::Top;
+
 
     public static function form(Form $form): Form
     {
         return $form
             ->schema([
+                Grid::make()
+                    ->schema([
+                        Section::make()
+                            ->schema([
+                                Hidden::make('doctor_id')
+                                    ->default(auth()->user()->id)
+                                    ->columnSpanFull(),
 
-                TextInput::make('appoint_cat_name')
-                ->required()
-                ->label('Service Name')
-                ->maxLength(255)
-                ->live(onBlur: true)
-                ->afterStateUpdated(fn (Set $set, ?string $state) => $set('appoint_cat_slug', Str::slug($state)))
-                ->unique(AppointmentCategory::class, 'appoint_cat_name', ignoreRecord: true)
-                ->columnSpan(1),
+                                TextInput::make('appoint_cat_name')
+                                    ->required()
+                                    ->label('Service Name')
+                                    ->maxLength(255)
+                                    ->live(onBlur: true)
+                                    ->afterStateUpdated(fn(Set $set, ?string $state) => $set('appoint_cat_slug', Str::slug($state)))
+                                    ->unique(AppointmentCategory::class, 'appoint_cat_name', ignoreRecord: true)
+                                    ->columnSpanFull(),
 
-                TextInput::make('appoint_cat_slug')
-                ->disabled()
-                ->label('Service Slug')
-                ->dehydrated()
-                ->required()
-                ->maxLength(255)
-                ->unique(AppointmentCategory::class, 'appoint_cat_slug', ignoreRecord: true)
-                ->columnSpan(1),
+                                TextInput::make('appoint_cat_slug')
+                                    ->disabled()
+                                    ->label('Service Slug')
+                                    ->dehydrated()
+                                    ->required()
+                                    ->maxLength(255)
+                                    ->unique(AppointmentCategory::class, 'appoint_cat_slug', ignoreRecord: true)
+                                    ->columnSpanFull(),
 
-                MarkdownEditor::make('appoint_cat_description')
-                ->label('Service Description')
-                ->maxLength(65535)
-                ->columnSpanFull(),
+                                TextInput::make('price')
+                                    ->required()
+                                    ->numeric()
+                                    ->minValue(50)
+                                    ->prefix('PHP')
+                                    ->label('Service Price')
+                                    ->columnSpanFull(),
 
-                
+                                MarkdownEditor::make('appoint_cat_description')
+                                    ->label('Service Description')
+                                    ->required()
+                                    ->maxLength(65535)
+                                    ->columnSpanFull(),
+                            ])
+                            ->columnSpan(['lg' => 2]),
+
+                        Section::make()
+                            ->schema([
+                                FileUpload::make('img')
+                                    ->label('Image')
+                                    ->image()
+                                    ->imageEditorAspectRatios([null, '16:9', '4:3'])
+                                    ->maxSize(2048)
+                                    ->required()
+                                    ->columnSpanFull(),
+                            ])
+                            ->columnSpan(['lg' => 1]),
+                    ])
+                    ->columns(3),
             ]);
     }
-
     public static function table(Table $table): Table
     {
         return $table
             ->columns([
                 Tables\Columns\TextColumn::make('appoint_cat_name')
-                ->searchable()
-                ->sortable()
-                ->label('Services')    
-                ->formatStateUsing(fn ($state) => ucfirst($state)),
+                    ->searchable()
+                    ->sortable()
+                    ->label('Services')
+                    ->formatStateUsing(fn($state) => ucfirst($state)),
+
+                TextColumn::make('price')
+                    ->sortable()
+                    ->label('Service Price')
+                    ->badge()
+                    ->formatStateUsing(fn($state) => '₱' . number_format($state, 2)),
 
                 Tables\Columns\TextColumn::make('appoint_cat_description')
-                ->formatStateUsing(fn ($state) => ucfirst(Str::limit(strip_tags($state), 50, '...')))
-                ->label('Sercvices Description')
+                    ->formatStateUsing(fn($state) => ucfirst(Str::limit(strip_tags($state), 50, '...')))
+                    ->label('Services Description')
 
             ])
             ->filters([
@@ -93,14 +137,20 @@ class AppointmentCategoryResource extends Resource
                     Tables\Actions\DeleteAction::make(),
                 ])->tooltip('Actions')
             ])
+            ->modifyQueryUsing(function (Builder $query) {
+                if (auth()->user()->hasAnyRole(['super_admin', 'super-admin'])) {
+                    return $query;
+                }
+                return $query->where('doctor_id', auth()->user()->id);
+            })
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
                     Tables\Actions\DeleteBulkAction::make(),
                 ]),
             ])->emptyStateActions([
                 Tables\Actions\CreateAction::make()
-                ->icon('heroicon-m-plus')
-                ->label(__('Create New Service')),
+                    ->icon('heroicon-m-plus')
+                    ->label(__('Create New Service')),
             ])->emptyStateIcon('heroicon-o-folder')
             ->emptyStateHeading('No Services Found')
             ->emptyStateDescription('Get started by creating a new service.');
@@ -109,8 +159,9 @@ class AppointmentCategoryResource extends Resource
     public static function getRelations(): array
     {
         return [
-            //
+            DoctorschedulesRelationManager::class
         ];
+     
     }
 
     public static function getPages(): array
@@ -129,8 +180,6 @@ class AppointmentCategoryResource extends Resource
             Pages\ViewAppointmentCategory::class,
             Pages\EditAppointmentCategory::class
         ]);
-
-        
     }
 
 
@@ -140,32 +189,34 @@ class AppointmentCategoryResource extends Resource
         return $infolist
             ->schema([
                 InfoSection::make()
-                ->schema([
-                    TextEntry::make('appoint_cat_name')
-                    ->label('Appointment Category Name')
-                    ->formatStateUsing(fn (string $state) : string => ucwords($state))
-                    ->size(TextEntry\TextEntrySize::Large)
-                    ->weight(FontWeight::ExtraBold),
-
-                    
-
-                    ComponentsSection::make('Appointment Category Details')
-                    ->icon('heroicon-o-information-circle')
                     ->schema([
-                      
-                        TextEntry::make('appoint_cat_description')
-                            ->label('')
+                        TextEntry::make('appoint_cat_name')
+                            ->label('Appointment Category Name')
+                            ->formatStateUsing(fn(string $state): string => ucwords($state))
                             ->size(TextEntry\TextEntrySize::Large)
-                            ->html()
-                            // ->formatStateUsing(fn ($state) => strip_tags($state))
                             ->weight(FontWeight::ExtraBold),
-                        
-                    ])->collapsible(),
 
-                ])
+                        TextEntry::make('price')
+                            ->label('Service Price')
+                            ->formatStateUsing(fn(string $state): string => number_format($state, 2))
+                            ->size(TextEntry\TextEntrySize::Large)
+                            ->weight(FontWeight::ExtraBold),
+
+
+                        ComponentsSection::make('Appointment Category Details')
+                            ->icon('heroicon-o-information-circle')
+                            ->schema([
+
+                                TextEntry::make('appoint_cat_description')
+                                    ->label('')
+                                    ->size(TextEntry\TextEntrySize::Large)
+                                    ->html()
+                                    // ->formatStateUsing(fn ($state) => strip_tags($state))
+                                    ->weight(FontWeight::ExtraBold),
+
+                            ])->collapsible(),
+
+                    ])
             ]);
     }
-
-
-
 }

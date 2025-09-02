@@ -18,6 +18,8 @@ Here are the details of your booked services:
 
 **Payment Method:** {{ $payment_method }}
 
+**Your Appointment Date:** {{  \Carbon\Carbon::parse($date_to_visit_clinic)->format('l, F j, Y \a\t g:i A') }}
+
 Please arrive 10 minutes before your scheduled time. We look forward to seeing you and your pet!
 
 @break

@@ -7,35 +7,36 @@ use Filament\Pages\Page;
 use Filament\Actions\Action;
 use Filament\Pages\Auth\Login as LoginPage;
 use Illuminate\Validation\ValidationException;
+
 class Login extends LoginPage
 {
-      public function form(Form $form): Form
+    public function form(Form $form): Form
     {
         return $form
             ->schema([
-             
-                $this->getEmailFormComponent(), 
+
+                $this->getEmailFormComponent(),
                 $this->getPasswordFormComponent(),
                 $this->getRememberFormComponent(),
-               // $this->getPasswordConfirmationFormComponent(),
+                // $this->getPasswordConfirmationFormComponent(),
             ])
             ->statePath('data');
     }
 
-     protected function getCredentialsFromFormData(array $data): array
+    protected function getCredentialsFromFormData(array $data): array
     {
-     
- 
+
+
         return [
             'email' => $data['email'],
             'password'  => $data['password'],
         ];
     }
 
-     protected function throwFailureValidationException(): never
+    protected function throwFailureValidationException(): never
     {
         throw ValidationException::withMessages([
-            'data.email' => __('filament-panels::pages/auth/login.messages.failed'),
+            'data.email' => __('Incorrect email or password'),
         ]);
     }
 

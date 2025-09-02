@@ -20,28 +20,44 @@ class RoleBaseMiddleware
         $user = $request->user();
         $currentPanel = Filament::getCurrentPanel()?->getId();
 
-        if(!$user || !$currentPanel ){
+        if (!$user || !$currentPanel) {
             return redirect()->route('filament.auth.auth.login');
-           // return redirect(Filament::getPanel('auth')->getLoginUrl());
+            // return redirect(Filament::getPanel('auth')->getLoginUrl());
         }
-       
+
+
         $userRoles = $user->roles()->pluck('name')->toArray();
+        //dd($userRoles);
+
+         if($user && empty($userRoles) && $currentPanel === 'admin') {
+            return back();
+        }
+
 
         // If user has no roles and is trying to access the 'admin' panel, redirect them to normal dashboard
-        if (empty($userRole) && $currentPanel === 'auth') {
-            Session::flush();
+        if (empty($userRoles) && $currentPanel === 'auth') {
+            // Session::flush();
             return redirect()->route('dashboard');
         }
 
+
         // If user has roles and is trying to access the 'auth' panel, redirect them to admin dashboard
         if (!empty($userRoles) && $currentPanel === 'auth') {
-             Session::flush();
-            return redirect()->route('filament.admin.pages.dashboard');
+            //Session::flush();
+            return redirect()->route('filament.admin.pages.dashboard'); // admin dashboard
+
         }
 
-        
 
- 
+
         return $next($request);
+
+
+
+       
+
+
+
+
     }
 }

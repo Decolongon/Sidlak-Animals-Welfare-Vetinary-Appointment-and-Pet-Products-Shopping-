@@ -33,7 +33,7 @@ class VetAppointmentObserver
      */
    public function updated(Appointment $appointment): void
     {
-        if ($appointment->wasChanged('appointment_status')) {
+        if ($appointment->wasChanged('appointment_status') && $appointment->appointment_status !== AppointmentStatusEnum::Completed->value) {
             if ($appointment->user) {
                 Mail::to($appointment->user->email)
                     ->send(new VetAppointmentStatusUpdatedMail(

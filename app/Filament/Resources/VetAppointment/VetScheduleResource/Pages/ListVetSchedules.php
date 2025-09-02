@@ -14,7 +14,7 @@ class ListVetSchedules extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
-            Actions\CreateAction::make()->icon('heroicon-s-plus-circle')->label('New Vetinary Schedule'),
+            Actions\CreateAction::make()->icon('heroicon-s-plus-circle')->label('New Clinic Hours'),
         ];
     }
 

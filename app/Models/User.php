@@ -8,6 +8,7 @@ use Filament\Panel;
 use App\Models\Blog\Comment;
 use App\Models\Blog\BlogPost;
 use App\Models\Ecommerce\Cart;
+use Filament\Facades\Filament;
 use App\Models\Ecommerce\Order;
 use App\Models\Adoption\Adoption;
 use App\Models\Donation\Donation;
@@ -18,9 +19,11 @@ use Illuminate\Support\Facades\Auth;
 use Laravel\Jetstream\HasProfilePhoto;
 use Spatie\Permission\Traits\HasRoles;
 use App\Models\Appointment\Appointment;
+use App\Models\Appointment\AppointmentCategory;
 use App\Models\Appointment\VetSchedule;
 use App\Models\Ecommerce\ProductReview;
 use Illuminate\Notifications\Notifiable;
+use App\Models\Appointment\DoctorSchedule;
 use Filament\Models\Contracts\FilamentUser;
 use Laravel\Fortify\TwoFactorAuthenticatable;
 use Illuminate\Database\Eloquent\Relations\HasOne;
@@ -29,10 +32,10 @@ use BezhanSalleh\FilamentShield\Traits\HasPanelShield;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
-use Filament\Facades\Filament;
-class User extends Authenticatable 
+
+class User extends Authenticatable
 {
-   // implements FilamentUser
+    // implements FilamentUser
     use HasApiTokens;
 
     /** @use HasFactory<\Database\Factories\UserFactory> */
@@ -41,7 +44,7 @@ class User extends Authenticatable
     use Notifiable;
     use TwoFactorAuthenticatable;
     use HasRoles;
-    // use HasPanelShield;
+    //use HasPanelShield;
 
     /**
      * The attributes that are mass assignable.
@@ -88,32 +91,32 @@ class User extends Authenticatable
         ];
     }
 
-    public function volunteer() : HasOne
+    public function volunteer(): HasOne
     {
         return $this->hasOne(Volunteer::class);
     }
 
-    public function blogPosts() : HasMany
+    public function blogPosts(): HasMany
     {
         return $this->hasMany(BlogPost::class);
     }
 
-    public function comments() : HasMany
+    public function comments(): HasMany
     {
         return $this->hasMany(Comment::class);
     }
 
-    public function adoption() : HasMany
+    public function adoption(): HasMany
     {
         return $this->hasMany(Adoption::class);
     }
 
-    public function donations() : HasMany
+    public function donations(): HasMany
     {
         return $this->hasMany(Donation::class);
     }
 
-    public function blogPostLikes() : BelongsToMany
+    public function blogPostLikes(): BelongsToMany
     {
         return $this->belongsToMany(BlogPost::class, 'blog_post_like')->withTimestamps();
     }
@@ -127,13 +130,13 @@ class User extends Authenticatable
             return false; // Prevents errors when no user is logged in
         }
 
-        //return $user->hasAnyRole(['super_admin','admin','admin_shop']);
+        // return $user->hasAnyRole(['super_admin','admin','admin_shop']);
         return $user->roles()->exists();
     }
 
 
 
-    public function announcements() : HasMany
+    public function announcements(): HasMany
     {
         return $this->hasMany(Announcement::class);
     }
@@ -164,15 +167,22 @@ class User extends Authenticatable
         return $this->hasMany(Appointment::class);
     }
 
-    
+
     public function carts(): HasMany
     {
         return $this->hasMany(Cart::class);
     }
 
+    //clinic hours schedule
     public function vetschedules(): HasMany
     {
         return $this->hasMany(VetSchedule::class);
+    }
+
+    // vet doctor services
+    public function doctorservices(): HasMany
+    {
+        return $this->hasMany(AppointmentCategory::class);
     }
 
     public function addresses(): HasMany
@@ -181,16 +191,19 @@ class User extends Authenticatable
     }
 
 
-     public function userPanel(): string
+    protected function userPanel(): string
     {
         // Check if the user has any role
-         if ($this->getRoleNames()->isNotEmpty()) {
-        // Redirect to Filament Admin panel
-        return url(Filament::getPanel('admin')->getPath());
-      
-        }
+        //  if ($this->getRoleNames()->isNotEmpty()) {
+        // // Redirect to Filament Admin panel
 
-    // Default redirect to normal dashboard
+        //     return url(Filament::getPanel('admin')->getPath());
+
+        // }
+        if (auth()->user()?->roles()->exists()) {
+            return url(Filament::getPanel('admin')->getPath());
+        }
+        //dd(auth()->user()->roles()->exists());
         return route('dashboard');
     }
 }

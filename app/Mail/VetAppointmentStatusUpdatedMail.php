@@ -21,6 +21,7 @@ class VetAppointmentStatusUpdatedMail extends Mailable
     public AppointmentStatusEnum $status;
     public array $booked_services;
     public $payment_method;
+    public $date_to_visit_clinic;
 
     /**
      * Create a new message instance.
@@ -36,6 +37,7 @@ class VetAppointmentStatusUpdatedMail extends Mailable
         //categories many is to may relationship ara sa model
        $this->booked_services = $appointment->categories()->get()->toArray();
        $this->payment_method = $appointment->payment_method;
+       $this->date_to_visit_clinic = $appointment->appoint_sched;
     }
 
     /**
@@ -59,7 +61,8 @@ class VetAppointmentStatusUpdatedMail extends Mailable
                 'user' => $this->user,
                 'status' => $this->status,
                 'booked_services' => $this->booked_services,
-                'payment_method' => $this->payment_method
+                'payment_method' => $this->payment_method,
+                'date_to_visit_clinic' => $this->date_to_visit_clinic
             ]
         );
     }

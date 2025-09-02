@@ -18,7 +18,7 @@ class StatsOverview extends BaseWidget
 {
     use HasWidgetShield;
     protected static ?string $pollingInterval = '60s';
-     protected static ?int $sort = 1;
+    protected static ?int $sort = 1;
     protected function getStats(): array
     {
         $pendingCount = Adoption::where('status', 'pending')->count();

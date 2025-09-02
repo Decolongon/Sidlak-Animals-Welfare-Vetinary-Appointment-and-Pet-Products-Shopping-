@@ -4,10 +4,11 @@ namespace App\Livewire\Ecommerce;
 
 use Livewire\Component;
 use App\Models\Ecommerce\Cart;
-use App\Models\Ecommerce\Product;
+use Livewire\Attributes\Title;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Locked;
-use Livewire\Attributes\Title;
+use App\Models\Ecommerce\Product;
+use App\Livewire\Ecommerce\GetCart;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Session;
 use Jantinnerezo\LivewireAlert\LivewireAlert;
@@ -23,24 +24,18 @@ class AddToCartForm extends Component
     public $session_id;
 
     #[Locked]
-    public $quantity;
     public $user_id;
+
+    public $quantity;
     public $cartItems;
 
-    protected function rules(): array
-    {
-        return [
-            'product_id' => 'required|exists:products,id',
-            'quantity' => 'required|numeric|min:1',
-        ];
-    }
 
     public function mount(): void
     {
         $this->initializeSession();
         $this->user_id = Auth::id();
         $this->migrateGuestCartToUser();
-        $this->getCartItems();
+       // $this->getCartItems();
     }
 
     protected function initializeSession(): void
@@ -83,7 +78,7 @@ class AddToCartForm extends Component
 
         $this->dispatch('cartUpdated');
         //$this->showSuccessAlert();
-        $this->getCartItems();
+       // $this->getCartItems();
     }
 
     //get existing cart kng my ara
@@ -91,7 +86,8 @@ class AddToCartForm extends Component
     {
         return Cart::where('product_id', $product->id)
             ->where(function ($query) {
-                $query->when($this->user_id, 
+                $query->when(
+                    $this->user_id,
                     fn($q) => $q->where('user_id', $this->user_id),
                     fn($q) => $q->where('session_id', $this->session_id)
                 );
@@ -103,7 +99,7 @@ class AddToCartForm extends Component
     protected function updateExistingCartItem(Cart $cart, Product $product): void
     {
         $quantityToAdd = 1;
-        
+
         if ($cart->quantity + $quantityToAdd > $product->prod_quantity) {
             $this->showAlert('warning', 'Not enough stock available!');
             return;
@@ -126,13 +122,13 @@ class AddToCartForm extends Component
     }
 
     // get sng tanan na cart items login or guest user mana
-    public function getCartItems(): void
-    {
-        $this->cartItems = Cart::where(
-            $this->user_id ? 'user_id' : 'session_id',
-            $this->user_id ?: $this->session_id
-        )->get();
-    }
+    // public function getCartItems(): void
+    // {
+    //     $this->cartItems = Cart::where(
+    //         $this->user_id ? 'user_id' : 'session_id',
+    //         $this->user_id ?: $this->session_id
+    //     )->orderBy('created_at', 'desc')->get();
+    // }
 
 
     protected function showAlert(string $type, string $message): void
@@ -166,7 +162,7 @@ class AddToCartForm extends Component
     public function render()
     {
         return view('livewire.ecommerce.add-to-cart-form', [
-            'cartItems' => $this->cartItems
+            // 'cartItems' => $this->cartItems
         ]);
     }
 }

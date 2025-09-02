@@ -41,6 +41,7 @@ class MergeCart
                 'session_id' => null,
             ]);
            Session::forget($session_id);
+           Session::flush();
          
           
         }

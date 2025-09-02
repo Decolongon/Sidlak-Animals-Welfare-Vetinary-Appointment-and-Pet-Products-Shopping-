@@ -2,9 +2,10 @@
 
 namespace App\Filament\Resources\VetAppointment\AppointmentCategoryResource\Pages;
 
-use App\Filament\Resources\VetAppointment\AppointmentCategoryResource;
 use Filament\Actions;
 use Filament\Resources\Pages\EditRecord;
+use Filament\Resources\Pages\ContentTabPosition;
+use App\Filament\Resources\VetAppointment\AppointmentCategoryResource;
 
 class EditAppointmentCategory extends EditRecord
 {
@@ -17,8 +18,14 @@ class EditAppointmentCategory extends EditRecord
         ];
     }
 
-    protected function getRedirectUrl(): string
-    {
-        return $this->getResource()::getUrl('index');
-    }
+    // public function hasCombinedRelationManagerTabsWithContent(): bool
+    // {
+    //     return true;
+    // }
+
+    // public function getContentTabPosition(): ?ContentTabPosition
+    // {
+    //     return ContentTabPosition::Before;
+    // }
+   
 }

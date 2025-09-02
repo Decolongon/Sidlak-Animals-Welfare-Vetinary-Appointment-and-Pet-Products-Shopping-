@@ -21,6 +21,7 @@ use App\Policies\Animal\BreedPolicy;
 use App\Policies\AnnouncementPolicy;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Gate;
+use App\Http\Responses\LoginResponse;
 use App\Policies\Blog\BlogPostPolicy;
 use App\Policies\Blog\CategoryPolicy;
 use App\Http\Responses\LogoutResponse;
@@ -39,15 +40,18 @@ use App\Observers\VetAppointmentObserver;
 use App\Policies\Adoption\AdoptionPolicy;
 use App\Policies\Donation\DonationPolicy;
 use App\Policies\Ecommerce\ProductPolicy;
+use App\Models\Appointment\DoctorSchedule;
+// use Filament\Http\Responses\Auth\Contracts\LogoutResponse as LogoutResponseContract;
 use App\Policies\Volunteer\VolunteerPolicy;
 use App\Models\Appointment\AppointmentCategory;
-// use Filament\Http\Responses\Auth\Contracts\LogoutResponse as LogoutResponseContract;
 use App\Policies\Appointment\AppointmentPolicy;
 use App\Policies\Appointment\VetSchedulePolicy;
 use App\Policies\Ecommerce\ProductReviewPolicy;
 use App\Policies\Ecommerce\ProductCategoryPolicy;
 use App\Policies\Ecommerce\ProductDiscountPolicy;
+use App\Policies\Appointment\DoctorSchedulePolicy;
 use App\Policies\Appointment\AppointmentCategoryPolicy;
+use Filament\Http\Responses\Auth\Contracts\RegistrationResponse;
 use Filament\Http\Responses\Auth\LoginResponse as AuthLoginResponse;
 use Filament\Http\Responses\Auth\Contracts\LogoutResponse as LogoutContractResponse;
 
@@ -56,17 +60,31 @@ class AppServiceProvider extends ServiceProvider
     /**
      * Register any application services.
      */
-     protected $listen = [];
-   
+    protected $listen = [];
+
     public function register(): void
     {
-         $this->registerPolicies();
+        $this->registerPolicies();
         //  $this->registerEvent();
         // $this->app->bind(
         //     LogoutContractResponse::class,
         //     LogoutResponse::class,
         // );
-       
+
+        // $this->app->singleton(
+        //     RegistrationResponse::class,
+        //     \App\Http\Responses\RegisterResponse::class
+        // );
+
+        $this->app->singleton(
+            AuthLoginResponse::class,
+            LoginResponse::class,
+        );
+        //for filament admin
+        $this->app->bind(
+            LogoutContractResponse::class,
+            LogoutResponse::class,
+        );
     }
 
     /**
@@ -74,61 +92,57 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-       
+
         Announcement::observe(AnnouncementObserver::class);
         Appointment::observe(VetAppointmentObserver::class);
-      
-       
     }
 
-     /**
-    * @param array $modelPolicies
-    * @return void
-    */
-   protected function inBulkPolicies(array $modelPolicies)
-   {
-       foreach ($modelPolicies as $model => $policy) {
-           Gate::policy($model, $policy);
-       }
-   }
+    /**
+     * @param array $modelPolicies
+     * @return void
+     */
+    protected function inBulkPolicies(array $modelPolicies)
+    {
+        foreach ($modelPolicies as $model => $policy) {
+            Gate::policy($model, $policy);
+        }
+    }
 
 
-   protected function registerPolicies()
-   {
-       $policies = [
-           Adoption::class => AdoptionPolicy::class,
-           Breed::class => BreedPolicy::class,
-           Dog::class => DogPolicy::class,
-           AppointmentCategory::class => AppointmentCategoryPolicy::class,
-           Appointment::class => AppointmentPolicy::class,
-           BlogPost::class => BlogPostPolicy::class,
-           Category::class => CategoryPolicy::class,
-           Inquiry::class => InquiryPolicy::class,
-           Donation::class => DonationPolicy::class,
-           Product::class => ProductPolicy::class,
-           ProductCategory::class => ProductCategoryPolicy::class,
-           ProductReview::class => ProductReviewPolicy::class,
-           Order::class => OrderPolicy::class,
-           Volunteer::class => VolunteerPolicy::class,
-           Announcement::class => AnnouncementPolicy::class,
-           VetSchedule::class => VetSchedulePolicy::class,
-           ProductDiscount::class => ProductDiscountPolicy::class,
-        //    User::class => UserPolicy::class,
-           
-       ];
+    protected function registerPolicies()
+    {
+        $policies = [
+            Adoption::class => AdoptionPolicy::class,
+            Breed::class => BreedPolicy::class,
+            Dog::class => DogPolicy::class,
+            AppointmentCategory::class => AppointmentCategoryPolicy::class,
+            Appointment::class => AppointmentPolicy::class,
+            BlogPost::class => BlogPostPolicy::class,
+            Category::class => CategoryPolicy::class,
+            Inquiry::class => InquiryPolicy::class,
+            Donation::class => DonationPolicy::class,
+            Product::class => ProductPolicy::class,
+            ProductCategory::class => ProductCategoryPolicy::class,
+            ProductReview::class => ProductReviewPolicy::class,
+            Order::class => OrderPolicy::class,
+            Volunteer::class => VolunteerPolicy::class,
+            Announcement::class => AnnouncementPolicy::class,
+            VetSchedule::class => VetSchedulePolicy::class,
+            ProductDiscount::class => ProductDiscountPolicy::class,
+           // DoctorSchedule::class => DoctorSchedulePolicy::class,
+            //    User::class => UserPolicy::class,
 
-       $this->inBulkPolicies($policies);
-   }
-
-   protected function registerEvent(): void
-   {
-       $this->listen = [
-            \Illuminate\Auth\Events\Registered::class => [
-                \App\Listeners\MergeCart::class,
-            ],
         ];
-   }
 
-  
+        $this->inBulkPolicies($policies);
+    }
 
+    // protected function registerEvent(): void
+    // {
+    //     $this->listen = [
+    //         \Illuminate\Auth\Events\Registered::class => [
+    //             \App\Listeners\MergeCart::class,
+    //         ],
+    //     ];
+    // }
 }

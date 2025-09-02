@@ -15,6 +15,7 @@ class OrderItem extends Model
         'quantity',
         'price',
         'total',
+        'size',
     ];
 
     

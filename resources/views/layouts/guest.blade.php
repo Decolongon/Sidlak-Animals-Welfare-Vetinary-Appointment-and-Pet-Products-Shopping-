@@ -48,11 +48,11 @@
                 });
             }
             //  console.log('CSRF from blade:', document.querySelector('meta[name="csrf-token"]').getAttribute('content'));
-           $(document).ajaxSuccess(function(event, xhr, settings) {
-                if (xhr.responseJSON && xhr.responseJSON.newToken) {
-                    $('meta[name="csrf-token"]').attr('content', xhr.responseJSON.newToken);
-                }
-            });
+        //  $(document).ajaxSuccess(function(event, xhr, settings) {
+        //         if (xhr.responseJSON && xhr.responseJSON.newToken) {
+        //             $('meta[name="csrf-token"]').attr('content', xhr.responseJSON.newToken);
+        //         }
+        //     }); 
           
         </script>
      

@@ -24,11 +24,13 @@ return new class extends Migration
             $table->enum('pet_type', ['dog', 'cat', 'other'])->default('dog');
             $table->string('pet_breed');
             $table->enum('pet_gender', ['male', 'female'])->default('male');
-            $table->enum('appointment_status', ['pending', 'approved', 'rejected'])->default('pending');
+            $table->enum('appointment_status', ['pending', 'approved', 'rejected','completed'])->default('pending');
             $table->string('pet_age');
+            $table->double('total_amount',2)->nullable();
             $table->string('payment_method')->nullable();
             $table->string('paymentIntent_id')->nullable();
             $table->string('pet_weight');
+            $table->dateTime('appoint_sched')->nullable();
             $table->enum('payment_status', ['pending', 'completed', 'failed'])->default('pending');
             $table->boolean('isPetVaccinated')->default(false)->nullable();
             $table->timestamps();

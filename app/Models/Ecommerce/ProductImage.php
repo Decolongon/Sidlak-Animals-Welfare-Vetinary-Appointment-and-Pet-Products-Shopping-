@@ -5,6 +5,7 @@ namespace App\Models\Ecommerce;
 use App\Models\Ecommerce\Product;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class ProductImage extends Model
@@ -24,11 +25,9 @@ class ProductImage extends Model
      */
     protected $casts = [
         'quantity' => 'integer',
-        'is_primary' => 'boolean'
+        'is_primary' => 'boolean',
     ];
 
-
-    
 
 
 

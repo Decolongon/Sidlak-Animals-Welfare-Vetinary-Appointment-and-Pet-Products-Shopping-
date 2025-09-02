@@ -15,11 +15,12 @@ return new class extends Migration
     {
         Schema::create('addresses', function (Blueprint $table) {
             $table->id();
-           // $table->foreignIdFor(User::class, 'user_id')->constrained()->cascadeOnDelete();
-            $table->string('country')->nullable()->default('Philippines');
-           // $table->string('province')->nullable()->default('Negros Occidental');
+            // $table->foreignIdFor(User::class, 'user_id')->constrained()->cascadeOnDelete();
+            // $table->string('country')->nullable()->default('Philippines');
+            // $table->string('province')->nullable()->default('Negros Occidental');
             $table->string('street')->nullable();
             $table->string('city')->nullable();
+            // $table->string('barangay')->nullable();
             $table->string('state')->nullable();
             $table->string('zip')->nullable();
             $table->enum('address_type', ['billing', 'shipping'])->nullable(); // Add Address Type

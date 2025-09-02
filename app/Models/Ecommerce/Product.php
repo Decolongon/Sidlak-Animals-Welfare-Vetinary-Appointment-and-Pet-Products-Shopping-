@@ -7,6 +7,8 @@ use App\Models\Ecommerce\ProductImage;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Storage;
 use App\Models\Ecommerce\ProductDiscount;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -32,7 +34,6 @@ class Product extends Model
         'shipping_cost',
     ];
 
-    
     /**
      * @var array<string, string>
      */
@@ -89,4 +90,64 @@ class Product extends Model
     {
          return 'prod_slug';
     }
+
+    protected function scopeInstock(Builder $query): void
+    {
+        $query->where('prod_quantity', '>', 10)
+              ->where('prod_unit', '!=', 'diff_size');
+    }
+
+    protected function scopeLowInStock(Builder $query): void
+    {
+        $query->where('prod_quantity', '>', 0)
+              ->where('prod_quantity', '<=', 10)
+              ->where('prod_unit', '!=', 'diff_size');
+    }
+
+    protected function scopeOutOfStock(Builder $query): void
+    {
+        $query->where('prod_quantity', '<',1)
+              ->where('prod_unit', '!=', 'diff_size');
+    }
+
+    protected function scopeWithVariants(Builder $query): void
+    {
+        $query->where('prod_unit', 'diff_size');
+    }
+
+
+    public function calculateDiscountedPrice(): void
+    {
+        //  foreach ($products as $product) {
+                $this->discounted_price = null;
+                $this->discount_amount = null;
+                $this->discount_label = null;
+
+                $discount = $this->productDiscounts->first();
+
+                if (!$discount || !$discount->pivot) {
+                    return;
+                }
+
+                $type = $discount->pivot->discount_type;
+                $value = floatval($discount->pivot->discounted_price);
+
+                if ($type === 'fixed') {
+                    $this->discount_amount = $value;
+                    $this->discounted_price = $this->prod_price - $value;
+                    $this->discount_label = ' ₱' . number_format($value, 0) . ' off';
+                } 
+                if ($type === 'percent') {
+                    $discountValue = $this->prod_price * ($value / 100);
+                    $this->discount_amount = $discountValue;
+                    $this->discounted_price = $this->prod_price - $discountValue;
+                    $this->discount_label = number_format($value, 0) . ' % off';
+                }
+
+               
+
+            // }
+    }
+
+   
 }

@@ -28,6 +28,8 @@ use App\Actions\Fortify\UpdateUserProfileInformation;
 use Laravel\Fortify\Contracts\LogoutResponse as JetsstreamLogout;
 use Filament\Http\Responses\Auth\LoginResponse as AuthLoginResponse;
 use Filament\Http\Responses\Auth\Contracts\LogoutResponse as LogoutContractResponse;
+use Laravel\Fortify\Http\Responses\LogoutResponse as FortifyLogoutResponse;
+
 
 class FortifyServiceProvider extends ServiceProvider
 {
@@ -36,20 +38,14 @@ class FortifyServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        // $this->app->singleton(LoginResponse::class, RoleBasedRedirect::class);
-           $this->app->singleton(
-            AuthLoginResponse::class,
-            LoginResponse::class,
-        );
-        //for filament admin
-        $this->app->bind(
-            LogoutContractResponse::class,
-            LogoutResponse::class,
-        );
-      
+        //$this->app->singleton(LoginResponse::class, RoleBasedRedirect::class);
      
       
-       
+        // //for filament admin
+        // $this->app->bind(
+        //     LogoutContractResponse::class,
+        //     LogoutResponse::class,
+        // );
     }
 
     /**
@@ -58,9 +54,9 @@ class FortifyServiceProvider extends ServiceProvider
     public function boot(): void
     {
         // Fortify::createUsersUsing(CreateNewUser::class);
-        // Fortify::updateUserProfileInformationUsing(UpdateUserProfileInformation::class);
-        // Fortify::updateUserPasswordsUsing(UpdateUserPassword::class);
-        // Fortify::resetUserPasswordsUsing(ResetUserPassword::class);
+        Fortify::updateUserProfileInformationUsing(UpdateUserProfileInformation::class);
+        Fortify::updateUserPasswordsUsing(UpdateUserPassword::class);
+        Fortify::resetUserPasswordsUsing(ResetUserPassword::class);
 
         // RateLimiter::for('login', function (Request $request) {
         //     $throttleKey = Str::transliterate(Str::lower($request->input(Fortify::username())).'|'.$request->ip());
@@ -72,10 +68,8 @@ class FortifyServiceProvider extends ServiceProvider
         //     return Limit::perMinute(5)->by($request->session()->get('login.id'));
         // });
 
-     
 
-         
+        // Fortify::ignoreRoutes();
 
-        
     }
 }

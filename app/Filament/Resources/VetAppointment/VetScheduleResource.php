@@ -28,7 +28,9 @@ class VetScheduleResource extends Resource
     protected static ?string $model = VetSchedule::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-calendar-date-range';
-    protected static ?string $navigationLabel = 'Vetinary Schedule';
+    protected static ?string $navigationLabel = 'Clinic Hours';
+    protected static ?string $modelLabel = 'Clinic Hours'; // Singular name para sa form
+    protected static ?string $pluralModelLabel = 'Clinic Hours'; // Plural name para sa table
     protected static ?string $navigationGroup = 'Vetinary Appointment';
     //protected static ?int $navigationSort = 2;
     public static function form(Form $form): Form
@@ -179,9 +181,9 @@ class VetScheduleResource extends Resource
             ])->emptyStateActions([
                 Tables\Actions\CreateAction::make()
                 ->icon('heroicon-m-plus-circle')
-                ->label(__('Create Vetinary Schedule')),
+                ->label(__('Create Clinic Schedule')),
             ])->emptyStateIcon('heroicon-s-calendar-date-range')
-            ->emptyStateHeading('No Vetinary Schedules');
+            ->emptyStateHeading('No Clinic Schedules');
     }
 
     public static function getWidgets(): array

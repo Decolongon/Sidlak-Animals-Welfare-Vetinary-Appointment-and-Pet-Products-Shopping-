@@ -6,13 +6,14 @@ use Filament\Pages;
 use Filament\Panel;
 use Filament\Widgets;
 use Filament\PanelProvider;
-
-
 use Filament\Support\Colors\Color;
+use App\Filament\Pages\AdminDashboard;
 use App\Filament\Pages\Auth\EditProfile;
+use App\Http\Middleware\AdminMiddleware;
 use Filament\Navigation\NavigationGroup;
 use Filament\Http\Middleware\Authenticate;
 use App\Http\Middleware\CheckPaymentStatus;
+use App\Http\Middleware\RoleBaseMiddleware;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\Cookie\Middleware\EncryptCookies;
 use App\Filament\AdminPanel\Pages\ShopAppDashboard;
@@ -28,7 +29,7 @@ use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
 class AdminPanelProvider extends PanelProvider
 {
     public function panel(Panel $panel): Panel
-    {   
+    {
 
         return $panel
             ->default()
@@ -50,8 +51,8 @@ class AdminPanelProvider extends PanelProvider
             ->font('Poppins')
             ->navigationGroups([
                 NavigationGroup::make()
-                 ->label('News & Events')
-                 ->collapsed(),
+                    ->label('News & Events')
+                    ->collapsed(),
             ])
             ->colors([
                 'primary' => Color::Amber,
@@ -61,14 +62,14 @@ class AdminPanelProvider extends PanelProvider
             ->favicon(asset('imgs/sdas-logo.png'))
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\\Filament\\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\\Filament\\Pages')
-            ->pages( 
+            ->pages(
 
-                
-                 [
-                    Pages\Dashboard::class,
+
+                [
+                   Pages\Dashboard::class,
                 ]
-              
-                
+
+
             )
             ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\\Filament\\Widgets')
             ->widgets([
@@ -87,7 +88,7 @@ class AdminPanelProvider extends PanelProvider
                 DispatchServingFilamentEvent::class,
                 // CheckPaymentStatus::class,
             ])
-             ->plugins([
+            ->plugins([
                 FilamentShieldPlugin::make()
                     ->gridColumns([
                         'default' => 1,
@@ -104,10 +105,14 @@ class AdminPanelProvider extends PanelProvider
                         'default' => 1,
                         'sm' => 2,
                     ]),
+            ])
+            ->authMiddleware([
+                RoleBaseMiddleware::class,
+               // AdminMiddleware::class
             ]);
-            // ->plugins([
-            //     FilamentShieldPlugin::make(),
-            // ]);
-            // ->databaseNotifications();
+        // ->plugins([
+        //     FilamentShieldPlugin::make(),
+        // ]);
+        // ->databaseNotifications();
     }
 }

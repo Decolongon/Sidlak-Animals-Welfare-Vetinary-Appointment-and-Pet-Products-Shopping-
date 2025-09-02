@@ -5,6 +5,7 @@ namespace App\Models\Ecommerce;
 use App\Models\User;
 use App\Models\Ecommerce\Address;
 use App\Models\Ecommerce\OrderItem;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -25,7 +26,8 @@ class Order extends Model
         'notes',
         'shipping_price',
         'shipping_method',
-        'payment_intent_id'
+        'payment_intent_id',
+        'order_num'
 
     ];
     
@@ -35,6 +37,11 @@ class Order extends Model
     protected $casts = [
         'is_billing_same_as_shipping' => 'boolean',
     ];
+
+    protected function scopeOrderStatus(Builder $query, string $orderStatus): void
+    {
+        $query->where('order_status', $orderStatus);
+    }
 
     public function product(): BelongsTo
     {
@@ -60,4 +67,9 @@ class Order extends Model
     {
         return $this->hasMany(OrderItem::class);
     }
+
+    public function getRouteKeyName()
+    {
+        return 'order_num';
+    }   
 }

@@ -18,6 +18,7 @@ return new class extends Migration
             $table->foreignIdFor(Product::class, 'product_id')->constrained()->cascadeOnDelete();
             $table->foreignIdFor(User::class, 'user_id')->nullable()->constrained()->cascadeOnDelete();
             $table->decimal('quantity');
+            $table->string('size')->nullable();
             $table->string('session_id')->nullable(); 
             $table->timestamps();
         });

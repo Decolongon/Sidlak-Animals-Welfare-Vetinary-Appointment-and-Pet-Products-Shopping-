@@ -1,5 +1,5 @@
 <div>
   
-    @livewire('ecommerce.shop')
+    {{-- @livewire('ecommerce.shop'['lazy' => true]) --}}
 </div>
 

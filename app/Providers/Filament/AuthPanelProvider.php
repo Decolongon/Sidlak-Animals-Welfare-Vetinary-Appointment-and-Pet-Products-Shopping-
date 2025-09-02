@@ -59,7 +59,7 @@ class AuthPanelProvider extends PanelProvider
                 DisableBladeIconComponents::class,
                 DispatchServingFilamentEvent::class,
             ])
-             ->plugins([
+            ->plugins([
                 FilamentShieldPlugin::make()
             ])
             ->authMiddleware([

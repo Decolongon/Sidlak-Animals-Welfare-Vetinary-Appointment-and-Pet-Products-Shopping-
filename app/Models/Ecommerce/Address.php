@@ -18,6 +18,8 @@ class Address extends Model
         'address_type',
         // 'user_id',
         // 'province'
+        //city,
+        //barangay,
     ];
 
     public function addressable(): MorphTo

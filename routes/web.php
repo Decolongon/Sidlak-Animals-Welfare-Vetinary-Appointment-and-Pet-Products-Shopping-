@@ -2,6 +2,7 @@
 
 use App\Livewire\TestPost;
 use Illuminate\Http\Request;
+use Filament\Pages\Dashboard;
 use App\Livewire\Auth\Register;
 use App\Livewire\Pages\DogPage;
 use App\Http\Livewire\MergeCart;
@@ -24,18 +25,21 @@ use App\Livewire\Adoption\AdoptionCart;
 use App\Livewire\Pages\ApplicationForm;
 use Illuminate\Support\Facades\Session;
 use App\Livewire\Pages\SingleBlogPostPage;
+use App\Filament\Pages\CustomAdminDashboard;
 use App\Livewire\VetAppointment\Appointment;
 use App\Livewire\Ecommerce\ProductReviewsForm;
 use App\Livewire\Pages\AnnouncementSinglePage;
 use App\Http\Controllers\Paymongo\PaymentController;
+use App\Livewire\VetAppointment\AppointmentServiceSinglePage;
 
 Route::middleware([
     'auth:sanctum',
     config('jetstream.auth_session'),
     'verified',
+    'adminMiddleware',
 ])->group(function () {
 
-    
+
     Route::get('/adopt/application-form', ApplicationForm::class)->name('page.app-form');
     Route::get('/dashboard', function () {
         return view('dashboard');
@@ -43,38 +47,55 @@ Route::middleware([
     Route::get('/checkout', Checkout::class)->name('checkout'); // ecommerce checkout page
     Route::get('/review', ProductReviewsForm::class)->name('page.review');
     Route::get('/view-order', ViewOrder::class)->name('view-order');
-    
+
 });
 
-Route::post('/custom-logout', [App\Http\Controllers\CustomLogout::class, 'logout'])->name('custom-logout');
+//override ang login default ni fortify
+Route::get('/login', function () {
+    return redirect()->route('filament.auth.auth.login');
+})->name('login');
 
-Route::get('/appointment',Appointment::class)->name('appointment'); // vet appointment
+//override ang register default ni fortify
+Route::get('/register', function () {
+    return redirect()->route('filament.auth.auth.register');
+})->name('register');
 
-Route::get('/singleProd/{prod_slug}',SingleProd::class)->name('page.singleProd'); // para sa long description and reviews of specific product
-//Route::get('/merge-cart', MergeCart::class)->name('merge-cart');
-Route::get('/shop', Shop::class)->name('page.shop');
-Route::get('/cart', GetCart::class)->name('page.get-cart'); // ecommerce cart
 
-Route::get('/', HomePage::class)->name('page.home');
-Route::get('/dogs', DogPage::class)->name('page.dogs');
-Route::get('/dogs/{dog_slug}', DogSinglePage::class)->name('page.dog.single');
+Route::middleware('adminMiddleware')->group(function () {
 
-Route::get('/volunteer', VolunteerPage::class)->name('page.volunteer');
+    Route::get('/announcements', Announcements::class)->name('page.announcements');
+    Route::get('/announcement/{announcementId}', AnnouncementSinglePage::class)->name('page.announcement-single');
+    Route::get('/single-product/{prod_slug}', SingleProd::class)->name('page.singleProd'); // para sa long description and reviews of specific product
+    Route::get('/shop', Shop::class)->name('page.shop');
+    Route::get('/cart', GetCart::class)->name('page.get-cart'); // ecommerce cart
 
-Route::get('/blogs', BlogPage::class)->name('page.blogs');
-Route::get('/blogs/{slug}', SingleBlogPostPage::class)->name('page.blog.single');
+    Route::get('/service/{appoint_cat_slug}', AppointmentServiceSinglePage::class)->name('service');
 
-Route::get('/contact', ContactPage::class)->name('page.contact');
+    Route::get('/', HomePage::class)->name('page.home');
+    Route::get('/dogs', DogPage::class)->name('page.dogs');
+    Route::get('/dogs/{dog_slug}', DogSinglePage::class)->name('page.dog.single');
 
-Route::get('/selected-dogs', AdoptionCart::class)->name('page.cart'); // adoption cart
+    Route::get('/volunteer', VolunteerPage::class)->name('page.volunteer');
 
-Route::get('/donate', DonationPage::class)->name('page.donate');
+    Route::get('/blogs', BlogPage::class)->name('page.blogs');
+    Route::get('/blogs/{slug}', SingleBlogPostPage::class)->name('page.blog.single');
+
+    Route::get('/contact', ContactPage::class)->name('page.contact');
+
+    Route::get('/selected-dogs', AdoptionCart::class)->name('page.cart'); // adoption cart
+
+    Route::get('/donate', DonationPage::class)->name('page.donate');
+    Route::get('/appointment', Appointment::class)->name('appointment');  // vet appointment
+
+});
+
+
+
 
 // this work in laravel herd not in laragon
 Route::get('/donation/redirect', [PaymentController::class, 'handleRedirect'])->name('donation.redirect');
 
-Route::get('/announcements', Announcements::class)->name('page.announcements');
-Route::get('/announcement/{announcementId}', AnnouncementSinglePage::class)->name('page.announcement-single');
+
 
 
 Route::get('/payment/callback', [PaymentController::class, 'paymentCallback'])->name('payment.callback');

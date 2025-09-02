@@ -10,6 +10,7 @@ use Filament\Forms\Form;
 use Filament\Tables\Table;
 use Illuminate\Support\Str;
 use Filament\Resources\Resource;
+use Filament\Forms\Components\Grid;
 use Filament\Forms\Components\Group;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Section;
@@ -35,60 +36,59 @@ class ProductDiscountResource extends Resource
     {
         return $form
             ->schema([
-          Section::make()
-            ->schema([
-                TextInput::make('discount_name')
-                ->required()
-                ->unique(ProductDiscount::class, 'discount_name', ignoreRecord: true)
-                ->label('Discount Name')
-                ->live(onBlur: true)
-                ->afterStateUpdated(fn (Set $set, ?string $state) => $set('discount_slug', Str::slug($state)))
-                ->maxLength(255),
+                Grid::make()
+                    ->schema([
+                        Section::make()
+                            ->schema([
+                                TextInput::make('discount_name')
+                                    ->required()
+                                    ->unique(ProductDiscount::class, 'discount_name', ignoreRecord: true)
+                                    ->label('Discount Name')
+                                    ->live(onBlur: true)
+                                    ->afterStateUpdated(fn(Set $set, ?string $state) => $set('discount_slug', Str::slug($state)))
+                                    ->maxLength(255)
+                                    ->columnSpanFull(),
 
+                                TextInput::make('discount_slug')
+                                    ->disabled()
+                                    ->dehydrated()
+                                    ->required()
+                                    ->unique(ProductDiscount::class, 'discount_slug', ignoreRecord: true)
+                                    ->label('Discount Slug')
+                                    ->columnSpanFull(),
 
-                TextInput::make('discount_slug')
-                ->disabled()
-                ->dehydrated()
-                ->required()
-                ->unique(ProductDiscount::class, 'discount_slug', ignoreRecord: true)
-                ->label('Discount Slug'),
+                                MarkdownEditor::make('desc_discount')
+                                    ->label('Discount Description')
+                                    ->columnSpanFull()
+                                    ->maxLength(65535),
+                            ])
+                            ->columnSpan(['lg' => 2]),
 
-                MarkdownEditor::make('desc_discount')
-                ->label('Discount Description')
-                ->columnSpanFull()
-                ->maxLength(65535),
+                        Section::make()
+                            ->schema([
+                                DateTimePicker::make('start_at')
+                                    ->label('Start Date')
+                                    ->seconds(false)
+                                    ->live()
+                                    ->minDate(now()->startOfDay())
+                                    ->rules(['after_or_equal:now'])
+                                    ->date('F j, Y, g:i a')
+                                    ->required()
+                                    ->columnSpanFull(),
 
-             ])->columns([
-                'sm' => 1,
-                'md' => 2,
-                'lg' => 3,
-             ]),
-
-             Group::make([
-                Section::make()
-                ->schema([
-                    DateTimePicker::make('start_at')
-                    ->label('Start Date')
-                    // ->native(false)
-                    ->seconds(false)
-                    ->live()
-                    ->minDate(now()->startOfDay()) // allow today
-                    ->rules(['after_or_equal:now' ]) // must be today or later
-                    ->date('F j, Y, g:i a')
-                    ->required(),
-
-                    DateTimePicker::make('end_at')
-                    ->label('End Date')
-                    //->native(false)
-                    ->seconds(false)
-                    ->minDate(fn (callable $get) => $get('start_at')) // live binding
-                    ->rules(['after:start_at']) // must be after start_at
-                    ->date('F j, Y, g:i a')
-                    ->required(),
-                ])
-             ])
-               
-        ]);
+                                DateTimePicker::make('end_at')
+                                    ->label('End Date')
+                                    ->seconds(false)
+                                    ->minDate(fn(callable $get) => $get('start_at'))
+                                    ->rules(['after:start_at'])
+                                    ->date('F j, Y, g:i a')
+                                    ->required()
+                                    ->columnSpanFull(),
+                            ])
+                            ->columnSpan(['lg' => 1]),
+                    ])
+                    ->columns(3),
+            ]);
     }
 
     public static function table(Table $table): Table
@@ -96,22 +96,26 @@ class ProductDiscountResource extends Resource
         return $table
             ->columns([
                 Tables\Columns\TextColumn::make('discount_name')
-                ->label('Discount Name')
-                ->formatStateUsing(fn ($state) => Str::title($state))
-                ->sortable()
-                ->searchable(),
+                    ->label('Discount Name')
+                    ->formatStateUsing(fn($state) => Str::title($state))
+                    ->sortable()
+                    ->searchable(),
 
                 TextColumn::make('desc_discount')
-                ->label('Description'),
+                    ->formatStateUsing(fn($state) => Str::limit($state, 50, '...'))
+                    ->wrap()
+                    ->html()
+                    ->placeholder('No Description')
+                    ->label('Description'),
 
                 TextColumn::make('start_at')
-                ->label('Start Date')
-                ->formatStateUsing(fn ($state) => date('F j, Y h:i A', strtotime($state))),
+                    ->label('Start Date')
+                    ->formatStateUsing(fn($state) => date('F j, Y h:i A', strtotime($state))),
 
                 TextColumn::make('end_at')
-                ->label('End Date')
-                ->formatStateUsing(fn ($state) => date('F j, Y h:i A', strtotime($state))),
-                
+                    ->label('End Date')
+                    ->formatStateUsing(fn($state) => date('F j, Y h:i A', strtotime($state))),
+
             ])
             ->filters([
                 //
@@ -119,12 +123,12 @@ class ProductDiscountResource extends Resource
             ->actions([
                 Tables\Actions\ViewAction::make(),
 
-               Tables\Actions\ActionGroup::make([
-                 Tables\Actions\EditAction::make(),
+                Tables\Actions\ActionGroup::make([
+                    Tables\Actions\EditAction::make(),
                     Tables\Actions\DeleteAction::make(),
-                   
+
                 ])->tooltip('Actions')
-                
+
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
@@ -133,10 +137,10 @@ class ProductDiscountResource extends Resource
             ])
             ->emptyStateActions([
                 Tables\Actions\CreateAction::make()
-                ->icon('heroicon-m-plus-circle')
-                ->label(__('New Product Discount')),
+                    ->icon('heroicon-m-plus-circle')
+                    ->label(__('New Product Discount')),
             ])
-            ->emptyStateIcon('heroicon-o-percent-badge')  
+            ->emptyStateIcon('heroicon-o-percent-badge')
             ->emptyStateHeading('No Discount Available');
     }
 

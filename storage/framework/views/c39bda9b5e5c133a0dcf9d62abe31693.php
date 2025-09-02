@@ -17,7 +17,7 @@
         <span class="absolute -top-1 -right-2 px-1.5 py-0.5 text-[10px] font-bold 
         text-black dark:text-white bg-white-500 border border-white dark:border-gray-800 
         rounded-full shadow-md"
-        wire:poll.100ms>
+      >
         <?php echo e($this->cartCount); ?>
 
         </span>

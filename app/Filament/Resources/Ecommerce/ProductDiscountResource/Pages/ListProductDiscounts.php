@@ -16,4 +16,9 @@ class ListProductDiscounts extends ListRecords
             Actions\CreateAction::make()->label('New Product Discount')->icon('heroicon-m-plus-circle'),
         ];
     }
+
+    public function hasCombinedRelationManagerTabsWithContent(): bool
+    {
+        return true;
+    }
 }

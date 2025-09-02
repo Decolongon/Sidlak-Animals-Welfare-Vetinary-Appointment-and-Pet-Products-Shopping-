@@ -4,6 +4,7 @@ namespace App\Models\Appointment;
 
 use App\Models\User;
 use App\Models\Appointment\VetSchedule;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -27,6 +28,8 @@ class Appointment extends Model
         'appointment_status',
         'vet_schedule_id',
         'payment_status',
+        'total_amount',
+        'appoint_sched',
     ];
 
     /**
@@ -34,12 +37,18 @@ class Appointment extends Model
      */
     protected $casts = [
         'isPetVaccinated' => 'boolean',
+        'appoint_sched' => 'datetime',
     ];
 
     // public function category():BelongsTo
     // {
     //     return $this->belongsTo(AppointmentCategory::class,'appointment_category_id');
     // }
+
+    protected function scopeAppointmentStatus(Builder $query, string $appointmentStatus): void
+    {
+        $query->where('appointment_status', $appointmentStatus);
+    }
 
     public function categories(): BelongsToMany
     {

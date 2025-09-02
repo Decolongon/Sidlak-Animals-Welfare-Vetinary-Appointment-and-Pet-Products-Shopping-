@@ -38,11 +38,18 @@ class PaymentController extends Controller
                         $newStatus = 'completed';
                     } elseif (in_array($status, ['awaiting_payment', 'processing'])) {
                         $newStatus = 'pending';
-                    } elseif($status === 'expired'){
+                    } elseif ($status === 'expired') {
                         $newStatus = 'failed';
-                    } 
+                    }
 
                     $order->update(['payment_status' => $newStatus]);
+                    session()->forget([
+                        'buy_now_product',
+                        'buy_now_mode',
+                        'buy_now_quantity',
+                        'cart_quantities',
+                        'selected_checkout_items'
+                    ]);
                     return redirect()->route('page.shop');
                     // // Show appropriate message to user
                     // if ($newStatus === 'completed') {
@@ -78,9 +85,9 @@ class PaymentController extends Controller
                         $newStatus = 'completed';
                     } elseif (in_array($status, ['awaiting_payment', 'processing'])) {
                         $newStatus = 'pending';
-                    } elseif($status === 'expired'){
+                    } elseif ($status === 'expired') {
                         $newStatus = 'failed';
-                    } 
+                    }
 
                     $appoint->update(['payment_status' => $newStatus]);
                     return redirect()->route('appointment');
@@ -93,6 +100,4 @@ class PaymentController extends Controller
 
         return redirect()->route('appointment');
     }
-
-
 }

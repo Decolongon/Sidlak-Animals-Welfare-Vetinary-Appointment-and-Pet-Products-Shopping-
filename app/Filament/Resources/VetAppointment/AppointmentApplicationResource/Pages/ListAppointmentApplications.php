@@ -4,7 +4,7 @@ namespace App\Filament\Resources\VetAppointment\AppointmentApplicationResource\P
 
 use Filament\Actions;
 use Filament\Resources\Components\Tab;
-use App\Models\Appointment\Appointment;
+use App\Models\Appointment\Appointment as VetAppointment;
 use Filament\Resources\Pages\ListRecords;
 use App\Filament\Resources\VetAppointment\AppointmentApplicationResource;
 
@@ -22,21 +22,31 @@ class ListAppointmentApplications extends ListRecords
 
     public function getTabs(): array
     {
-        return [
+      return $this->getVetAppointmentTab();
+    }
+
+    protected function getVetAppointmentTab(): array
+    {
+         return [
             null => Tab::make('All')
-                    ->badge(Appointment::count()),
+                    ->badge(VetAppointment::count()),
 
             'Pending' => Tab::make()
-                            ->badge(Appointment::where('appointment_status','pending')->count())
-                            ->query(fn ($query) => $query->where('appointment_status', 'pending')),
+                            ->badge(VetAppointment::AppointmentStatus('pending')->count())
+                            ->modifyQueryUsing(fn ($query) => $query->AppointmentStatus('pending')),
 
             'Approved' => Tab::make()
-                            ->badge(Appointment::where('appointment_status','approved')->count())
-                            ->query(fn ($query) => $query->where('appointment_status', 'approved')),
+                            ->badge(VetAppointment::AppointmentStatus('approved')->count())
+                            ->modifyQueryUsing(fn ($query) => $query->AppointmentStatus('approved')),
+
+            'Completed' => Tab::make()
+                            ->badge(VetAppointment::AppointmentStatus('completed')->count())
+                            ->modifyQueryUsing(fn ($query) => $query->AppointmentStatus('completed')),
 
             'Rejected' => Tab::make()
-                             ->badge(Appointment::where('appointment_status','rejected')->count())
-                            ->query(fn ($query) => $query->where('appointment_status', 'rejected')),
+                             ->badge(VetAppointment::AppointmentStatus('rejected')->count())
+                            ->query(fn ($query) => $query->AppointmentStatus('rejected')),
+            
  
         ];
     }
