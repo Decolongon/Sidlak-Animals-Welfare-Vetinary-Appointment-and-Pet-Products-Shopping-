@@ -444,189 +444,189 @@ class Checkout extends Component
     // }
 
 
-    public function placeOrder()
-    {
-        $validatedData = $this->validate();
+    // public function placeOrder()
+    // {
+    //     $validatedData = $this->validate();
 
-        if ($this->shipping_method === 'e-wallet' && !$this->payment_method) {
-            $this->addError('payment_method', 'Please select a specific e-wallet.');
-            return;
-        }
+    //     if ($this->shipping_method === 'e-wallet' && !$this->payment_method) {
+    //         $this->addError('payment_method', 'Please select a specific e-wallet.');
+    //         return;
+    //     }
 
-        if ($this->checkoutItems->isEmpty()) {
-            $this->alert('error', '', [
-                'position' => 'top-end',
-                'timer' => 3000,
-                'toast' => true,
-                'text' => 'Please add items before placing an order.',
-            ]);
-            return;
-        }
+    //     if ($this->checkoutItems->isEmpty()) {
+    //         $this->alert('error', '', [
+    //             'position' => 'top-end',
+    //             'timer' => 3000,
+    //             'toast' => true,
+    //             'text' => 'Please add items before placing an order.',
+    //         ]);
+    //         return;
+    //     }
 
-        $sanitizedData = $this->sanitizeInput($validatedData);
+    //     $sanitizedData = $this->sanitizeInput($validatedData);
 
-        try {
-            // Start database transaction
-            DB::beginTransaction();
+    //     try {
+    //         // Start database transaction
+    //         DB::beginTransaction();
 
-            $brgyName = PhilippineBarangay::where('name', $sanitizedData['selectedBarangay'])->value('name');
-            $cityName = PhilippineCity::where('code', $sanitizedData['selectedCity'])->value('name');
+    //         $brgyName = PhilippineBarangay::where('name', $sanitizedData['selectedBarangay'])->value('name');
+    //         $cityName = PhilippineCity::where('code', $sanitizedData['selectedCity'])->value('name');
 
-            // Prepare order data
-            $orderData = [
-                'user_id' => Auth::id(),
-                'shipping_method' => $sanitizedData['shipping_method'],
-                'notes' => $sanitizedData['notes'],
-                'shipping_price' => $this->totalShipping,
-                'total' => $this->subtotal,
-                'payment_status' => 'pending',
-                'order_num' => $this->checkoutHelper()->generateOrderNumber()
-            ];
+    //         // Prepare order data
+    //         $orderData = [
+    //             'user_id' => Auth::id(),
+    //             'shipping_method' => $sanitizedData['shipping_method'],
+    //             'notes' => $sanitizedData['notes'],
+    //             'shipping_price' => $this->totalShipping,
+    //             'total' => $this->subtotal,
+    //             'payment_status' => 'pending',
+    //             'order_num' => $this->checkoutHelper()->generateOrderNumber()
+    //         ];
 
-            // online paynment method
-            if (in_array($this->shipping_method, ['gcash', 'paymaya', 'grab_pay', 'card'])) {
-                $this->paymentCreateIntent($this->subtotal);
-                $this->paymentIntent = Paymongo::paymentIntent()->find($this->paymentIntent_id)->getAttributes();
-                $this->paymentCreateMethod($sanitizedData);
+    //         // online paynment method
+    //         if (in_array($this->shipping_method, ['gcash', 'paymaya', 'grab_pay', 'card'])) {
+    //             $this->paymentCreateIntent($this->subtotal);
+    //             $this->paymentIntent = Paymongo::paymentIntent()->find($this->paymentIntent_id)->getAttributes();
+    //             $this->paymentCreateMethod($sanitizedData);
 
-                $orderData['payment_intent_id'] = $this->paymentIntent_id;
+    //             $orderData['payment_intent_id'] = $this->paymentIntent_id;
 
-                // Create order record
-                $order = Order::create($orderData);
+    //             // Create order record
+    //             $order = Order::create($orderData);
 
-                // Add billing address
-                if ($this->same_as_billing == true) {
-                    $order->billingAddress()->create([
-                        'bil_city' => $cityName,
-                        'bil_barangay' => $brgyName
-                    ]);
-                }
+    //             // Add billing address
+    //             if ($this->same_as_billing == true) {
+    //                 $order->billingAddress()->create([
+    //                     'bil_city' => $cityName,
+    //                     'bil_barangay' => $brgyName
+    //                 ]);
+    //             }
 
-                if ($this->same_as_billing == false) {
-                    $bil_brgyName = PhilippineBarangay::where('name', $sanitizedData['billing_brgy'])->value('name');
-                    $bil_cityName = PhilippineCity::where('code', $sanitizedData['billing_city'])->value('name');
+    //             if ($this->same_as_billing == false) {
+    //                 $bil_brgyName = PhilippineBarangay::where('name', $sanitizedData['billing_brgy'])->value('name');
+    //                 $bil_cityName = PhilippineCity::where('code', $sanitizedData['billing_city'])->value('name');
 
-                    $order->billingAddress()->create([
-                        'bil_city' => $bil_cityName,
-                        'bil_barangay' => $bil_brgyName
-                    ]);
-                }
+    //                 $order->billingAddress()->create([
+    //                     'bil_city' => $bil_cityName,
+    //                     'bil_barangay' => $bil_brgyName
+    //                 ]);
+    //             }
 
-                // Process order items
-                $this->processOrderItems($order);
+    //             // Process order items
+    //             $this->processOrderItems($order);
 
-                // Attach payment method to payment intent
-                $attachedPaymentIntent = $this->createPaymentIntent->attach($this->paymentMethod->id, route('payment.callback'));
+    //             // Attach payment method to payment intent
+    //             $attachedPaymentIntent = $this->createPaymentIntent->attach($this->paymentMethod->id, route('payment.callback'));
 
-                // For redirect-based payments
-                if (isset($attachedPaymentIntent->next_action['redirect']['url'])) {
-                    DB::commit();
-                    return redirect()->away($attachedPaymentIntent->next_action['redirect']['url']);
-                }
+    //             // For redirect-based payments
+    //             if (isset($attachedPaymentIntent->next_action['redirect']['url'])) {
+    //                 DB::commit();
+    //                 return redirect()->away($attachedPaymentIntent->next_action['redirect']['url']);
+    //             }
 
-                // payments (like cards)
-                if ($attachedPaymentIntent->status === 'succeeded') {
-                    $order->update(['payment_status' => 'completed']);
+    //             // payments (like cards)
+    //             if ($attachedPaymentIntent->status === 'succeeded') {
+    //                 $order->update(['payment_status' => 'completed']);
 
-                    // Update user address
-                    Address::updateOrCreate(
-                        ['user_id' => Auth::id()],
-                        [
-                            'barangay' => $brgyName,
-                            'city' => $cityName,
-                        ]
-                    );
+    //                 // Update user address
+    //                 Address::updateOrCreate(
+    //                     ['user_id' => Auth::id()],
+    //                     [
+    //                         'barangay' => $brgyName,
+    //                         'city' => $cityName,
+    //                     ]
+    //                 );
 
-                    // Clear session data
-                    session()->forget([
-                        'buy_now_product',
-                        'buy_now_mode',
-                        'buy_now_quantity',
-                        'cart_quantities',
-                        'selected_checkout_items'
-                    ]);
+    //                 // Clear session data
+    //                 session()->forget([
+    //                     'buy_now_product',
+    //                     'buy_now_mode',
+    //                     'buy_now_quantity',
+    //                     'cart_quantities',
+    //                     'selected_checkout_items'
+    //                 ]);
 
-                    DB::commit();
+    //                 DB::commit();
 
-                    $this->alert('success', '', [
-                        'position' => 'top-end',
-                        'timer' => 3000,
-                        'toast' => true,
-                        'text' => 'Product ordered!',
-                    ]);
-                    return redirect()->route('page.shop');
-                } else {
-                    // Payment failed
-                    throw new \Exception('Payment processing failed with status: ' . $attachedPaymentIntent->status);
-                }
-            }
+    //                 $this->alert('success', '', [
+    //                     'position' => 'top-end',
+    //                     'timer' => 3000,
+    //                     'toast' => true,
+    //                     'text' => 'Product ordered!',
+    //                 ]);
+    //                 return redirect()->route('page.shop');
+    //             } else {
+    //                 // Payment failed
+    //                 throw new \Exception('Payment processing failed with status: ' . $attachedPaymentIntent->status);
+    //             }
+    //         }
 
-            // (cash on delivery)
-            $order = Order::create($orderData);
+    //         // (cash on delivery)
+    //         $order = Order::create($orderData);
 
-            // Add billing address
-            if ($this->same_as_billing == true) {
-                $order->billingAddress()->create([
-                    'bil_city' => $cityName,
-                    'bil_barangay' => $brgyName
-                ]);
-            }
+    //         // Add billing address
+    //         if ($this->same_as_billing == true) {
+    //             $order->billingAddress()->create([
+    //                 'bil_city' => $cityName,
+    //                 'bil_barangay' => $brgyName
+    //             ]);
+    //         }
 
-            if ($this->same_as_billing == false) {
-                $bil_brgyName = PhilippineBarangay::where('name', $sanitizedData['billing_brgy'])->value('name');
-                $bil_cityName = PhilippineCity::where('code', $sanitizedData['billing_city'])->value('name');
+    //         if ($this->same_as_billing == false) {
+    //             $bil_brgyName = PhilippineBarangay::where('name', $sanitizedData['billing_brgy'])->value('name');
+    //             $bil_cityName = PhilippineCity::where('code', $sanitizedData['billing_city'])->value('name');
 
-                $order->billingAddress()->create([
-                    'bil_city' => $bil_cityName,
-                    'bil_barangay' => $bil_brgyName
-                ]);
-            }
+    //             $order->billingAddress()->create([
+    //                 'bil_city' => $bil_cityName,
+    //                 'bil_barangay' => $bil_brgyName
+    //             ]);
+    //         }
 
-            // Process order items
-            $this->processOrderItems($order);
+    //         // Process order items
+    //         $this->processOrderItems($order);
 
-            // Update user address
-            Address::updateOrCreate(
-                ['user_id' => Auth::id()],
-                [
-                    'barangay' => $brgyName,
-                    'city' => $cityName,
-                ]
-            );
+    //         // Update user address
+    //         Address::updateOrCreate(
+    //             ['user_id' => Auth::id()],
+    //             [
+    //                 'barangay' => $brgyName,
+    //                 'city' => $cityName,
+    //             ]
+    //         );
 
-            // Clear session data
-            session()->forget([
-                'buy_now_product',
-                'buy_now_mode',
-                'buy_now_quantity',
-                'cart_quantities',
-                'selected_checkout_items'
-            ]);
+    //         // Clear session data
+    //         session()->forget([
+    //             'buy_now_product',
+    //             'buy_now_mode',
+    //             'buy_now_quantity',
+    //             'cart_quantities',
+    //             'selected_checkout_items'
+    //         ]);
 
-            DB::commit();
+    //         DB::commit();
 
-            $this->reset();
-            $this->alert('success', '', [
-                'position' => 'top-end',
-                'timer' => 3000,
-                'toast' => true,
-                'text' => 'Product ordered!',
-            ]);
-            return redirect()->route('page.shop');
-        } catch (\Exception $e) {
-            // Rollback transaction on error
-            DB::rollBack();
+    //         $this->reset();
+    //         $this->alert('success', '', [
+    //             'position' => 'top-end',
+    //             'timer' => 3000,
+    //             'toast' => true,
+    //             'text' => 'Product ordered!',
+    //         ]);
+    //         return redirect()->route('page.shop');
+    //     } catch (\Exception $e) {
+    //         // Rollback transaction on error
+    //         DB::rollBack();
 
-            $this->alert('warning', '', [
-                'position' => 'top-end',
-                'timer' => 3000,
-                'toast' => true,
-                'text' => 'Order processing failed: ' . $e->getMessage(),
-            ]);
+    //         $this->alert('warning', '', [
+    //             'position' => 'top-end',
+    //             'timer' => 3000,
+    //             'toast' => true,
+    //             'text' => 'Order processing failed: ' . $e->getMessage(),
+    //         ]);
 
-            return redirect()->route('checkout');
-        }
-    }
+    //         return redirect()->route('checkout');
+    //     }
+    // }
 
     public function paymentCreateIntent($amount)
     {
