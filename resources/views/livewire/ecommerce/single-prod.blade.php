@@ -58,7 +58,7 @@
 
                 <!-- Add to Cart & Buy Now Buttons -->
                 <div class="flex items-center space-x-4 mt-4">
-                    @if ($product->prod_quantity > 0)
+                    @if ($product->prod_quantity > 0 || $product->prod_unit === 'diff_size')
                         @if ($product->prod_unit !== 'diff_size')
                             <livewire:ecommerce.add-to-cart-form :product_id="$product->id"
                                 wire:key="add-to-cart-{{ $product->id }}" />
@@ -85,9 +85,10 @@
             </div>
         </div>
 
-        <!-- Image Slider (if multiple images) -->
-        @if ($product && $product->images->count() > 1)
-            <div data-hs-carousel='{
+      
+  <!-- Image Slider (if multiple images) -->
+        @if ($product && $product->images->count() > 1) 
+              <div data-hs-carousel='{
                 "loadingClasses": "opacity-0",
                 "dotsItemClasses": "hs-carousel-active:bg-blue-700 hs-carousel-active:border-blue-700 size-3 border border-gray-400 rounded-full cursor-pointer dark:border-neutral-600 dark:hs-carousel-active:bg-blue-400 dark:hs-carousel-active:border-blue-400",
                 "slidesQty": { "xs": 1, "lg": 3 },
@@ -133,9 +134,11 @@
 
                 <!-- Carousel Dots -->
                 <div class="hs-carousel-pagination flex justify-center absolute bottom-3 inset-x-0 gap-x-2"></div>
-            </div>
-        @endif
+            </div> 
 
+
+         
+        @endif
         <!-- Tabs Section -->
         <div class="mt-6 border-t border-gray-400 dark:border-gray-700 pt-4">
             <!-- Tabs Navigation -->

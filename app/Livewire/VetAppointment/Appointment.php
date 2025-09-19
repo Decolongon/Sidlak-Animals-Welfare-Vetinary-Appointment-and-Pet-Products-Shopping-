@@ -157,11 +157,12 @@ class Appointment extends Component
 
     public function getAppointmentCat()
     {
-        return AppointmentCategory::with(['doctorschedules' => function($query){
-            $query->where('effective_from', '<=', now())
-            ->where('effective_to', '>=', now());
-        }
-        
+        return AppointmentCategory::with([
+            'doctorschedules' => function ($query) {
+                $query->where('effective_from', '<=', now())
+                    ->where('effective_to', '>=', now());
+            }
+
         ])->get(['id', 'appoint_cat_name', 'price']);
     }
 
@@ -202,6 +203,105 @@ class Appointment extends Component
         ];
     }
 
+    // public function submit()
+    // {
+    //     $validatedData = $this->validate();
+
+    //     $sanitizedData = $this->sanitizeInput([
+    //         'pet_name' => $validatedData['pet_name'],
+    //         'pet_type' => $validatedData['pet_type'],
+    //         'pet_breed' => $validatedData['pet_breed'],
+    //         'pet_age' => $validatedData['pet_age'],
+    //         'pet_age_unit' => $validatedData['pet_age_unit'],
+    //         'pet_gender' => $validatedData['pet_gender'],
+    //         'pet_weight' => $validatedData['pet_weight'],
+    //         'isPetVaccinated' => $validatedData['isPetVaccinated'],
+    //         'appointment_category_id' => $validatedData['appointment_category_id'],
+    //         'payment_method' =>  $validatedData['payment_method'],
+    //         'user_id' => Auth::user()->id,
+    //         'total_amount' => $this->getTotalPrice()
+    //     ]);
+
+    //     if ($this->payment_method === 'card') {
+    //         $sanitizedData['card_name'] = $validatedData['card_name'];
+    //         $sanitizedData['expiration_month'] = $validatedData['expiration_month'];
+    //         $sanitizedData['expiration_year'] = $validatedData['expiration_year'];
+    //         $sanitizedData['cvv'] = $validatedData['cvv'];
+    //     }
+
+    //     try {
+    //         $insertCat = VetAppointment::create([
+    //             'pet_name' => $sanitizedData['pet_name'],
+    //             'pet_type' => $sanitizedData['pet_type'],
+    //             'pet_breed' => $sanitizedData['pet_breed'],
+    //             'pet_age' => $sanitizedData['pet_age'] . ' ' . ucwords($sanitizedData['pet_age_unit']),
+    //             'pet_gender' => $sanitizedData['pet_gender'],
+    //             'pet_weight' => $sanitizedData['pet_weight'],
+    //             'isPetVaccinated' => $sanitizedData['isPetVaccinated'],
+    //             'user_id' => $sanitizedData['user_id'],
+    //             'payment_method' =>  $sanitizedData['payment_method'],
+    //             'total_amount' => $this->getTotalPrice()
+    //         ]);
+
+    //         $insertCat->categories()->attach($sanitizedData['appointment_category_id']);
+
+    //         if ($this->payment_method !== 'Over The Counter') {
+    //             $this->paymentCreateIntent($this->getTotalPrice());
+    //             $this->paymentIntent = Paymongo::paymentIntent()->find($this->paymentIntent_id)->getAttributes();
+
+    //             $this->paymentCreateMethod($sanitizedData);
+
+    //             $insertCat->update([
+    //                 'paymentIntent_id' => $this->paymentIntent_id
+    //             ]);
+    //             $attachedPaymentIntent = $this->createPaymentIntent->attach($this->paymentMethod->id, route('payment_vet'));
+    //             if (isset($attachedPaymentIntent->next_action['redirect']['url'])) {
+    //                 $insertCat->update([
+    //                     'payment_status' => 'pending'
+    //                 ]);
+    //                 return redirect()->away($attachedPaymentIntent->next_action['redirect']['url']);
+    //             }
+
+    //             if ($attachedPaymentIntent->status === 'succeeded') {
+    //                 $insertCat->update([
+    //                     'payment_status' => 'completed'
+    //                 ]);
+    //                 $this->alert('success', '', [
+    //                     'position' => 'top-end',
+    //                     'timer' => 5000,
+    //                     'toast' => true,
+    //                     'text' => 'Successfully Booked Appointment!',
+    //                 ]);
+    //                 return redirect()->route('appointment');
+    //             }
+    //         }
+
+    //         $this->alert('success', '', [
+    //             'position' => 'top-end',
+    //             'timer' => 3000,
+    //             'toast' => true,
+    //             'text' => 'Successfully Booked Appointment!',
+    //         ]);
+    //         return redirect()->route('appointment');
+    //     } catch (\Exception $e) {
+
+    //         if (isset($insertCat)) {
+    //             $insertCat->update([
+    //                 'payment_status' => 'failed'
+    //             ]);
+    //         }
+    //         $insertCat->delete();
+    //         $this->alert('warning', '', [
+    //             'position' => 'top-end',
+    //             'timer' => 10000,
+    //             'toast' => true,
+    //             'text' => 'Payment processing failed: ' . $e->getMessage(),
+    //         ]);
+
+    //         return redirect()->route('appointment');
+    //     }
+    // }
+
     public function submit()
     {
         $validatedData = $this->validate();
@@ -228,7 +328,11 @@ class Appointment extends Component
         }
 
         try {
-            $insertCat = VetAppointment::create([
+            // Start database transaction
+            DB::beginTransaction();
+
+            // Only create appointment record after successful payment processing
+            $appointmentData = [
                 'pet_name' => $sanitizedData['pet_name'],
                 'pet_type' => $sanitizedData['pet_type'],
                 'pet_breed' => $sanitizedData['pet_breed'],
@@ -239,31 +343,44 @@ class Appointment extends Component
                 'user_id' => $sanitizedData['user_id'],
                 'payment_method' =>  $sanitizedData['payment_method'],
                 'total_amount' => $this->getTotalPrice()
-            ]);
+            ];
 
-            $insertCat->categories()->attach($sanitizedData['appointment_category_id']);
-
+            // Process payment first for non-OTC methods
             if ($this->payment_method !== 'Over The Counter') {
                 $this->paymentCreateIntent($this->getTotalPrice());
                 $this->paymentIntent = Paymongo::paymentIntent()->find($this->paymentIntent_id)->getAttributes();
 
                 $this->paymentCreateMethod($sanitizedData);
 
-                $insertCat->update([
-                    'paymentIntent_id' => $this->paymentIntent_id
-                ]);
+                $appointmentData['paymentIntent_id'] = $this->paymentIntent_id;
+
+                // Attach payment method to payment intent
                 $attachedPaymentIntent = $this->createPaymentIntent->attach($this->paymentMethod->id, route('payment_vet'));
+
                 if (isset($attachedPaymentIntent->next_action['redirect']['url'])) {
-                    $insertCat->update([
-                        'payment_status' => 'pending'
-                    ]);
+                    // Payment requires further action (3DS authentication)
+                    $appointmentData['payment_status'] = 'pending';
+
+                    // Create appointment record
+                    $insertCat = VetAppointment::create($appointmentData);
+                    $insertCat->categories()->attach($sanitizedData['appointment_category_id']);
+
+                    DB::commit();
+
+                    // Redirect to payment gateway
                     return redirect()->away($attachedPaymentIntent->next_action['redirect']['url']);
                 }
 
                 if ($attachedPaymentIntent->status === 'succeeded') {
-                    $insertCat->update([
-                        'payment_status' => 'completed'
-                    ]);
+                    // Payment successful
+                    $appointmentData['payment_status'] = 'completed';
+
+                    // Create appointment record
+                    $insertCat = VetAppointment::create($appointmentData);
+                    $insertCat->categories()->attach($sanitizedData['appointment_category_id']);
+
+                    DB::commit();
+
                     $this->alert('success', '', [
                         'position' => 'top-end',
                         'timer' => 5000,
@@ -271,28 +388,35 @@ class Appointment extends Component
                         'text' => 'Successfully Booked Appointment!',
                     ]);
                     return redirect()->route('appointment');
+                } else {
+                    // Payment failed
+                    throw new \Exception('Payment processing failed with status: ' . $attachedPaymentIntent->status);
                 }
-            }
+            } else {
+                // Over The Counter payment - create appointment immediately
+                $appointmentData['payment_status'] = 'pending';
+                $insertCat = VetAppointment::create($appointmentData);
+                $insertCat->categories()->attach($sanitizedData['appointment_category_id']);
 
-            $this->alert('success', '', [
-                'position' => 'top-end',
-                'timer' => 3000,
-                'toast' => true,
-                'text' => 'Successfully Booked Appointment!',
-            ]);
-            return redirect()->route('appointment');
-        } catch (\Exception $e) {
-            if (isset($insertCat)) {
-                $insertCat->update([
-                    'payment_status' => 'failed'
+                DB::commit();
+
+                $this->alert('success', '', [
+                    'position' => 'top-end',
+                    'timer' => 3000,
+                    'toast' => true,
+                    'text' => 'Successfully Booked Appointment!',
                 ]);
+                return redirect()->route('appointment');
             }
+        } catch (\Exception $e) {
+            // Rollback transaction on error
+            DB::rollBack();
 
             $this->alert('warning', '', [
                 'position' => 'top-end',
                 'timer' => 10000,
                 'toast' => true,
-                'text' => 'Payment processing failed: ' . $e->getMessage(),
+                'text' => 'Appointment booking failed: ' . $e->getMessage(),
             ]);
 
             return redirect()->route('appointment');

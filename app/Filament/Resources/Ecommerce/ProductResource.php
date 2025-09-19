@@ -21,6 +21,7 @@ use Filament\Resources\Pages\Page;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\HtmlString;
+use Filament\Tables\Filters\Filter;
 use Filament\Forms\Components\Group;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Toggle;
@@ -48,6 +49,8 @@ use Filament\Forms\Components\ToggleButtons;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Forms\Components\MarkdownEditor;
 use Filament\Infolists\Components\ImageEntry;
+use Filament\Tables\Grouping\Group as TableGroup;
+use Filament\Tables\Actions\Action as TableAction;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Filament\Infolists\Components\Grid as ComponentsGrid;
 use Filament\Infolists\Components\Section as InfoSection;
@@ -57,8 +60,6 @@ use App\Filament\Resources\Ecommerce\ProductResource\Pages;
 use Filament\Forms\Components\Actions\Action as FormAction;
 use Filament\Infolists\Components\Group as ComponentsGroup;
 use Filament\Infolists\Components\Section as ComponentsSection;
-use Filament\Tables\Actions\Action as TableAction;
-use Filament\Tables\Grouping\Group as TableGroup;
 use App\Filament\Resources\Ecommerce\ProductResource\RelationManagers;
 
 
@@ -494,6 +495,24 @@ class ProductResource extends Resource
                         '0' => 'Not Visible to Market',
                     ]),
 
+                SelectFilter::make('prod_requires_shipping')
+                    ->label('Is Free Shipping?')
+                    ->options([
+                        '0' => 'Free Shipping',
+                        '1' => 'Paid Shipping',
+                    ])
+                // Filter::make('prod_requires_shipping')
+                //     ->label('Free Shipping')
+                //     ->query(function ($query) {
+                //         return $query->where('prod_requires_shipping', 0);
+                //     }),
+
+                // Filter::make('prod_requires_shipping')
+                //     ->label('Paid Shipping')
+                //     ->query(function ($query) {
+                //         return $query->where('prod_requires_shipping', 1);
+                //     })
+                   
                 // SelectFilter::make('prod_stock')
                 // ->label('Product Stock')
                 // ->options([
@@ -840,20 +859,20 @@ class ProductResource extends Resource
                         ->label('Available Quantity')
                         ->badge()
                         ->color(function ($state) {
-                            if($state > 10) {
+                            if ($state > 10) {
                                 return 'success';
                             }
-                            if($state > 0 && $state <= 10) {
+                            if ($state > 0 && $state <= 10) {
                                 return 'warning';
                             } else {
                                 return 'danger';
                             }
                         })
                         ->formatStateUsing(function ($state) {
-                            if($state > 10) {
+                            if ($state > 10) {
                                 return $state . ' In Stock';
                             }
-                            if($state > 0 && $state <= 10) {
+                            if ($state > 0 && $state <= 10) {
                                 return $state . ' Low Stock';
                             } else {
                                 return 'Out of Stock';

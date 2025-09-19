@@ -95,7 +95,7 @@ class GetCart extends Component
     {
         foreach ($products as $product) {
             if ($product->images->isNotEmpty()) {
-                // Set the primary image dynamically
+                // Set primary image
                 $product->primary_image = $product->images
                     ->where('is_primary', true)
                     ->first() ?? $product->images->first();
@@ -137,7 +137,7 @@ class GetCart extends Component
             ]);
         }
 
-        $this->getCarts();
+       $this->getCarts();
     }
 
 
@@ -186,7 +186,7 @@ class GetCart extends Component
             }
         }
 
-        $this->getCarts(); // Keep this if you need to recalculate totals
+        $this->getCarts(); 
         //$this->dispatch('cartUpdated');
     }
 
@@ -307,6 +307,7 @@ class GetCart extends Component
 
         $this->dispatch('cartUpdated');
         $this->selectedItems = [];
+        $this->reset(['selectAll', 'selectedItems']);
 
         $this->alert('success', 'Selected items removed from cart', [
             'position' => 'top-end',
@@ -344,7 +345,20 @@ class GetCart extends Component
         $outOfStockItems = Cart::with('product')
             ->whereIn('id', $this->selectedItems)
             ->get()
-            ->filter(fn($cart) => $cart->quantity > $cart->product->prod_quantity);
+            ->filter(function ($cart) {
+
+                if($cart->product->prod_unit === 'diff_size' && $cart->size){
+                   $variant = $cart->product->images()
+                    ->where('sizes', $cart->size)
+                    ->first();
+
+                    if($variant){
+                        return $variant->quantity < $cart->quantity;
+                    }
+
+                }
+                return $cart->product->prod_quantity < $cart->quantity;
+            });
 
         if ($outOfStockItems->isNotEmpty()) {
             // Store them temporarily in session 

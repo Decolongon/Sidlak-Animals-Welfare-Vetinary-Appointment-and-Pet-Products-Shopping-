@@ -28,7 +28,8 @@ class ViewOrder extends Component
             ->orderBy('created_at', 'desc');
 
         if ($this->statusFilter !== 'all') {
-            $query->where('order_status', $this->statusFilter);
+            $query->where('order_status', '=' ,"{$this->statusFilter}");
+
         }
 
         $this->orders = $query->take(10)->get();
@@ -46,20 +47,27 @@ class ViewOrder extends Component
                 }
             });
         });
-        // Calculate discounted prices for all products in orders
-        foreach ($this->orders as $order) {
-            $products = $order->orderItems->map(function ($item) {
-                return $item->product;
-            })->filter();
+        // // Calculate discounted prices for all products in orders
+        // foreach ($this->orders as $order) {
+        //     $products = $order->orderItems->map(function ($item) {
+        //         return $item->product;
+        //     })->filter();
 
-            if ($products->isNotEmpty()) {
-                app(ProductDiscountHelper::class)->calculateDiscountedPrice($products);
-            }
-        }
+        //     if ($products->isNotEmpty()) {
+        //         app(ProductDiscountHelper::class)->calculateDiscountedPrice($products);
+        //     }
+        // }
 
         $this->getPrimaryImage($this->orders);
+      
     }
 
+    // public function filter($filter)
+    // {
+    //     $this->$this->statusFilter = $filter;
+    //     $this->getOrders();
+    // }
+  
 
     protected function getPrimaryImage($orders)
     {
@@ -93,6 +101,15 @@ class ViewOrder extends Component
             $product = $item->product;
 
             if ($product) {
+                if($product->prod_unit === 'diff_size'){
+                    $variant = $product->images()
+                        ->where('sizes', $item->size)
+                        ->first();
+                    if ($variant) {
+                        $variant->quantity += $item->quantity;
+                        $variant->save();
+                    }
+                }
                 $product->prod_quantity += $item->quantity; // Add back the ordered quantity
                 $product->save();
             }

@@ -59,7 +59,7 @@
 
                                     <!--[if BLOCK]><![endif]--><?php if($cart->size): ?>
                                         <span class="text-sm text-gray-600 dark:text-neutral-400">
-                                            <?php echo e(ucwords($cart->size)); ?>
+                                            <?php echo e(ucwords(preg_replace('/[^a-zA-Z0-9\s]/', ' ', $cart->size))); ?>
 
                                         </span>
                                     <?php endif; ?><!--[if ENDBLOCK]><![endif]-->

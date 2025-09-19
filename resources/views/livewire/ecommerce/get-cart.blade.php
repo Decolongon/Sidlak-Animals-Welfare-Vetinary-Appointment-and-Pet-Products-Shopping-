@@ -58,7 +58,7 @@
                                     {{ ucwords($cart->product->prod_name) }}
                                     @if ($cart->size)
                                         <span class="text-sm text-gray-600 dark:text-neutral-400">
-                                            {{ ucwords($cart->size) }}
+                                            {{ ucwords(preg_replace('/[^a-zA-Z0-9\s]/', ' ', $cart->size)) }}
                                         </span>
                                     @endif
 

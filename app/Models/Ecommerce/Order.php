@@ -5,8 +5,9 @@ namespace App\Models\Ecommerce;
 use App\Models\User;
 use App\Models\Ecommerce\Address;
 use App\Models\Ecommerce\OrderItem;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
+use App\Models\Ecommerce\BillingAddress;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
@@ -53,14 +54,14 @@ class Order extends Model
         return $this->belongsTo(User::class);
     }
 
-    public function shippingAddress() : BelongsTo
-    {
-        return $this->belongsTo(Address::class, 'shipping_address_id');
-    }
+    // public function shippingAddress() : BelongsTo
+    // {
+    //     return $this->belongsTo(Address::class, 'shipping_address_id');
+    // }
 
-    public function billingAddress() : BelongsTo
+    public function billingAddress() : HasMany
     {
-        return $this->belongsTo(Address::class, 'billing_address_id');
+        return $this->hasMany(BillingAddress::class);
     }
 
     public function orderItems(): HasMany

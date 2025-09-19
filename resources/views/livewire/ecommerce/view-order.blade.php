@@ -49,7 +49,7 @@
 
         <!-- Order Cards -->
         @forelse ($orders as $order)
-            <div
+            <div wire:key="order-{{ $order->order_num }}"
                 class="mb-6 bg-white dark:bg-neutral-800 rounded-lg shadow-sm overflow-hidden border border-gray-200 dark:border-neutral-700 transition-all hover:shadow-md">
                 <!-- Order Header -->
                 <div
@@ -96,7 +96,7 @@
                                 <div>
                                     <h4 class="text-sm font-medium text-gray-800 dark:text-white">
                                         @if (isset($item->variant))
-                                            {{ $item->product->prod_name }} - {{ ucwords($item->variant->sizes) }}
+                                            {{ $item->product->prod_name }} - {{ ucwords(preg_replace('/[^a-zA-Z0-9\s]/', ' ', $item->variant->sizes)) }}
                                         @else
                                             {{ $item->product->prod_name }}
                                         @endif
@@ -116,7 +116,7 @@
                                 </div>
                             </div>
                             <span class="text-sm font-medium text-gray-800 dark:text-white">
-                                @if ($item->product->discounted_price !== null)
+                                {{-- @if ($item->product->discounted_price !== null)
                                     {{ number_format($item->product->discounted_price,2) }}
                                 @else
                                     @if (isset($item->variant))
@@ -124,22 +124,23 @@
                                     @else
                                         Price:₱ {{ number_format($item->product->prod_price,2) }}
                                     @endif
-                                @endif
+                                @endif --}}
+                               Price:₱ {{ number_format($item->price,2) }}
 
                                 <!-- Shipping Cost -->
                                 {{-- @foreach ($order->orderItems as $item) --}}
-                                @if ($item->product->prod_requires_shipping === true)
+                                {{-- @if ($item->product->prod_requires_shipping === true)
                                     <div class="flex justify-between">
                                         <span class="text-sm text-gray-500 dark:text-gray-400">Shipping:</span>
                                         <span
-                                            class="text-sm font-medium dark:text-white">₱{{ number_format($item->product->shipping_cost, 2) }}</span>
+                                            class="text-sm font-medium dark:text-white">₱{{ number_format($item->product->shipping_price, 2) }}</span>
                                     </div>
                                 @else
                                     <div class="flex justify-between">
                                         <span class="text-sm font-medium text-green-500 dark:text-green-400">Free
                                             Shipping</span>
                                     </div>
-                                @endif
+                                @endif --}}
                                 {{-- @endforeach --}}
                             </span>
                         </div>

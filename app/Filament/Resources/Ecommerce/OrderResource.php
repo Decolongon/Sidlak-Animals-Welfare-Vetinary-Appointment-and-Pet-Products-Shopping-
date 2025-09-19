@@ -146,66 +146,66 @@ class OrderResource extends Resource
                     ])
                     ->columns(1),
 
-                Section::make('Addresses')
-                    ->schema([
-                        Select::make('shipping_address_id')
-                            ->label('Shipping Address')
-                            ->relationship(name: 'shippingAddress', titleAttribute: 'full_address')
-                            ->preload()
-                            // ->required()
-                            ->optionsLimit(5)
-                            ->searchable()
-                            ->createOptionForm([
-                                TextInput::make('street')->required(),
-                                TextInput::make('city')->required(),
-                                TextInput::make('state')->required(),
-                                TextInput::make('zip')->required(),
-                                Hidden::make('address_type')->default('shipping'),
-                            ]),
+                // Section::make('Addresses')
+                //     ->schema([
+                //         Select::make('shipping_address_id')
+                //             ->label('Shipping Address')
+                //             ->relationship(name: 'shippingAddress', titleAttribute: 'full_address')
+                //             ->preload()
+                //             // ->required()
+                //             ->optionsLimit(5)
+                //             ->searchable()
+                //             ->createOptionForm([
+                //                 TextInput::make('street')->required(),
+                //                 TextInput::make('city')->required(),
+                //                 TextInput::make('state')->required(),
+                //                 TextInput::make('zip')->required(),
+                //                 Hidden::make('address_type')->default('shipping'),
+                //             ]),
 
-                        Select::make('billing_address_id')
-                            ->label('Billing Address')
-                            ->relationship(name: 'billingAddress', titleAttribute: 'full_address')
-                            ->preload()
-                            //->required()
-                            ->dehydrated()
-                            ->optionsLimit(5)
-                            ->searchable()
-                            ->createOptionForm([
-                                TextInput::make('street')->required(),
-                                TextInput::make('city')->required(),
-                                TextInput::make('state')->required(),
-                                TextInput::make('zip')->required(),
-                                Hidden::make('address_type')->default('billing'),
-                            ]),
+                //         Select::make('billing_address_id')
+                //             ->label('Billing Address')
+                //             ->relationship(name: 'billingAddress', titleAttribute: 'full_address')
+                //             ->preload()
+                //             //->required()
+                //             ->dehydrated()
+                //             ->optionsLimit(5)
+                //             ->searchable()
+                //             ->createOptionForm([
+                //                 TextInput::make('street')->required(),
+                //                 TextInput::make('city')->required(),
+                //                 TextInput::make('state')->required(),
+                //                 TextInput::make('zip')->required(),
+                //                 Hidden::make('address_type')->default('billing'),
+                //             ]),
 
-                        Toggle::make('is_billing_same_as_shipping')
-                            ->label('Billing same as Shipping')
-                            ->reactive()
-                            ->afterStateUpdated(
-                                fn($state, $set, $get) =>
-                                $state ? $set('billing_address_id', $get('shipping_address_id')) : null
-                            ),
+                //         Toggle::make('is_billing_same_as_shipping')
+                //             ->label('Billing same as Shipping')
+                //             ->reactive()
+                //             ->afterStateUpdated(
+                //                 fn($state, $set, $get) =>
+                //                 $state ? $set('billing_address_id', $get('shipping_address_id')) : null
+                //             ),
 
-                        Select::make('shipping_method')
-                            ->label('Shipping Method')
-                            ->options([
-                                'COD' => 'Cash on Delivery',
-                                // 'gcash' => 'gcash',
-                                // 'paymaya' => 'paymaya',
-                                // 'card' => 'card',
-                                // 'grab_pay' => 'grab_pay',
-                            ])
-                            ->default('COD')
-                            ->required(),
+                //         Select::make('shipping_method')
+                //             ->label('Shipping Method')
+                //             ->options([
+                //                 'COD' => 'Cash on Delivery',
+                //                 // 'gcash' => 'gcash',
+                //                 // 'paymaya' => 'paymaya',
+                //                 // 'card' => 'card',
+                //                 // 'grab_pay' => 'grab_pay',
+                //             ])
+                //             ->default('COD')
+                //             ->required(),
 
-                        Textarea::make('notes')
-                            ->maxLength(1000)
-                            ->rows(5)
-                            ->label('Notes (optional)')
+                //         Textarea::make('notes')
+                //             ->maxLength(1000)
+                //             ->rows(5)
+                //             ->label('Notes (optional)')
 
-                    ])
-                    ->columns(2),
+                //     ])
+                //     ->columns(2),
 
 
 
@@ -358,329 +358,342 @@ class OrderResource extends Resource
 
 
 
-public static function table(Table $table): Table
-{
-    return $table
-        ->groups([
-            Group::make('created_at')
-                ->label('Ordered at')
-                ->collapsible()
-                ->date(),
-        ])
-        ->columns([
-            TextColumn::make('user.name')
-                ->label('Customer Name')
-                ->sortable()
-                ->formatStateUsing(fn(string $state): string => ucwords($state))
-                ->searchable()
-                ->weight('medium')
-                ->color('gray-700'),
+    public static function table(Table $table): Table
+    {
+        return $table
+            ->groups([
+                Group::make('created_at')
+                    ->label('Ordered at')
+                    ->collapsible()
+                    ->date(),
+            ])
+            ->columns([
+                TextColumn::make('user.name')
+                    ->label('Customer Name')
+                    ->sortable()
+                    ->formatStateUsing(fn(string $state): string => ucwords($state))
+                    ->searchable()
+                    ->weight('medium')
+                    ->color('gray-700'),
 
-            TextColumn::make('order_num')
-                ->label('Tracking #')
-                ->badge()
-                ->searchable()
-                ->color('primary')
-                ->copyable()
-                ->copyMessage('Tracking number copied!'),
+                TextColumn::make('user.address.complete_address')
+                    ->label('Address')
+                    ->html()
+                    ->limit(30)
+                    ->formatStateUsing(fn(string $state): string => ucwords($state)),
 
-            TextColumn::make('orderItems.product.prod_name')
-                ->label('Product Ordered')
-                ->sortable()
-                ->formatStateUsing(function ($record) {
-                    $items = $record->orderItems;
-                    
-                    $html = $items->map(function ($item) {
-                        return "<div class='min-h-[50px] flex items-center text-sm text-gray-700'>" .
-                            ucwords(Str::limit($item->product->prod_name, 20)) .
-                            "</div>";
-                    })->join('');
-                    
-                    return $html;
-                })
-                ->html()
-                ->searchable(),
+                TextColumn::make('billingAddress.bil_complete_address')
+                    ->label('Billing Address')
+                    ->limit(30)
+                    ->formatStateUsing(fn(string $state): string => ucwords($state)),
 
-            TextColumn::make('images.url')
-                ->label('Product Image')
-                ->getStateUsing(function ($record) {
-                    $items = $record->orderItems;
-                    
-                    $html = $items->map(function ($item) {
-                        $product = $item->product;
+                //->toggleable(isToggledHiddenByDefault: true),
 
-                        if (!$product || !$product->images) {
-                            return "<div class='flex items-center justify-center w-8 h-8 bg-gray-100 rounded-full'>
+                TextColumn::make('order_num')
+                    ->label('Tracking #')
+                    ->badge()
+                    ->searchable()
+                    ->color('primary')
+                    ->copyable()
+                    ->copyMessage('Tracking number copied!'),
+
+                TextColumn::make('orderItems.product.prod_name')
+                    ->label('Product Ordered')
+                    ->sortable()
+                    ->formatStateUsing(function ($record) {
+                        $items = $record->orderItems;
+
+                        $html = $items->map(function ($item) {
+                            return "<div class='min-h-[50px] flex items-center text-sm text-gray-700'>" .
+                                ucwords(Str::limit($item->product->prod_name, 20)) .
+                                "</div>";
+                        })->join('');
+
+                        return $html;
+                    })
+                    ->html()
+                    ->searchable(),
+
+                TextColumn::make('images.url')
+                    ->label('Product Image')
+                    ->getStateUsing(function ($record) {
+                        $items = $record->orderItems;
+
+                        $html = $items->map(function ($item) {
+                            $product = $item->product;
+
+                            if (!$product || !$product->images) {
+                                return "<div class='flex items-center justify-center w-8 h-8 bg-gray-100 rounded-full'>
                                 <span class='text-xs text-gray-400'>No image</span>
                             </div>";
-                        }
+                            }
 
-                        // For diff_size products, find the image that matches the ordered size
-                        if ($product->prod_unit === 'diff_size' && $item->size) {
-                            $sizeImage = $product->images->first(function ($image) use ($item) {
-                                return isset($image->sizes) && $image->sizes === $item->size;
-                            });
+                            // For diff_size products, find the image that matches the ordered size
+                            if ($product->prod_unit === 'diff_size' && $item->size) {
+                                $sizeImage = $product->images->first(function ($image) use ($item) {
+                                    return isset($image->sizes) && $image->sizes === $item->size;
+                                });
 
-                            if ($sizeImage) {
-                                $imageUrl = asset(Storage::url($sizeImage->url));
+                                if ($sizeImage) {
+                                    $imageUrl = asset(Storage::url($sizeImage->url));
+                                    return "<div class='flex items-center justify-center'><img src='{$imageUrl}' class='w-8 h-8 object-cover rounded-full border border-gray-200'></div>";
+                                }
+                            }
+
+                            // For all other cases, get the primary image or first available image
+                            $imagePath = $product->images->first(function ($image) {
+                                return $image->is_primary === true;
+                            })->url ?? $product->images->first()->url ?? null;
+
+                            if ($imagePath) {
+                                $imageUrl = asset(Storage::url($imagePath));
                                 return "<div class='flex items-center justify-center'><img src='{$imageUrl}' class='w-8 h-8 object-cover rounded-full border border-gray-200'></div>";
                             }
-                        }
 
-                        // For all other cases, get the primary image or first available image
-                        $imagePath = $product->images->first(function ($image) {
-                            return $image->is_primary === true;
-                        })->url ?? $product->images->first()->url ?? null;
-
-                        if ($imagePath) {
-                            $imageUrl = asset(Storage::url($imagePath));
-                            return "<div class='flex items-center justify-center'><img src='{$imageUrl}' class='w-8 h-8 object-cover rounded-full border border-gray-200'></div>";
-                        }
-
-                        return "<div class='flex items-center justify-center w-8 h-8 bg-gray-100 rounded-full'>
+                            return "<div class='flex items-center justify-center w-8 h-8 bg-gray-100 rounded-full'>
                             <span class='text-xs text-gray-400'>No image</span>
                         </div>";
-                    })->filter()->join('');
-                    
-                    return $html;
-                })
-                ->html()
-                ->toggleable(isToggledHiddenByDefault: true),
+                        })->filter()->join('');
 
-            TextColumn::make('orderItems')
-                ->label('Quantity')
-                ->formatStateUsing(function ($record) {
-                    $items = $record->orderItems;
-                    
-                    $html = $items->map(function ($item) {
-                        $qty = number_format($item->quantity, 0) ?? 0;
-                        $unit = $item->product->prod_unit ?? '';
-                        $weight = $item->product->prod_weight ?? 0;
+                        return $html;
+                    })
+                    ->html()
+                    ->toggleable(isToggledHiddenByDefault: true),
 
-                        if ($unit === 'pcs') {
-                            $quantityText = "{$qty} pcs";
-                        } elseif ($unit === 'diff_size') {
-                            $quantityText = "{$qty} × " . (ucwords($item->size) ?? 'N/A');
-                        } else {
-                            $quantityText = "{$qty} × " . number_format($weight, 2) . $unit;
-                        }
+                TextColumn::make('orderItems')
+                    ->label('Quantity')
+                    ->formatStateUsing(function ($record) {
+                        $items = $record->orderItems;
 
-                        return "<div class='min-h-[50px] flex items-center text-sm text-gray-700 font-medium'>" .
-                            $quantityText .
-                            "</div>";
-                    })->join('');
-                    
-                    return $html;
-                })
-                ->html()
-                ->toggleable(isToggledHiddenByDefault: true),
+                        $html = $items->map(function ($item) {
+                            $qty = number_format($item->quantity, 0) ?? 0;
+                            $unit = $item->product->prod_unit ?? '';
+                            $weight = $item->product->prod_weight ?? 0;
 
-            TextColumn::make('notes')
-                ->limit(70)
-                ->html()
-                ->label('Notes')
-                ->toggleable(isToggledHiddenByDefault: true)
-                ->formatStateUsing(fn($state) => $state ? "<div class='text-sm text-gray-600 italic'>" . nl2br(e($state)) . "</div>" : '<span class="text-gray-400 text-sm">No notes</span>'),
+                            if ($unit === 'pcs') {
+                                $quantityText = "{$qty} pcs";
+                            } elseif ($unit === 'diff_size') {
+                                $quantityText = "{$qty} × " . (ucwords($item->size) ?? 'N/A');
+                            } else {
+                                $quantityText = "{$qty} × " . number_format($weight, 2) . $unit;
+                            }
 
-            TextColumn::make('order_status')
-                ->label('Order Status')
-                ->badge()
-                ->formatStateUsing(fn($state) => OrderStatusEnum::tryFrom($state)?->getLabel() ?? 'Unknown')
-                ->color(fn($state) => OrderStatusEnum::tryFrom($state)?->getColor() ?? 'gray')
-                ->icon(fn($state) => OrderStatusEnum::tryFrom($state)?->getIcon() ?? null)
-                ->sortable(),
+                            return "<div class='min-h-[50px] flex items-center text-sm text-gray-700 font-medium'>" .
+                                $quantityText .
+                                "</div>";
+                        })->join('');
 
-            TextColumn::make('payment_status')
-                ->label('Payment Status')
-                ->badge()
-                ->formatStateUsing(fn($state) => PaymentStatusEnum::tryFrom($state)?->getLabel() ?? 'Unknown')
-                ->color(fn($state) => PaymentStatusEnum::tryFrom($state)?->getColor() ?? 'gray')
-                ->icon(fn($state) => PaymentStatusEnum::tryFrom($state)?->getIcon() ?? null)
-                ->sortable(),
+                        return $html;
+                    })
+                    ->html()
+                    ->toggleable(isToggledHiddenByDefault: true),
 
-            TextColumn::make('shipping_method')
-                ->label('Shipping Method')
-                ->badge()
-                ->toggleable(isToggledHiddenByDefault: true)
-                ->formatStateUsing(fn(string $state): string => ($state == 'gcash' || $state == 'paymaya' || $state == 'grab_pay' || $state == 'card') ? 'E-Wallet/' . strtoupper($state) : strtoupper($state))
-                ->color(fn($state) => $state == 'gcash' || $state == 'paymaya' || $state == 'grab_pay' || $state == 'card' ? 'success' : 'primary'),
+                TextColumn::make('notes')
+                    ->limit(70)
+                    ->html()
+                    ->label('Notes')
+                    ->toggleable(isToggledHiddenByDefault: true)
+                    ->formatStateUsing(fn($state) => $state ? "<div class='text-sm text-gray-600 italic'>" . nl2br(e($state)) . "</div>" : '<span class="text-gray-400 text-sm">No notes</span>'),
 
-            TextColumn::make('created_at')
-                ->sortable()
-                ->formatStateUsing(fn($state) => "<span >" . Carbon::parse($state)->format('M d, Y g:i A') . "</span>")
-                ->html()
-                ->label('Ordered At'),
+                TextColumn::make('order_status')
+                    ->label('Order Status')
+                    ->badge()
+                    ->formatStateUsing(fn($state) => OrderStatusEnum::tryFrom($state)?->getLabel() ?? 'Unknown')
+                    ->color(fn($state) => OrderStatusEnum::tryFrom($state)?->getColor() ?? 'gray')
+                    ->icon(fn($state) => OrderStatusEnum::tryFrom($state)?->getIcon() ?? null)
+                    ->sortable(),
 
-            TextColumn::make('shipping_price')
-                ->label('Shipping Cost')
-                ->sortable()
-                ->formatStateUsing(function ($state) {
-                    return $state == 0 ? 
-                        "<span >Free Shipping</span>" : 
-                        "<span >₱" . number_format($state, 2) . "</span>";
-                })
-                ->html()
-                ->badge()
-                ->color(fn($record) => $record->shipping_price == 0 ? 'success' : 'info'),
+                TextColumn::make('payment_status')
+                    ->label('Payment Status')
+                    ->badge()
+                    ->formatStateUsing(fn($state) => PaymentStatusEnum::tryFrom($state)?->getLabel() ?? 'Unknown')
+                    ->color(fn($state) => PaymentStatusEnum::tryFrom($state)?->getColor() ?? 'gray')
+                    ->icon(fn($state) => PaymentStatusEnum::tryFrom($state)?->getIcon() ?? null)
+                    ->sortable(),
 
-            TextColumn::make('total')
-                ->label('Total Amount')
-                ->sortable()
-                ->formatStateUsing(fn($state) => "<span >₱" . number_format($state, 2) . "</span>")
-                ->html(),
+                TextColumn::make('shipping_method')
+                    ->label('Shipping Method')
+                    ->badge()
+                    ->toggleable(isToggledHiddenByDefault: true)
+                    ->formatStateUsing(fn(string $state): string => ($state == 'gcash' || $state == 'paymaya' || $state == 'grab_pay' || $state == 'card') ? 'E-Wallet/' . strtoupper($state) : strtoupper($state))
+                    ->color(fn($state) => $state == 'gcash' || $state == 'paymaya' || $state == 'grab_pay' || $state == 'card' ? 'success' : 'primary'),
 
-        ])
-        ->filters([
-            SelectFilter::make('payment_status')
-                ->label('Payment Status')
-                ->options(PaymentStatusEnum::class)
-                ->indicator('Payment Status'),
+                TextColumn::make('created_at')
+                    ->sortable()
+                    ->formatStateUsing(fn($state) => "<span >" . Carbon::parse($state)->format('M d, Y g:i A') . "</span>")
+                    ->html()
+                    ->label('Ordered At'),
 
-            Tables\Filters\Filter::make('created_at')
-                ->form([
-                    DatePicker::make('date')
-                        ->label('Date Ordered')
-                        ->closeOnDateSelection()
-                        ->nullable()
-                        ->live()
-                        ->displayFormat('M d, Y'),
-                ])
-                ->query(function (Builder $query, array $data): Builder {
-                    return $query
-                        ->when(
-                            $data['date'] ?? null,
-                            fn(Builder $query, $date): Builder => $query->whereDate('created_at', $date),
-                        );
-                })
-                ->indicateUsing(function (array $data): ?string {
-                    if (!isset($data['date'])) {
-                        return null;
-                    }
-                    return 'Date Ordered: ' . Carbon::parse($data['date'])->format('M d, Y');
-                })
-        ])
-        ->filtersTriggerAction(
-            fn(Action $action) => $action
-                ->slideOver()
-                ->button()
-                ->label('Filter')
-                ->icon('heroicon-o-funnel')
-                // ->color('gray'),
-        )
-        ->actions([
-            Tables\Actions\ViewAction::make()
-                ->icon('heroicon-o-eye'),
-                
-            Tables\Actions\ActionGroup::make([
-                Tables\Actions\EditAction::make()
-                    ->icon('heroicon-o-pencil'),
+                TextColumn::make('shipping_price')
+                    ->label('Shipping Cost')
+                    ->sortable()
+                    ->formatStateUsing(function ($state) {
+                        return $state == 0 ?
+                            "<span >Free Shipping</span>" :
+                            "<span >₱" . number_format($state, 2) . "</span>";
+                    })
+                    ->html()
+                    ->badge()
+                    ->color(fn($record) => $record->shipping_price == 0 ? 'success' : 'info'),
 
-                Action::make('update_order_status')
-                    ->label('Update Status')
-                    ->icon('heroicon-o-wrench-screwdriver')
-                    ->requiresConfirmation()
-                    ->tooltip('Update Order and Payment status')
-                    ->modalHeading(fn($record) => 'Confirm Status Update')
-                    ->modalDescription(fn($record) => 'Are you sure you want to update the status of ' . $record->user->name . "'s order?")
-                    ->color('warning')
-                    ->modalSubmitActionLabel('Confirm Update')
-                    ->modalWidth('2xl')
-                    ->form([
-                        ToggleButtons::make('order_status')
-                            ->options(OrderStatusEnum::class)
-                            ->default(fn($record) => $record->order_status)
-                            ->dehydrated()
-                            ->inline()
-                            ->required()
-                            ->label('Order Status'),
+                TextColumn::make('total')
+                    ->label('Total Amount')
+                    ->sortable()
+                    ->formatStateUsing(fn($state) => "<span >₱" . number_format($state, 2) . "</span>")
+                    ->html(),
 
-                        ToggleButtons::make('payment_status')
-                            ->options(PaymentStatusEnum::class)
-                            ->default(fn($record) => $record->payment_status)
-                            ->inline()
-                            ->dehydrated()
-                            ->required()
-                            ->label('Payment Status'),
-                    ])
-                    ->action(function (array $data, $record) {
-                        $record->update([
-                            'order_status' => $data['order_status'],
-                            'payment_status' => $data['payment_status'],
-                        ]);
-                        Notification::make()
-                            ->title('Status Updated Successfully')
-                            ->success()
-                            ->send();
-                    }),
-
-                Tables\Actions\DeleteAction::make()
-                    ->icon('heroicon-o-trash')
-                    ->color('danger'),
             ])
-            // ->tooltip('Actions')
-            // ->button()
-            // ->color('gray')
-            // ->label('Actions')
-        ])
-        ->bulkActions([
-            Tables\Actions\BulkActionGroup::make([
-                Tables\Actions\DeleteBulkAction::make()
-                    ->label('Delete Selected')
-                    ->icon('heroicon-o-trash')
-                    ->color('danger'),
+            ->filters([
+                SelectFilter::make('payment_status')
+                    ->label('Payment Status')
+                    ->options(PaymentStatusEnum::class)
+                    ->indicator('Payment Status'),
 
-                BulkAction::make('update_order_status')
-                    ->label('Update Status')
-                    ->icon('heroicon-o-wrench-screwdriver')
-                    ->requiresConfirmation()
-                    ->tooltip('Update Order and Payment status')
-                    ->modalHeading('Confirm Status Update')
-                    ->modalDescription('Are you sure you want to update the status of all selected orders?')
-                    ->color('warning')
-                    ->modalSubmitActionLabel('Confirm Update')
-                    ->modalWidth('2xl')
+                Tables\Filters\Filter::make('created_at')
                     ->form([
-                        ToggleButtons::make('order_status')
-                            ->options(OrderStatusEnum::class)
-                            ->dehydrated()
-                            ->inline()
-                            ->required()
-                            ->label('Order Status'),
-
-                        ToggleButtons::make('payment_status')
-                            ->options(PaymentStatusEnum::class)
-                            ->inline()
-                            ->dehydrated()
-                            ->required()
-                            ->label('Payment Status'),
+                        DatePicker::make('date')
+                            ->label('Date Ordered')
+                            ->closeOnDateSelection()
+                            ->nullable()
+                            ->live()
+                            ->displayFormat('M d, Y'),
                     ])
-                    ->action(function (array $data, $records) {
-                        foreach ($records as $record) {
+                    ->query(function (Builder $query, array $data): Builder {
+                        return $query
+                            ->when(
+                                $data['date'] ?? null,
+                                fn(Builder $query, $date): Builder => $query->whereDate('created_at', $date),
+                            );
+                    })
+                    ->indicateUsing(function (array $data): ?string {
+                        if (!isset($data['date'])) {
+                            return null;
+                        }
+                        return 'Date Ordered: ' . Carbon::parse($data['date'])->format('M d, Y');
+                    })
+            ])
+            ->filtersTriggerAction(
+                fn(Action $action) => $action
+                    ->slideOver()
+                    ->button()
+                    ->label('Filter')
+                    ->icon('heroicon-o-funnel')
+                // ->color('gray'),
+            )
+            ->actions([
+                Tables\Actions\ViewAction::make()
+                    ->icon('heroicon-o-eye'),
+
+                Tables\Actions\ActionGroup::make([
+                    Tables\Actions\EditAction::make()
+                        ->icon('heroicon-o-pencil'),
+
+                    Action::make('update_order_status')
+                        ->label('Update Status')
+                        ->icon('heroicon-o-wrench-screwdriver')
+                        ->requiresConfirmation()
+                        ->tooltip('Update Order and Payment status')
+                        ->modalHeading(fn($record) => 'Confirm Status Update')
+                        ->modalDescription(fn($record) => 'Are you sure you want to update the status of ' . $record->user->name . "'s order?")
+                        ->color('warning')
+                        ->modalSubmitActionLabel('Confirm Update')
+                        ->modalWidth('2xl')
+                        ->form([
+                            ToggleButtons::make('order_status')
+                                ->options(OrderStatusEnum::class)
+                                ->default(fn($record) => $record->order_status)
+                                ->dehydrated()
+                                ->inline()
+                                ->required()
+                                ->label('Order Status'),
+
+                            ToggleButtons::make('payment_status')
+                                ->options(PaymentStatusEnum::class)
+                                ->default(fn($record) => $record->payment_status)
+                                ->inline()
+                                ->dehydrated()
+                                ->required()
+                                ->label('Payment Status'),
+                        ])
+                        ->action(function (array $data, $record) {
                             $record->update([
                                 'order_status' => $data['order_status'],
                                 'payment_status' => $data['payment_status'],
                             ]);
-                        }
-                        Notification::make()
-                            ->title('Status Updated Successfully')
-                            ->success()
-                            ->send();
-                    }),
-            ]),
-        ])
-        ->emptyStateActions([
-            Tables\Actions\CreateAction::make()
-                ->icon('heroicon-m-plus')
-                ->label(__('New Order'))
-                ->button(),
-        ])
-        ->defaultSort('created_at', 'desc')
-        ->emptyStateIcon('heroicon-o-shopping-cart')
-        ->emptyStateHeading('No Orders Found')
-        ->emptyStateDescription('Create your first order to get started.')
-        // ->striped()
-        ->deferLoading();
-}
+                            Notification::make()
+                                ->title('Status Updated Successfully')
+                                ->success()
+                                ->send();
+                        }),
+
+                    Tables\Actions\DeleteAction::make()
+                        ->icon('heroicon-o-trash')
+                        ->color('danger'),
+                ])
+                // ->tooltip('Actions')
+                // ->button()
+                // ->color('gray')
+                // ->label('Actions')
+            ])
+            ->bulkActions([
+                Tables\Actions\BulkActionGroup::make([
+                    Tables\Actions\DeleteBulkAction::make()
+                        ->label('Delete Selected')
+                        ->icon('heroicon-o-trash')
+                        ->color('danger'),
+
+                    BulkAction::make('update_order_status')
+                        ->label('Update Status')
+                        ->icon('heroicon-o-wrench-screwdriver')
+                        ->requiresConfirmation()
+                        ->tooltip('Update Order and Payment status')
+                        ->modalHeading('Confirm Status Update')
+                        ->modalDescription('Are you sure you want to update the status of all selected orders?')
+                        ->color('warning')
+                        ->modalSubmitActionLabel('Confirm Update')
+                        ->modalWidth('2xl')
+                        ->form([
+                            ToggleButtons::make('order_status')
+                                ->options(OrderStatusEnum::class)
+                                ->dehydrated()
+                                ->inline()
+                                ->required()
+                                ->label('Order Status'),
+
+                            ToggleButtons::make('payment_status')
+                                ->options(PaymentStatusEnum::class)
+                                ->inline()
+                                ->dehydrated()
+                                ->required()
+                                ->label('Payment Status'),
+                        ])
+                        ->action(function (array $data, $records) {
+                            foreach ($records as $record) {
+                                $record->update([
+                                    'order_status' => $data['order_status'],
+                                    'payment_status' => $data['payment_status'],
+                                ]);
+                            }
+                            Notification::make()
+                                ->title('Status Updated Successfully')
+                                ->success()
+                                ->send();
+                        }),
+                ]),
+            ])
+            ->emptyStateActions([
+                Tables\Actions\CreateAction::make()
+                    ->icon('heroicon-m-plus')
+                    ->label(__('New Order'))
+                    ->button(),
+            ])
+            ->defaultSort('created_at', 'desc')
+            ->emptyStateIcon('heroicon-o-shopping-cart')
+            ->emptyStateHeading('No Orders Found')
+            ->emptyStateDescription('Create your first order to get started.')
+            // ->striped()
+            ->deferLoading();
+    }
     public static function getRelations(): array
     {
         return [
@@ -731,9 +744,11 @@ public static function table(Table $table): Table
                     ->schema([
                         TextEntry::make('user.name')->label('Name'),
                         TextEntry::make('user.email')->label('Email'),
+                        TextEntry::make('user.address.complete_address')->label('Address'),
+                        TextEntry::make('billingAddress.bil_complete_address')->label('Billing Address'),
                     ])
                     ->collapsible()
-                    ->columns(2),
+                    ->columns(3),
 
                 InfoSection::make('Order Details')
                     ->icon('heroicon-o-shopping-cart')

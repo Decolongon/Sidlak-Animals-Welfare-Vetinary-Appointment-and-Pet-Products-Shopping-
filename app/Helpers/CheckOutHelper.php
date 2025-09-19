@@ -20,20 +20,69 @@ class CheckOutHelper
     /**
      * Calculate the total shipping cost.
      */
-    public static function calculateTotalShipping($checkoutItems)
+    public static function calculateTotalShipping($checkoutItems, $selectedCity)
     {
+        $sel_checkout_items = (array) session()->get('selected_checkout_items', []);
+        //dd($inugCheckout);
         $totalShipping = 0;
-
+        $cityCode  = static::getCitiesCode();
+        
         foreach ($checkoutItems as $item) {
             $requiresShipping = $item->product->prod_requires_shipping;
             $cost = $item->product->shipping_cost;
 
+            if ( isset($cityCode[$selectedCity]) && count($sel_checkout_items) < 3) {
+                $cost = $cost * $cityCode[$selectedCity];
+            
+            }
+           
             if ($requiresShipping) {
                 $totalShipping += $cost;
             }
         }
 
         return $totalShipping;
+    }
+
+    protected static function getCitiesCode(): array
+    {
+        // city code and how much ang eh multiply sa shipping cost 
+        $cityCode = [
+            '064501' => 4, // BACOLOD CITY (Capital)
+            '064502' => 3, // BAGO CITY
+            '064503' => 2, // BINALBAGAN
+            '064504' => 2, // CADIZ CITY
+            '064505' => 2, // CALATRAVA
+            '064506' => 2, // CANDONI
+            '064507' => 2, // CAUAYAN
+            '064508' => 1, // ENRIQUE B. MAGALONA (SARAVIA)
+            '064509' => 3, // CITY OF ESCALANTE
+            '064510' => 3, // CITY OF HIMAMAYLAN
+            '064511' => 2, // HINIGARAN
+            '064512' => 2, // HINOBA-AN (ASIA)
+            '064513' => 2, // ILOG
+            '064514' => 2, // ISABELA
+            '064515' => 3, // CITY OF KABANKALAN
+            '064516' => 3, // LA CARLOTA CITY
+            '064517' => 2, // LA CASTELLANA
+            '064518' => 1, // MANAPLA
+            '064519' => 2, // MOISES PADILLA (MAGALLON)
+            '064520' => 4.3, // MURCIA
+            '064521' => 2, // PONTEVEDRA
+            '064522' => 2, // PULUPANDAN
+            '064523' => 3, // SAGAY CITY
+            '064524' => 3, // SAN CARLOS CITY
+            '064525' => 2, // SAN ENRIQUE
+            '064526' => 2, // SILAY CITY
+            '064527' => 3, // CITY OF SIPALAY
+            '064528' => 3, // CITY OF TALISAY
+            '064529' => 2, // TOBOSO
+            '064530' => 2, // VALLADOLID
+            '064531' => 1, // CITY OF VICTORIAS
+            '064532' => 2, // SALVADOR BENEDICTO
+        ];
+
+        return $cityCode;
     }
     /**
      * Get the primary image
@@ -46,6 +95,18 @@ class CheckOutHelper
                 ->first() ?? $cartItem->product->images->first();
         } else {
             $cartItem->product->primary_image = null;
+        }
+
+        $this->getVariant($cartItem);
+    }
+    // get variant sizes
+    public function getVariant($cartItem)
+    {
+        // Attach variant info to each cart item
+        if ($cartItem->size && $cartItem->product->prod_unit === 'diff_size') {
+            $cartItem->variant = $cartItem->product->images
+                ->where('sizes', $cartItem->size)
+                ->first();
         }
     }
 
@@ -96,7 +157,7 @@ class CheckOutHelper
             $orders->orderItems()->create([
                 'product_id' => $item->product->id,
                 'quantity' => $quantity,
-                'price' => $isDiscounted,
+                'price' => $isDiscounted[$item->id],
                 'size' => $item->size,
 
             ]);
@@ -213,12 +274,7 @@ class CheckOutHelper
                 if (isset($cartQuantities[$cartItem->id])) {
                     $cartItem->quantity = $cartQuantities[$cartItem->id];
                 }
-                // Attach variant info to each cart item
-                if ($cartItem->size && $cartItem->product->prod_unit === 'diff_size') {
-                    $cartItem->variant = $cartItem->product->images
-                        ->where('sizes', $cartItem->size)
-                        ->first();
-                }
+
                 $this->getPrimaryImage($cartItem);
             });
 

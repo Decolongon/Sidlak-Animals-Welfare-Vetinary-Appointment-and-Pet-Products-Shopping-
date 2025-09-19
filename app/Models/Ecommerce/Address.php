@@ -13,13 +13,13 @@ class Address extends Model
         'country',
         'street',
         'city',
-        'state',
+        //'state',
         'zip',
         'address_type',
-        // 'user_id',
-        // 'province'
-        //city,
-        //barangay,
+        'user_id',
+        'province',
+        'city',
+        'barangay',
     ];
 
     public function addressable(): MorphTo

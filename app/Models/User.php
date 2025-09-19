@@ -185,9 +185,9 @@ class User extends Authenticatable
         return $this->hasMany(AppointmentCategory::class);
     }
 
-    public function addresses(): HasMany
+    public function address(): HasOne
     {
-        return $this->hasMany(Address::class);
+        return $this->hasOne(Address::class);
     }
 
 

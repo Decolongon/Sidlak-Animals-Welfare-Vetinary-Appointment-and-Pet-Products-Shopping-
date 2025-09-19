@@ -7,13 +7,17 @@ use Filament\Forms\Form;
 use Filament\Pages\Page;
 use Illuminate\Support\Str;
 use App\Models\Ecommerce\Cart;
+use App\Models\Ecommerce\Address;
 use Filament\Forms\Components\Group;
+use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Wizard;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Session;
 use Filament\Forms\Components\TextInput;
-use Filament\Pages\Auth\Register as RegistrationPage;
 use Filament\Forms\Components\Wizard\Step;
+use Woenel\Prpcmblmts\Models\PhilippineCity;
+use Woenel\Prpcmblmts\Models\PhilippineBarangay;
+use Filament\Pages\Auth\Register as RegistrationPage;
 
 class Register extends RegistrationPage
 {
@@ -40,10 +44,48 @@ class Register extends RegistrationPage
                                 ->required()
                                 ->minLength(3),
 
-                            // Select::make('gender')
-                            //     ->label('Gender')
-                            //     ->columnSpanFull()
 
+
+                        ]),
+
+                    Step::make('Address')
+                        ->schema([
+                            Select::make('city')
+                                ->label('Select City')
+                                ->required()
+                                ->options(
+                                    PhilippineCity::where('province_code', '0645')
+                                        ->get()
+                                        ->pluck('name', 'code')
+                                        ->toArray()
+
+                                )
+                                ->live()
+                                ->optionsLimit(5)
+                                ->afterStateUpdated(function ($set) {
+                                    $set('barangay', null); // Reset barangay when city changes
+                                })
+                                ->searchable(),
+
+                            Select::make('barangay')
+                                ->label('Select Barangay')
+                                ->required()
+                                ->options(
+
+                                    function ($get) {
+                                        $city = $get('city');
+                                        if (! $city) {
+                                            return [];
+                                        }
+                                        return PhilippineBarangay::where('city_code', $city)
+                                            ->get()
+                                            ->pluck('name', 'id')
+                                            ->toArray();
+                                    }
+
+                                )
+                                ->optionsLimit(5)
+                                ->searchable()
                         ]),
 
                     Step::make('Account Information')
@@ -65,7 +107,7 @@ class Register extends RegistrationPage
         //user model
         $user = $this->userData($sanitizedData);
         $this->mergeGuestCartToUser($user);
-
+        $this->createAddress($sanitizedData, $user);
 
         // //user proifle model
         // $this->userProfile($user,$sanitizedData);
@@ -83,8 +125,8 @@ class Register extends RegistrationPage
             'middle_initial' => trim(strip_tags($data['middle_initial'])),
             'email' => filter_var($data['email'], FILTER_SANITIZE_EMAIL),
             'password' => $data['password'],
-            // 'gender' => Str::lower(trim(strip_tags($data['gender']))),
-            // 'name' => trim(strip_tags($data['name'])),
+            'city' => strip_tags($data['city']),
+            'barangay' => strip_tags($data['barangay']),
         ];
     }
 
@@ -96,6 +138,17 @@ class Register extends RegistrationPage
             // 'name' => $data['name'],
             'email' => $data['email'],
             'password' => $data['password']
+        ]);
+    }
+
+    protected function createAddress(array $data, ?User $user = null): Address
+    {
+        $brgyName = PhilippineBarangay::find($data['barangay'])->name;
+        $cityName = PhilippineCity::where('code', $data['city'])->value('name');
+        return Address::create([
+            'user_id' => $user->id,
+            'city' => $cityName,
+            'barangay' => $brgyName,
         ]);
     }
 
@@ -113,7 +166,7 @@ class Register extends RegistrationPage
 
             // Optionally forget any session variables
             Session::forget('cart');
-           // session()->flush();
+            // session()->flush();
             // if you store cart in session manually
         }
     }

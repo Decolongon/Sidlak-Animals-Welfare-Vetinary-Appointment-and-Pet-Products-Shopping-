@@ -4,10 +4,13 @@ namespace App\Livewire\Ecommerce;
 
 use Livewire\Component;
 use Livewire\WithPagination;
+use Livewire\Attributes\Lazy;
 use App\Models\Ecommerce\Cart;
 use Livewire\Attributes\Title;
 use Livewire\Attributes\Layout;
 use App\Models\Ecommerce\Product;
+use Livewire\Attributes\Computed;
+use Illuminate\Support\Facades\DB;
 use Livewire\WithoutUrlPagination;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
@@ -16,8 +19,6 @@ use Illuminate\Support\Facades\Session;
 use App\Models\Ecommerce\ProductCategory;
 use App\Models\Ecommerce\ProductDiscount;
 use App\Models\Ecommerce\ProductImage as ProductVariant;
-use Livewire\Attributes\Computed;
-use Livewire\Attributes\Lazy;
 
 
 class Shop extends Component
@@ -83,7 +84,9 @@ class Shop extends Component
         if(! empty($this->query)){
             $query->where(function ($q) { // for search
                 $q->where('prod_name', 'Like', '%' . $this->query . '%')
-                    ->orWhere('prod_sku', 'Like', '%' . $this->query . '%');
+                    ->orWhere('prod_sku', 'Like', '%' . $this->query . '%')
+                    ->orWhereRaw("CONCAT(COALESCE(prod_weight, ''), '', COALESCE(prod_unit, '')) LIKE ?", ['%' . $this->query . '%'])
+                    ->orWhereRaw("CONCAT(COALESCE(prod_name,''),' - ',COALESCE(prod_weight, ''), '', COALESCE(prod_unit, '')) LIKE ?", ['%' . $this->query . '%']);
             });
         }
 
