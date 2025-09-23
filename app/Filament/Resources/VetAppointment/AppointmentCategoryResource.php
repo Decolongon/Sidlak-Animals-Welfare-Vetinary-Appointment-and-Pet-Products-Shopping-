@@ -185,36 +185,36 @@ class AppointmentCategoryResource extends Resource
 
 
 
-    public static function infolist(Infolist $infolist): Infolist
-    {
-        return $infolist
-            ->schema([
-                InfoSection::make()
-                    ->schema([
-                        Split::make([
-                            InfoSection::make([
-                                TextEntry::make('appoint_cat_name')
-                                    ->label('Service Name')
-                                    ->weight(FontWeight::Bold),
+    // public static function infolist(Infolist $infolist): Infolist
+    // {
+    //     return $infolist
+    //         ->schema([
+    //             InfoSection::make()
+    //                 ->schema([
+    //                     Split::make([
+    //                         InfoSection::make([
+    //                             TextEntry::make('appoint_cat_name')
+    //                                 ->label('Service Name')
+    //                                 ->weight(FontWeight::Bold),
 
-                                TextEntry::make('price')
-                                    ->label('Service Price')
-                                    ->badge()
-                                    ->formatStateUsing(fn($state) => '₱' . number_format($state, 2))
-                                    ->color('primary'),
+    //                             TextEntry::make('price')
+    //                                 ->label('Service Price')
+    //                                 ->badge()
+    //                                 ->formatStateUsing(fn($state) => '₱' . number_format($state, 2))
+    //                                 ->color('primary'),
 
-                                TextEntry::make('appoint_cat_description')
-                                    ->label('Service Description')
-                                    ->markdown()
-                                    ->prose(),
-                            ]),
-                            InfoSection::make([
-                                ImageEntry::make('img')
-                                    ->label('Image')
-                            ])->grow(false),
-                        ])->from('md')
+    //                             TextEntry::make('appoint_cat_description')
+    //                                 ->label('Service Description')
+    //                                 ->markdown()
+    //                                 ->prose(),
+    //                         ]),
+    //                         InfoSection::make([
+    //                             ImageEntry::make('img')
+    //                                 ->label('Image')
+    //                         ])->grow(false),
+    //                     ])->from('md')
 
-                    ])
-            ]);
-    }
+    //                 ])
+    //         ]);
+    // }
 }
