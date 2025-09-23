@@ -60,6 +60,57 @@
                         <h3 class="text-lg font-medium text-gray-800 dark:text-white mt-1">
                             {{ $order->created_at->format('M j, Y') }}
                         </h3>
+                      @if ($orderId == $order->id)
+    <div x-data="{ counter: 10, cancelled: false, interval: null }" x-init="interval = setInterval(() => {
+        if (counter > 0) {
+            counter--;
+        } else {
+            if (!cancelled) {
+                $wire.processCancelOrder({{ $order->id }});
+            }
+            clearInterval(interval);
+        }
+    }, 1000);"
+    class="p-3 rounded-lg border border-amber-500/30 bg-amber-50 dark:bg-amber-950/20 shadow-sm">
+
+        <template x-if="!cancelled">
+            <div class="flex flex-col sm:flex-row sm:items-center gap-2">
+                <div class="flex items-center gap-1.5">
+                    <svg class="w-4 h-4 text-amber-600 dark:text-amber-400" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm0-2a6 6 0 100-12 6 6 0 000 12zM10 5a1 1 0 011 1v5a1 1 0 11-2 0V6a1 1 0 011-1zm0 10a1 1 0 100-2 1 1 0 000 2z" clip-rule="evenodd" />
+                    </svg>
+                    <p class="text-amber-800 dark:text-amber-200 font-medium text-sm">
+                        Cancelling in <span x-text="counter" class="font-bold"></span>s
+                    </p>
+                </div>
+
+                <button
+                    @click="
+                        cancelled = true; 
+                        clearInterval(interval);
+                        $wire.resetOrder();
+                    "
+                    class="px-2.5 py-1 text-xs font-medium text-white bg-gray-600 hover:bg-gray-700 rounded transition-colors duration-200 flex items-center gap-1 justify-center sm:justify-start">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                    Cancel
+                </button>
+            </div>
+        </template>
+
+        <template x-if="cancelled">
+            <div class="flex items-center gap-1.5 text-green-700 dark:text-green-400 text-sm">
+                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                </svg>
+                <p class="font-medium">Cancellation stopped</p>
+            </div>
+        </template>
+    </div>
+@endif
+
+
                     </div>
                     <span
                         class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium 
@@ -69,6 +120,7 @@
         @elseif($order->order_status == 'delivered') bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400
         @elseif($order->order_status == 'cancelled') bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400 @endif">
                         {{ ucfirst($order->order_status) }}
+
                     </span>
                 </div>
 
@@ -96,7 +148,8 @@
                                 <div>
                                     <h4 class="text-sm font-medium text-gray-800 dark:text-white">
                                         @if (isset($item->variant))
-                                            {{ $item->product->prod_name }} - {{ ucwords(preg_replace('/[^a-zA-Z0-9\s]/', ' ', $item->variant->sizes)) }}
+                                            {{ $item->product->prod_name }} -
+                                            {{ ucwords(preg_replace('/[^a-zA-Z0-9\s]/', ' ', $item->variant->sizes)) }}
                                         @else
                                             {{ $item->product->prod_name }}
                                         @endif
@@ -125,7 +178,7 @@
                                         Price:₱ {{ number_format($item->product->prod_price,2) }}
                                     @endif
                                 @endif --}}
-                               Price:₱ {{ number_format($item->price,2) }}
+                                Price:₱ {{ number_format($item->price, 2) }}
 
                                 <!-- Shipping Cost -->
                                 {{-- @foreach ($order->orderItems as $item) --}}
@@ -228,7 +281,7 @@
 
                     <!-- Order Actions -->
                     <div class="mt-3 flex justify-end space-x-2">
-                        <button type="button"
+                        {{-- <button type="button"
                             class="inline-flex items-center px-2.5 py-1.5 border border-gray-300 dark:border-neutral-600 shadow-xs text-xs font-medium rounded text-gray-700 dark:text-gray-200 bg-white dark:bg-neutral-800 hover:bg-gray-50 dark:hover:bg-neutral-700 focus:outline-none"
                             aria-haspopup="dialog" aria-expanded="false" aria-controls="hs-ai-invoice-modal"
                             data-hs-overlay="#hs-ai-invoice-modal">
@@ -240,7 +293,7 @@
                                     d="M3 4.5a.5.5 0 0 1 .5-.5h6a.5.5 0 1 1 0 1h-6a.5.5 0 0 1-.5-.5zm0 2a.5.5 0 0 1 .5-.5h6a.5.5 0 1 1 0 1h-6a.5.5 0 0 1-.5-.5zm0 2a.5.5 0 0 1 .5-.5h6a.5.5 0 1 1 0 1h-6a.5.5 0 0 1-.5-.5zm0 2a.5.5 0 0 1 .5-.5h6a.5.5 0 0 1 0 1h-6a.5.5 0 0 1-.5-.5zm8-6a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 0 1h-1a.5.5 0 0 1-.5-.5zm0 2a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 0 1h-1a.5.5 0 0 1-.5-.5zm0 2a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 0 1h-1a.5.5 0 0 1-.5-.5zm0 2a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 0 1h-1a.5.5 0 0 1-.5-.5z" />
                             </svg>
                             Details
-                        </button>
+                        </button> --}}
 
                         @if ($order->order_status == 'pending' && $order->payment_status !== 'completed')
                             <button type="button" wire:confirm="Are you sure you want to cancel this order?"

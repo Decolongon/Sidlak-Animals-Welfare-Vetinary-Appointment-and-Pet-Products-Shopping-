@@ -6,12 +6,18 @@ use Livewire\Component;
 use App\Models\Ecommerce\Order;
 use Livewire\Attributes\Layout;
 use App\Helpers\ProductDiscountHelper;
+use Livewire\Attributes\Locked;
 use Livewire\WithPagination;
 
 class ViewOrder extends Component
 {
     public $orders;
     public $statusFilter = 'all'; // default filter
+    public $counter = 0;
+    
+    #[Locked]
+    public $orderId;
+
     public function mount()
     {
         $this->getOrders();
@@ -28,8 +34,7 @@ class ViewOrder extends Component
             ->orderBy('created_at', 'desc');
 
         if ($this->statusFilter !== 'all') {
-            $query->where('order_status', '=' ,"{$this->statusFilter}");
-
+            $query->where('order_status', '=', "{$this->statusFilter}");
         }
 
         $this->orders = $query->take(10)->get();
@@ -59,7 +64,6 @@ class ViewOrder extends Component
         // }
 
         $this->getPrimaryImage($this->orders);
-      
     }
 
     // public function filter($filter)
@@ -67,7 +71,7 @@ class ViewOrder extends Component
     //     $this->$this->statusFilter = $filter;
     //     $this->getOrders();
     // }
-  
+
 
     protected function getPrimaryImage($orders)
     {
@@ -94,14 +98,40 @@ class ViewOrder extends Component
 
     public function cancelOrder($id)
     {
-        $order = Order::find($id);
+        $this->orderId = $id;
+        //$this->reset(['orderId']);
+        $this->getOrders();
+        // $this->counter = 5;
+        // while ($this->counter > 0) {
+
+            // $this->stream(
+            //     to: 'count',
+            //     content: $this->counter,
+            //     replace: true,
+            // );
+
+            //sleep(1);
+        //     $this->counter--;
+
+        //     if ($this->counter == 0) {
+        //         $this->processCancelOrder($id);
+        //         $this->getOrders();
+        //         break;
+        //     }
+        // }
+    }
+
+    public function processCancelOrder($id)
+    {
+        
+        $order = Order::findOrFail($id);
         $order->order_status = 'cancelled';
 
         foreach ($order->orderItems as $item) {
             $product = $item->product;
 
             if ($product) {
-                if($product->prod_unit === 'diff_size'){
+                if ($product->prod_unit === 'diff_size') {
                     $variant = $product->images()
                         ->where('sizes', $item->size)
                         ->first();
@@ -114,7 +144,13 @@ class ViewOrder extends Component
                 $product->save();
             }
         }
-        $order->save();
+       $order->save();
+       $this->resetOrder();
+    }
+
+    public function resetOrder()
+    {
+        $this->reset(['orderId']);
         $this->getOrders();
     }
 
