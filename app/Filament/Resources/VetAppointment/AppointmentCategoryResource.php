@@ -18,11 +18,13 @@ use Filament\Support\Enums\FontWeight;
 use Filament\Navigation\NavigationItem;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Forms\Components\TextInput;
+use Filament\Infolists\Components\Split;
 use Filament\Forms\Components\FileUpload;
 use Filament\Pages\SubNavigationPosition;
 use Illuminate\Database\Eloquent\Builder;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Forms\Components\MarkdownEditor;
+use Filament\Infolists\Components\ImageEntry;
 use App\Models\Appointment\AppointmentCategory;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Filament\Infolists\Components\Section as InfoSection;
@@ -161,7 +163,6 @@ class AppointmentCategoryResource extends Resource
         return [
             DoctorschedulesRelationManager::class
         ];
-     
     }
 
     public static function getPages(): array
@@ -190,31 +191,28 @@ class AppointmentCategoryResource extends Resource
             ->schema([
                 InfoSection::make()
                     ->schema([
-                        TextEntry::make('appoint_cat_name')
-                            ->label('Appointment Category Name')
-                            ->formatStateUsing(fn(string $state): string => ucwords($state))
-                            ->size(TextEntry\TextEntrySize::Large)
-                            ->weight(FontWeight::ExtraBold),
+                        Split::make([
+                            InfoSection::make([
+                                TextEntry::make('appoint_cat_name')
+                                    ->label('Service Name')
+                                    ->weight(FontWeight::Bold),
 
-                        TextEntry::make('price')
-                            ->label('Service Price')
-                            ->formatStateUsing(fn(string $state): string => number_format($state, 2))
-                            ->size(TextEntry\TextEntrySize::Large)
-                            ->weight(FontWeight::ExtraBold),
-
-
-                        ComponentsSection::make('Appointment Category Details')
-                            ->icon('heroicon-o-information-circle')
-                            ->schema([
+                                TextEntry::make('price')
+                                    ->label('Service Price')
+                                    ->badge()
+                                    ->formatStateUsing(fn($state) => '₱' . number_format($state, 2))
+                                    ->color('primary'),
 
                                 TextEntry::make('appoint_cat_description')
-                                    ->label('')
-                                    ->size(TextEntry\TextEntrySize::Large)
-                                    ->html()
-                                    // ->formatStateUsing(fn ($state) => strip_tags($state))
-                                    ->weight(FontWeight::ExtraBold),
-
-                            ])->collapsible(),
+                                    ->label('Service Description')
+                                    ->markdown()
+                                    ->prose(),
+                            ]),
+                            InfoSection::make([
+                                ImageEntry::make('img')
+                                    ->label('Image')
+                            ])->grow(false),
+                        ])->from('md')
 
                     ])
             ]);

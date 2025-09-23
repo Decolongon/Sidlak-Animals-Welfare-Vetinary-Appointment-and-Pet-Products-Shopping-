@@ -10,6 +10,7 @@ use App\Filament\Resources\VetAppointment\AppointmentCategoryResource;
 class ViewAppointmentCategory extends ViewRecord
 {
     protected static string $resource = AppointmentCategoryResource::class;
+    protected static ?string $title = 'View Service';
 
     public function getTitle(): string | Htmlable
     {

@@ -10,6 +10,7 @@ use App\Filament\Resources\VetAppointment\AppointmentCategoryResource;
 class EditAppointmentCategory extends EditRecord
 {
     protected static string $resource = AppointmentCategoryResource::class;
+    protected static ?string $title = 'Edit Service';
 
     protected function getHeaderActions(): array
     {
