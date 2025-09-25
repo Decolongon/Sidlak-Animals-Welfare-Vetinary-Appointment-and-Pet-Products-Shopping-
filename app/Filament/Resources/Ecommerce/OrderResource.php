@@ -780,14 +780,14 @@ class OrderResource extends Resource
                             ->schema([
                                 TextEntry::make('product.prod_name')->label('Product Name'),
 
-                                TextEntry::make('product.shipping_cost')->label('Shipping Cost')
-                                    ->formatStateUsing(function ($state, $record) {
-                                        if ($record->product->prod_requires_shipping === true && $state > 0) {
-                                            return '₱ ' . number_format($state, 2);
-                                        } else {
-                                            return 'Free Shipping';
-                                        }
-                                    })->badge(),
+                                // TextEntry::make('product.shipping_cost')->label('Shipping Cost')
+                                //     ->formatStateUsing(function ($state, $record) {
+                                //         if ($record->product->prod_requires_shipping === true && $state > 0) {
+                                //             return '₱ ' . number_format($state, 2);
+                                //         } else {
+                                //             return 'Free Shipping';
+                                //         }
+                                //     })->badge(),
 
                                 ImageEntry::make('product_image')
                                     ->label('Product Image')
@@ -837,12 +837,12 @@ class OrderResource extends Resource
 
                                             // Use the size-specific price if found
                                             if ($sizeImage) {
-                                                return '₱ ' . number_format($sizeImage->price, 2);
+                                                return '₱ ' . number_format($state, 2);
                                             }
                                         }
 
                                         // Fallback to the original price
-                                        return '₱ ' . number_format($product->prod_price, 2);
+                                        return '₱ ' . number_format($state, 2);
                                     }),
                                 TextEntry::make('quantity')->label('Quantity')
                                     ->formatStateUsing(function ($state, $record) {
