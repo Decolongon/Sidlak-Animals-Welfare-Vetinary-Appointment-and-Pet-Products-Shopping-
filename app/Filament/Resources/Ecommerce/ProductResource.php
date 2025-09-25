@@ -232,8 +232,8 @@ class ProductResource extends Resource
                                                     ->label('Shipping Cost')
                                                     ->numeric()
                                                     ->prefix('PHP')
-                                                    ->minValue(20)
-                                                    ->maxValue(100)
+                                                    ->minValue(30)
+                                                    ->maxValue(50)
                                                     ->required(fn($get) => $get('prod_requires_shipping') == true)
                                                     ->hidden(fn($get) => $get('prod_requires_shipping') == false),
 
