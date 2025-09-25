@@ -251,7 +251,7 @@
 
                                 <!-- Shipping Cost -->
 
-                                @if ($item->product->prod_requires_shipping === true)
+                                @if ($order->shipping_price > 0)
                                     <div class="flex justify-between">
                                         <span class="text-sm text-gray-500 dark:text-gray-400">Shipping:</span>
                                         <span
