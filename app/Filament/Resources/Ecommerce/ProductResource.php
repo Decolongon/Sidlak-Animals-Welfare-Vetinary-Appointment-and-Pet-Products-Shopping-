@@ -297,13 +297,35 @@ class ProductResource extends Resource
                                                 Select::make('sizes')
                                                     ->label('Sizes')
                                                     ->required()
-                                                    ->options([
-                                                        'extra_small' => 'Extra Small',
-                                                        'small' => 'Small',
-                                                        'medium' => 'Medium',
-                                                        'large' => 'Large',
-                                                        'extra_large' => 'Extra Large',
-                                                    ])
+                                                    ->live(onBlur: true)
+                                                    ->options(function (\Filament\Forms\Get $get) {
+                                                        $allSizes = [
+                                                            'extra_small' => 'Extra Small',
+                                                            'small' => 'Small',
+                                                            'medium' => 'Medium',
+                                                            'large' => 'Large',
+                                                            'extra_large' => 'Extra Large',
+                                                        ];
+
+                                                        // Get currently selected sizes 
+                                                        $images = $get('../../images') ?? [];
+                                                        $selectedSizes = collect($images)
+                                                            ->pluck('sizes')
+                                                            ->filter()
+                                                            ->unique()
+                                                            ->toArray();
+
+                                                        // Remove already selected sizes from available options
+                                                        // But keep the current item's selected size
+                                                        $currentSize = $get('sizes');
+                                                        foreach ($selectedSizes as $selectedSize) {
+                                                            if ($selectedSize !== $currentSize) {
+                                                                unset($allSizes[$selectedSize]);
+                                                            }
+                                                        }
+
+                                                        return $allSizes;
+                                                    })
                                                     ->hidden(fn($get) => $get('../../prod_unit') !== 'diff_size'),
 
                                                 TextInput::make('quantity')
@@ -512,7 +534,7 @@ class ProductResource extends Resource
                 //     ->query(function ($query) {
                 //         return $query->where('prod_requires_shipping', 1);
                 //     })
-                   
+
                 // SelectFilter::make('prod_stock')
                 // ->label('Product Stock')
                 // ->options([
