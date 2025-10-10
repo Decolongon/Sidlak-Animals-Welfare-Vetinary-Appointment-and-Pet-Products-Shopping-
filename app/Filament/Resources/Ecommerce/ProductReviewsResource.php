@@ -122,6 +122,7 @@ class ProductReviewsResource extends Resource
 
                 TableRatingStar::make('rating')
                     ->size('sm')
+                    ->summarize(\Filament\Tables\Columns\Summarizers\Average::make())
                     ->label('Rating'),
 
                 // TextColumn::make('review')

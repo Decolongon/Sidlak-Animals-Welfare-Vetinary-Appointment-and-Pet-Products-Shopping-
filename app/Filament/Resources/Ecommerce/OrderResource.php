@@ -368,24 +368,36 @@ class OrderResource extends Resource
                     ->date(),
             ])
             ->columns([
+
+
                 TextColumn::make('user.name')
-                    ->label('Customer Name')
+                    ->label('Customer')
                     ->sortable()
                     ->formatStateUsing(fn(string $state): string => ucwords($state))
                     ->searchable()
+                    ->description(fn(Order $record): string => str()->limit($record->user->email, 40), position: 'below')
                     ->weight('medium')
                     ->color('gray-700'),
 
-                TextColumn::make('user.address.complete_address')
-                    ->label('Address')
+                // TextColumn::make('user.email')
+                //     ->label('Email')
+                //     ->sortable()
+                //     ->formatStateUsing(fn(string $state): string => ucwords($state))
+                //     ->searchable()
+                //     ->weight('medium')
+                //     ->toggleable(isToggledHiddenByDefault: true)
+                //     ->color('gray-700'),
+
+                TextColumn::make('shippingAddresses.complete_address')
+                    ->label('Shipping Address')
                     ->html()
                     ->limit(30)
-                    ->formatStateUsing(fn(string $state): string => ucwords($state)),
+                    ->formatStateUsing(fn(string $state): string => ucwords(strtoLower($state))),
 
                 TextColumn::make('billingAddress.bil_complete_address')
                     ->label('Billing Address')
                     ->limit(30)
-                    ->formatStateUsing(fn(string $state): string => ucwords($state)),
+                    ->formatStateUsing(fn(string $state): string => ucwords(strtoLower($state))),
 
                 //->toggleable(isToggledHiddenByDefault: true),
 
@@ -414,51 +426,56 @@ class OrderResource extends Resource
                     ->html()
                     ->searchable(),
 
-                TextColumn::make('images.url')
-                    ->label('Product Image')
-                    ->getStateUsing(function ($record) {
-                        $items = $record->orderItems;
+                // TextColumn::make('images.url')
+                //     ->label('Product Image')
+                //     ->getStateUsing(function ($record) {
+                //         $items = $record->orderItems;
 
-                        $html = $items->map(function ($item) {
-                            $product = $item->product;
+                //         $html = $items->map(function ($item) {
+                //             $product = $item->product;
 
-                            if (!$product || !$product->images) {
-                                return "<div class='flex items-center justify-center w-8 h-8 bg-gray-100 rounded-full'>
-                                <span class='text-xs text-gray-400'>No image</span>
-                            </div>";
-                            }
+                //             if (!$product || !$product->images) {
+                //                 return "<div class='flex items-center justify-center w-8 h-8 bg-gray-100 rounded-full'>
+                //                 <span class='text-xs text-gray-400'>No image</span>
+                //             </div>";
+                //             }
 
-                            // For diff_size products, find the image that matches the ordered size
-                            if ($product->prod_unit === 'diff_size' && $item->size) {
-                                $sizeImage = $product->images->first(function ($image) use ($item) {
-                                    return isset($image->sizes) && $image->sizes === $item->size;
-                                });
+                //             // For diff_size products, find the image that matches the ordered size
+                //             if ($product->prod_unit === 'diff_size' && $item->size) {
+                //                 $sizeImage = $product->images->first(function ($image) use ($item) {
+                //                     // dd($image->sizes);
+                //                     return isset($image->sizes) && $image->sizes === $item->size;
 
-                                if ($sizeImage) {
-                                    $imageUrl = asset(Storage::url($sizeImage->url));
-                                    return "<div class='flex items-center justify-center'><img src='{$imageUrl}' class='w-8 h-8 object-cover rounded-full border border-gray-200'></div>";
-                                }
-                            }
+                //                 });
 
-                            // For all other cases, get the primary image or first available image
-                            $imagePath = $product->images->first(function ($image) {
-                                return $image->is_primary === true;
-                            })->url ?? $product->images->first()->url ?? null;
+                //                 //dd($sizeImage);
 
-                            if ($imagePath) {
-                                $imageUrl = asset(Storage::url($imagePath));
-                                return "<div class='flex items-center justify-center'><img src='{$imageUrl}' class='w-8 h-8 object-cover rounded-full border border-gray-200'></div>";
-                            }
+                //                 if ($sizeImage) {
+                //                     $imageUrl = asset(Storage::url($sizeImage->url));
+                //                     //dd($imageUrl);
+                //                      return "<div class='flex items-center justify-center' title='Size: {$item->size}'><img src='{$imageUrl}' class='w-8 h-8 object-cover rounded-full border border-gray-200'></div>";
+                //                 }
+                //             }
 
-                            return "<div class='flex items-center justify-center w-8 h-8 bg-gray-100 rounded-full'>
-                            <span class='text-xs text-gray-400'>No image</span>
-                        </div>";
-                        })->filter()->join('');
+                //             // For all other cases, get the primary image or first available image
+                //             $imagePath = $product->images->first(function ($image) {
+                //                 return $image->is_primary === true;
+                //             })->url ?? $product->images->first()->url ?? null;
 
-                        return $html;
-                    })
-                    ->html()
-                    ->toggleable(isToggledHiddenByDefault: true),
+                //             if ($imagePath) {
+                //                 $imageUrl = asset(Storage::url($imagePath));
+                //                 return "<div class='flex items-center justify-center'><img src='{$imageUrl}' class='w-8 h-8 object-cover rounded-full border border-gray-200'></div>";
+                //             }
+
+                //             return "<div class='flex items-center justify-center w-8 h-8 bg-gray-100 rounded-full'>
+                //             <span class='text-xs text-gray-400'>No image</span>
+                //         </div>";
+                //         })->filter()->join('');
+
+                //         return $html;
+                //     })
+                //     ->html()
+                //     ->toggleable(isToggledHiddenByDefault: true),
 
                 TextColumn::make('orderItems')
                     ->label('Quantity')
@@ -470,14 +487,13 @@ class OrderResource extends Resource
                             $unit = $item->product->prod_unit ?? '';
                             $weight = $item->product->prod_weight ?? 0;
 
-                            if ($unit === 'pcs') {
+                            if ($unit === 'pcs' || $unit === 'has_dimensions') {
                                 $quantityText = "{$qty} pcs";
                             } elseif ($unit === 'diff_size') {
                                 $quantityText = "{$qty} × " . (ucwords($item->size) ?? 'N/A');
                             } else {
                                 $quantityText = "{$qty} × " . number_format($weight, 2) . $unit;
                             }
-
                             return "<div class='min-h-[50px] flex items-center text-sm text-gray-700 font-medium'>" .
                                 $quantityText .
                                 "</div>";
@@ -492,6 +508,7 @@ class OrderResource extends Resource
                     ->limit(70)
                     ->html()
                     ->label('Notes')
+                    ->placeholder('No notes')
                     ->toggleable(isToggledHiddenByDefault: true)
                     ->formatStateUsing(fn($state) => $state ? "<div class='text-sm text-gray-600 italic'>" . nl2br(e($state)) . "</div>" : '<span class="text-gray-400 text-sm">No notes</span>'),
 
@@ -744,8 +761,10 @@ class OrderResource extends Resource
                     ->schema([
                         TextEntry::make('user.name')->label('Name'),
                         TextEntry::make('user.email')->label('Email'),
-                        TextEntry::make('user.address.complete_address')->label('Address'),
-                        TextEntry::make('billingAddress.bil_complete_address')->label('Billing Address'),
+                        TextEntry::make('shippingAddresses.complete_address')->label('Shipping Address')
+                            ->formatStateUsing(fn(string $state): string => strtoupper(strtolower($state))),
+                        TextEntry::make('billingAddress.bil_complete_address')->label('Billing Address')
+                            ->formatStateUsing(fn(string $state): string => strtoupper(strtolower($state))),
                     ])
                     ->collapsible()
                     ->columns(3),
@@ -778,7 +797,25 @@ class OrderResource extends Resource
                         RepeatableEntry::make('orderItems')
                             ->label('Items')
                             ->schema([
-                                TextEntry::make('product.prod_name')->label('Product Name'),
+                                TextEntry::make('product.prod_name')->label('Product Name')
+                                    ->formatStateUsing(function ($state, $record) {
+                                        $product = $record->product;
+
+                                        // If product has dimensions, append them to the product name
+                                        if ($product && $product->prod_unit === 'has_dimensions') {
+                                            $length = $product->prod_length ?? 'N/A';
+                                            $width = $product->prod_width ?? 'N/A';
+                                            $height = $product->prod_height ?? 'N/A';
+                                            return "{$state} ({$length} × {$width} × {$height} cm)";
+                                        }
+
+                                        return $state;
+                                    }),
+
+
+
+
+                                //TextEntry::make('size')->label('Size')->collapsible(),
 
                                 // TextEntry::make('product.shipping_cost')->label('Shipping Cost')
                                 //     ->formatStateUsing(function ($state, $record) {
@@ -850,12 +887,12 @@ class OrderResource extends Resource
                                         $unit = $record->product->prod_unit ?? '';
                                         $weight = $record->product->prod_weight ?? 0;
 
-                                        if ($unit === 'pcs') {
+                                        if ($unit === 'pcs' || $unit === 'has_dimensions') {
                                             return "{$qty}";
                                         }
                                         if ($unit === 'diff_size') {
 
-                                            return "{$qty} - " . (ucwords($record->size) ?? 'N/A');
+                                            return "{$qty} - " . (ucwords(preg_replace('/[^a-zA-Z0-9\s]/', ' ', $record->size)) ?? 'N/A');
                                         }
 
                                         return "{$qty} × " . number_format($weight, 2) . $unit;

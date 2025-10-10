@@ -1,11 +1,11 @@
 <div>
-    {{-- To attain knowledge, add things every day; To attain wisdom, subtract things every day. --}}
     <div x-data="{
         showModal: false,
         selectedSize: '',
         quantity: 1,
         resetModal() {
             this.selectedSize = '';
+            this.quantity = 1;
         }
     }" class="relative">
         <!-- Button to open modal -->
@@ -16,7 +16,7 @@
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                     d="M3 3h2l1 5h13l1-5h2M5 8l1 9h12l1-9M9 20h.01M15 20h.01"></path>
             </svg>
-            Add to Cart
+           Add to Cart
         </x-button>
 
         <!-- Modal Backdrop -->
@@ -63,7 +63,6 @@
                                 @foreach ($product->images as $variant)
                                     <div class="flex flex-col items-center">
                                         <!-- Product Image -->
-
                                         <div class="w-16 h-16 mb-1 overflow-hidden rounded-md">
                                             <img src="{{ asset(Storage::url($variant->url)) }}"
                                                 alt="{{ ucwords($variant->sizes) }}" class="object-cover w-full h-full">
@@ -75,19 +74,19 @@
                                             class="w-full px-2 py-1 text-xs border rounded-md focus:outline-none transition-colors"
                                             :class="{
                                                 'bg-amber-500 text-white border-amber-500': selectedSize === '{{ $variant->id }}',
-                                                'bg-gray-50 border-gray-300 text-gray-900 hover:bg-gray-100': selectedSize !== '{{ $variant->id }}'
+                                                'bg-gray-50 border-gray-300 text-gray-900 hover:bg-gray-100': selectedSize !== '{{ $variant->id }}',
+                                                'opacity-50 cursor-not-allowed': {{ $variant->quantity }} === 0
                                             }">
                                             {{ ucwords(preg_replace('/[^a-zA-Z0-9\s]/', ' ', $variant->sizes)) }}
-                                            <span class="text-xs text-gray-400">({{ $variant->quantity }})</span>
+                                            <span class="text-xs" :class="{
+                                                'text-gray-400': {{ $variant->quantity }} > 0,
+                                                'text-red-500': {{ $variant->quantity }} === 0
+                                            }">
+                                                ({{ $variant->quantity }})
+                                            </span>
                                         </button>
-
-
-
-
-
                                     </div>
                                 @endforeach
-
                             </div>
                         </div>
                     </div>
@@ -102,23 +101,54 @@
                             </div>
                         @endif
 
-                        <div class="flex space-x-2">
+                        <div class="flex flex-col sm:flex-row gap-2">
+                            <!-- Cancel Button -->
                             <button @click="showModal = false; resetModal()" type="button" wire:click="resetModal"
                                 class="flex-1 text-gray-500 bg-white hover:bg-gray-100 focus:ring-4 focus:outline-none focus:ring-gray-200 rounded-lg border border-gray-200 text-sm font-medium px-5 py-2.5 hover:text-gray-900 focus:z-10 dark:bg-gray-700 dark:text-gray-300 dark:border-gray-500 dark:hover:text-white dark:hover:bg-gray-600 dark:focus:ring-gray-600">
                                 Cancel
                             </button>
-                            <button @click="showModal = false; resetModal()" :disabled="!selectedSize" type="button"
-                                wire:click="addToCart"
-                                class="flex-1 text-white bg-amber-600 hover:bg-amber-700 focus:ring-4 focus:outline-none focus:ring-amber-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-amber-600 dark:hover:bg-amber-700 dark:focus:ring-amber-800 disabled:opacity-50 disabled:cursor-not-allowed">
-                                Add to Cart
+                            
+                            <!-- Buy Now Button -->
+                            <button @click="showModal = false; resetModal()" 
+                                :disabled="!selectedSize" 
+                                type="button"
+                                wire:click="buyNowWithSize"
+                                wire:loading.attr="disabled"
+                                class="flex-1 text-white bg-blue-600  hover:bg-blue-700 focus:ring-4 focus:outline-none focus:ring-ble-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-ble-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
+                                <div wire:loading.remove wire:target="buyNowWithSize">
+                                    Buy Now
+                                </div>
+                                <div wire:loading wire:target="buyNowWithSize" class="flex items-center justify-center">
+                                    <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                    </svg>
+                                    Processing...
+                                </div>
                             </button>
-
+                            
+                            <!-- Add to Cart Button -->
+                            <button @click="showModal = false; resetModal()" 
+                                :disabled="!selectedSize" 
+                                type="button"
+                                wire:click="addToCart"
+                                wire:loading.attr="disabled"
+                                class="flex-1 text-white bg-amber-600 hover:bg-amber-700 focus:ring-4 focus:outline-none focus:ring-amber-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-amber-600 dark:hover:bg-amber-700 dark:focus:ring-amber-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
+                                <div wire:loading.remove wire:target="addToCart">
+                                    Add to Cart
+                                </div>
+                                <div wire:loading wire:target="addToCart" class="flex items-center justify-center">
+                                    <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                    </svg>
+                                    Adding...
+                                </div>
+                            </button>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-
-
 </div>

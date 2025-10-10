@@ -130,7 +130,7 @@ class ProductsRelationManager extends RelationManager
             ])
             ->headerActions([
                 Tables\Actions\AttachAction::make()
-                     ->recordSelectOptionsQuery(fn (Builder $query) => $query->where('prod_unit', '!=', 'diff_size'))
+                    ->recordSelectOptionsQuery(fn(Builder $query) => $query->where('prod_unit', '!=', 'diff_size'))
                     ->preloadRecordSelect()
                     ->slideOver()
                     ->button('Attach')
@@ -203,7 +203,11 @@ class ProductsRelationManager extends RelationManager
 
                         $action->getRecordSelect(),
                     ]),
+
+
+        
             ])
+
             ->deferLoading()
             ->actions([
                 Tables\Actions\EditAction::make(),

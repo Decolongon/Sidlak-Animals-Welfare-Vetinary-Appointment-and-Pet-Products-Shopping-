@@ -109,7 +109,7 @@
 
             <!-- Card -->
             @foreach ($this->getServiceSched as $service)
-                <a wire:navigate href="{{ route('service',['appoint_cat_slug' => $service->appoint_cat_slug]) }}"
+                <a wire:navigate.hover href="{{ route('service',['appoint_cat_slug' => $service->appoint_cat_slug]) }}" wire:key="service-{{ $service->id }}"
                     class="group flex flex-col bg-white border border-gray-200 shadow-2xs rounded-xl hover:shadow-md focus:outline-hidden focus:shadow-md transition dark:bg-neutral-900 dark:border-neutral-800">
                     <div class="h-48 overflow-hidden">
                         <img class="w-full h-full object-cover rounded-t-xl"
@@ -180,7 +180,7 @@
                                 Want to book an appointment?You must login first
                             </p>
                             <a class="inline-flex items-center gap-x-1.5 text-blue-600 decoration-2 hover:underline focus:outline-hidden focus:underline font-medium dark:text-blue-500"
-                                href="{{ route('filament.auth.auth.login') }}">
+                                href="{{ route('login') }}">
                                 click here
                                 <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24"
                                     height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"

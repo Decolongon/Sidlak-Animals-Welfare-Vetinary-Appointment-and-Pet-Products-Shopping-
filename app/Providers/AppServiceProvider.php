@@ -12,6 +12,7 @@ use App\Models\Blog\Category;
 use Filament\Facades\Filament;
 use App\Models\Contact\Inquiry;
 use App\Models\Ecommerce\Order;
+use App\Observers\OrderObserver;
 use App\Models\Adoption\Adoption;
 use App\Models\Donation\Donation;
 use App\Models\Ecommerce\Product;
@@ -40,8 +41,9 @@ use App\Observers\VetAppointmentObserver;
 use App\Policies\Adoption\AdoptionPolicy;
 use App\Policies\Donation\DonationPolicy;
 use App\Policies\Ecommerce\ProductPolicy;
-use App\Models\Appointment\DoctorSchedule;
 // use Filament\Http\Responses\Auth\Contracts\LogoutResponse as LogoutResponseContract;
+use App\Models\Appointment\DoctorSchedule;
+use App\Models\Ecommerce\FreeshippingCity;
 use App\Policies\Volunteer\VolunteerPolicy;
 use App\Models\Appointment\AppointmentCategory;
 use App\Policies\Appointment\AppointmentPolicy;
@@ -50,6 +52,7 @@ use App\Policies\Ecommerce\ProductReviewPolicy;
 use App\Policies\Ecommerce\ProductCategoryPolicy;
 use App\Policies\Ecommerce\ProductDiscountPolicy;
 use App\Policies\Appointment\DoctorSchedulePolicy;
+use App\Policies\Ecommerce\FreeshippingCityPolicy;
 use App\Policies\Appointment\AppointmentCategoryPolicy;
 use Filament\Http\Responses\Auth\Contracts\RegistrationResponse;
 use Filament\Http\Responses\Auth\LoginResponse as AuthLoginResponse;
@@ -76,10 +79,10 @@ class AppServiceProvider extends ServiceProvider
         //     \App\Http\Responses\RegisterResponse::class
         // );
 
-        $this->app->singleton(
-            AuthLoginResponse::class,
-            LoginResponse::class,
-        );
+        // $this->app->singleton(
+        //     AuthLoginResponse::class,
+        //     LoginResponse::class,
+        // );
         //for filament admin
         $this->app->bind(
             LogoutContractResponse::class,
@@ -95,6 +98,7 @@ class AppServiceProvider extends ServiceProvider
 
         Announcement::observe(AnnouncementObserver::class);
         Appointment::observe(VetAppointmentObserver::class);
+        //Order::observe(OrderObserver::class);
     }
 
     /**
@@ -129,6 +133,7 @@ class AppServiceProvider extends ServiceProvider
             Announcement::class => AnnouncementPolicy::class,
             VetSchedule::class => VetSchedulePolicy::class,
             ProductDiscount::class => ProductDiscountPolicy::class,
+            FreeshippingCity::class => FreeshippingCityPolicy::class,
            // DoctorSchedule::class => DoctorSchedulePolicy::class,
             //    User::class => UserPolicy::class,
 

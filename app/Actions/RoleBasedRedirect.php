@@ -34,7 +34,7 @@ class RoleBasedRedirect implements LoginResponseContract
             return redirect()->intended(config('filament.path', 'admin'));
         }
 
-        
+         
         // For non-admin users, redirect to regular dashboard
         return redirect()->intended(config('fortify.home', '/dashboard'));
       

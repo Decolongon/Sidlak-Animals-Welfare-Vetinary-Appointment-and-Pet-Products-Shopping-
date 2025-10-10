@@ -262,6 +262,7 @@ class AppointmentApplicationResource extends Resource
                     ->date(),
             ])
             ->columns([
+
                 Tables\Columns\TextColumn::make('user.name')
                     ->searchable()
                     ->sortable()
@@ -273,6 +274,8 @@ class AppointmentApplicationResource extends Resource
                     ->sortable()
                     ->label('Email')
                     ->formatStateUsing(fn($state) => $state),
+
+
 
                 Tables\Columns\TextColumn::make('categories.appoint_cat_name')
                     ->searchable()
@@ -365,7 +368,7 @@ class AppointmentApplicationResource extends Resource
             ])
             ->filtersTriggerAction(
                 fn(TableAction $action) => $action
-                    ->slideOver()
+                    // ->slideOver()
                     ->button()
                     ->label('Filter'),
             )
@@ -399,8 +402,9 @@ class AppointmentApplicationResource extends Resource
                                     DateTimePicker::make('appoint_sched')
                                         ->required()
                                         ->seconds(false)
-                                        //->default(fn($record) => $record->appoint_sched ?? now()->addDays(1))
+                                        ->default(fn($record) => $record->appoint_sched ?? now()->startOfDay())
                                         ->minDate(now()->startOfDay())
+                                        ->maxDate(now()->addWeek()->endOfDay())
                                         ->hidden(fn(Get $get) => $get('appointment_status') !== 'approved')
                                         ->dehydrated()
                                         ->label('Schedule Date')
@@ -468,6 +472,7 @@ class AppointmentApplicationResource extends Resource
                                         ->seconds(false)
                                         // ->default(fn($record) => $record->appoint_sched ?? now()->addDays(1))
                                         ->minDate(now()->startOfDay())
+                                        ->maxDate(now()->addWeek()->endOfDay())
                                         ->hidden(fn(Get $get) => $get('appointment_status') !== 'approved')
                                         ->dehydrated()
                                         ->columnSpan(1)

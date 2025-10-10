@@ -48,67 +48,81 @@
         </div>
 
         <!-- Order Cards -->
-        @forelse ($orders as $order)
+        @forelse ($this->getOrders as $order)
             <div wire:key="order-{{ $order->order_num }}"
                 class="mb-6 bg-white dark:bg-neutral-800 rounded-lg shadow-sm overflow-hidden border border-gray-200 dark:border-neutral-700 transition-all hover:shadow-md">
                 <!-- Order Header -->
                 <div
                     class="px-5 py-4 border-b border-gray-200 dark:border-neutral-700 flex justify-between items-center">
                     <div>
-                        <span class="text-sm text-gray-500 dark:text-gray-400">Tracking #:
-                            {{ $order->order_num }}</span>
-                        <h3 class="text-lg font-medium text-gray-800 dark:text-white mt-1">
+                        <span class="text-xs text-gray-500 dark:text-gray-400">Tracking #:
+                            {{ $order->order_num }}
+                        </span>
+                        <br>
+                        <span class="text-xs text-gray-500 dark:text-gray-400">Shipping address:
+                            @foreach ($order->shippingAddresses as $ship)
+                                {{ str()->limit(ucwords(strtolower($ship->complete_address)), 40, '...') }}
+                            @endforeach
+                        </span>
+                        <h3 class="text-xs font-medium text-gray-800 dark:text-white mt-1">
                             {{ $order->created_at->format('M j, Y') }}
                         </h3>
-                      @if ($orderId == $order->id)
-    <div x-data="{ counter: 10, cancelled: false, interval: null }" x-init="interval = setInterval(() => {
-        if (counter > 0) {
-            counter--;
-        } else {
-            if (!cancelled) {
-                $wire.processCancelOrder({{ $order->id }});
-            }
-            clearInterval(interval);
-        }
-    }, 1000);"
-    class="p-3 rounded-lg border border-amber-500/30 bg-amber-50 dark:bg-amber-950/20 shadow-sm">
+                        @if ($orderId == $order->id)
+                            <div x-data="{ counter: 10, cancelled: false, interval: null }" x-init="interval = setInterval(() => {
+                                if (counter > 0) {
+                                    counter--;
+                                } else {
+                                    if (!cancelled) {
+                                        $wire.processCancelOrder({{ $order->id }});
+                                    }
+                                    clearInterval(interval);
+                                }
+                            }, 1000);"
+                                class="p-3 rounded-lg border border-amber-500/30 bg-amber-50 dark:bg-amber-950/20 shadow-sm">
 
-        <template x-if="!cancelled">
-            <div class="flex flex-col sm:flex-row sm:items-center gap-2">
-                <div class="flex items-center gap-1.5">
-                    <svg class="w-4 h-4 text-amber-600 dark:text-amber-400" fill="currentColor" viewBox="0 0 20 20">
-                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm0-2a6 6 0 100-12 6 6 0 000 12zM10 5a1 1 0 011 1v5a1 1 0 11-2 0V6a1 1 0 011-1zm0 10a1 1 0 100-2 1 1 0 000 2z" clip-rule="evenodd" />
-                    </svg>
-                    <p class="text-amber-800 dark:text-amber-200 font-medium text-sm">
-                        Cancelling in <span x-text="counter" class="font-bold"></span>s
-                    </p>
-                </div>
+                                <template x-if="!cancelled">
+                                    <div class="flex flex-col sm:flex-row sm:items-center gap-2">
+                                        <div class="flex items-center gap-1.5">
+                                            <svg class="w-4 h-4 text-amber-600 dark:text-amber-400" fill="currentColor"
+                                                viewBox="0 0 20 20">
+                                                <path fill-rule="evenodd"
+                                                    d="M10 18a8 8 0 100-16 8 8 0 000 16zm0-2a6 6 0 100-12 6 6 0 000 12zM10 5a1 1 0 011 1v5a1 1 0 11-2 0V6a1 1 0 011-1zm0 10a1 1 0 100-2 1 1 0 000 2z"
+                                                    clip-rule="evenodd" />
+                                            </svg>
+                                            <p class="text-amber-800 dark:text-amber-200 font-medium text-sm">
+                                                Cancelling in <span x-text="counter" class="font-bold"></span>s
+                                            </p>
+                                        </div>
 
-                <button
-                    @click="
+                                        <button
+                                            @click="
                         cancelled = true; 
                         clearInterval(interval);
                         $wire.resetOrder();
                     "
-                    class="px-2.5 py-1 text-xs font-medium text-white bg-gray-600 hover:bg-gray-700 rounded transition-colors duration-200 flex items-center gap-1 justify-center sm:justify-start">
-                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                    </svg>
-                    Cancel
-                </button>
-            </div>
-        </template>
+                                            class="px-2.5 py-1 text-xs font-medium text-white bg-gray-600 hover:bg-gray-700 rounded transition-colors duration-200 flex items-center gap-1 justify-center sm:justify-start">
+                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor"
+                                                viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M6 18L18 6M6 6l12 12"></path>
+                                            </svg>
+                                            Cancel
+                                        </button>
+                                    </div>
+                                </template>
 
-        <template x-if="cancelled">
-            <div class="flex items-center gap-1.5 text-green-700 dark:text-green-400 text-sm">
-                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
-                </svg>
-                <p class="font-medium">Cancellation stopped</p>
-            </div>
-        </template>
-    </div>
-@endif
+                                <template x-if="cancelled">
+                                    <div class="flex items-center gap-1.5 text-green-700 dark:text-green-400 text-sm">
+                                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                                            <path fill-rule="evenodd"
+                                                d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                                                clip-rule="evenodd" />
+                                        </svg>
+                                        <p class="font-medium">Cancellation stopped</p>
+                                    </div>
+                                </template>
+                            </div>
+                        @endif
 
 
                     </div>
@@ -156,12 +170,12 @@
 
                                     </h4>
                                     <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                                        @if ($item->product->prod_unit === 'pcs')
+                                        @if ($item->product->prod_unit === 'pcs' || $item->product->prod_unit === 'has_dimensions')
                                             {{ number_format($item->quantity, 0) }} pcs
-                                        @elseif($item->product->prod_unit == 'diff_size' && isset($item->variant))
+                                        @elseif($item->product->prod_unit === 'diff_size' && isset($item->variant))
                                             {{ number_format($item->quantity, 0) }} pcs
                                         @else
-                                            {{ $item->quantity }} ×
+                                            {{ number_format($item->quantity, 0) }} ×
                                             {{ number_format($item->product->prod_weight, 2) }}
                                             {{ $item->product->prod_unit }}
                                         @endif

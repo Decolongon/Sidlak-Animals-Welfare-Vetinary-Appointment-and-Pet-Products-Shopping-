@@ -15,13 +15,16 @@ class AdminMiddleware
      * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
      */
     public function handle(Request $request, Closure $next): Response
-    {   
-
+    {
+        $panel = Filament::getCurrentPanel()?->getId();
         //admin panel lng ma kita ya
-         if(auth()->check() && auth()->user()->roles()->exists()){
+         if(auth()->check() && auth()->user()->roles()->exists()) {
              return back();
          }
 
-         return $next($request);
+       
+
+      
+        return $next($request);
     }
 }

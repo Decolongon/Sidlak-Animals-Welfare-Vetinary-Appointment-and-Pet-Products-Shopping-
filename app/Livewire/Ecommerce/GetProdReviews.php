@@ -3,12 +3,13 @@
 namespace App\Livewire\Ecommerce;
 
 use Livewire\Component;
+use Livewire\Attributes\On;
+use Livewire\Attributes\Lazy;
 use Livewire\Attributes\Title;
 use Livewire\Attributes\Layout;
-use App\Models\Ecommerce\ProductReview;
-use Livewire\Attributes\Lazy;
 use Livewire\Attributes\Locked;
-use Livewire\Attributes\On;
+use Livewire\Attributes\Computed;
+use App\Models\Ecommerce\ProductReview;
 
 #[Lazy()]
 class GetProdReviews extends Component
@@ -25,38 +26,19 @@ class GetProdReviews extends Component
     public function mount($product_id)
     {
         $this->product_id = $product_id;
-        $this->getProdReviews();
+        //$this->getProdReviews();
         //$this->countReviews();
     }
 
-    //    public function showAllReviews()
-    //     {
-    //         $this->showAll = true;
-    //         $this->prod_reviews = ProductReview::with(['user', 'product'])->where('product_id', $this->product_id)
-    //             ->latest()
-    //             ->get(); 
-    //     }
-
-    // public function newReviewAdded()
-    // {
-    //     $this->getProdReviews();
-    // }
-
-    
-
     //get sg product reviews each product kg dy sinu ng post reviews
-
+    #[Computed()]
     public function getProdReviews()
     {
-        // $this->showAll = false;
-        $this->prod_reviews = ProductReview::with(['user', 'product'])->where('product_id', $this->product_id)
+
+        return ProductReview::with(['user', 'product'])->where('product_id', $this->product_id)
             ->latest()
             // ->take(5)
             ->get();
-
-
-        // $this->count_reviews = $this->prod_reviews->count();
-
     }
     public function placeholder()
     {
@@ -76,8 +58,7 @@ class GetProdReviews extends Component
     public function render()
     {
         return view('livewire.ecommerce.get-prod-reviews', [
-            'prod_reviews' => $this->prod_reviews,
-            // 'count_reviews' => $this->count_reviews,
+
         ]);
     }
 }

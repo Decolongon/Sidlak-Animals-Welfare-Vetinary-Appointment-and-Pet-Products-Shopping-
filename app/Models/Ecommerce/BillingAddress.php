@@ -15,6 +15,8 @@ class BillingAddress extends Model
         'bil_country',
         'bil_province',
         'bil_complete_address',
+        'street',
+        'postal_code',
     ];
 
     public function order(): BelongsTo

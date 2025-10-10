@@ -138,6 +138,7 @@ class ProductResource extends Resource
                                                     ->required()
                                                     ->options([
                                                         'diff_size' => 'Different Sizes (small, medium, large,etc)',
+                                                        'has_dimensions' => 'Has Dimensions (length, width, height)',
                                                         'pcs' => 'Piece (pcs)',
                                                         'kg' => 'Kilograms (kg)',
                                                         'g' => 'Grams (g)',
@@ -145,13 +146,83 @@ class ProductResource extends Resource
                                                     ->default('pcs')
                                                     ->reactive(),
 
+                                                TextInput::make('prod_length')
+                                                    ->label('Product Length')
+                                                    ->required()
+                                                    ->numeric()
+                                                    ->minValue(1)
+                                                    ->hidden(fn($get) => $get('prod_unit') !== 'has_dimensions')
+                                                    ->maxValue(150)
+                                                    ->suffix('cm')
+                                                    ->rule(function ($get) {
+                                                        return function (string $attribute, $value, Closure $fail) use ($get) {
+                                                            $length = $get('prod_length');
+                                                            $width = $get('prod_width');
+                                                            $height = $get('prod_height');
+
+                                                            // Check if all dimensions are set and numeric
+                                                            if ($length && $width && $height) {
+                                                                if ($length * $width * $height > 175000) {
+                                                                    $fail('The product dimensions would exceed 50kg shipping weight. Please reduce the size.');
+                                                                }
+                                                            }
+                                                        };
+                                                    }),
+
+                                                TextInput::make('prod_width')
+                                                    ->label('Product Width')
+                                                    ->required()
+                                                    ->numeric()
+                                                    ->minValue(1)
+                                                    ->hidden(fn($get) => $get('prod_unit') !== 'has_dimensions')
+                                                    ->maxValue(150)
+                                                    ->suffix('cm')
+                                                    ->rule(function ($get) {
+                                                        return function (string $attribute, $value, Closure $fail) use ($get) {
+                                                            $length = $get('prod_length');
+                                                            $width = $get('prod_width');
+                                                            $height = $get('prod_height');
+
+                                                            // Check if all dimensions are set and numeric
+                                                            if ($length && $width && $height) {
+                                                                if ($length * $width * $height > 175000) {
+                                                                    $fail('The product dimensions would exceed 50kg shipping weight. Please reduce the size.');
+                                                                }
+                                                            }
+                                                        };
+                                                    }),
+
+
+                                                TextInput::make('prod_height')
+                                                    ->label('Product Height')
+                                                    ->required()
+                                                    ->numeric()
+                                                    ->minValue(1)
+                                                    ->hidden(fn($get) => $get('prod_unit') !== 'has_dimensions')
+                                                    ->maxValue(150)
+                                                    ->suffix('cm')
+                                                    ->rule(function ($get) {
+                                                        return function (string $attribute, $value, Closure $fail) use ($get) {
+                                                            $length = $get('prod_length');
+                                                            $width = $get('prod_width');
+                                                            $height = $get('prod_height');
+
+                                                            // Check if all dimensions are set and numeric
+                                                            if ($length && $width && $height) {
+                                                                if ($length * $width * $height > 175000) {
+                                                                    $fail('The product dimensions would exceed 50kg shipping weight. Please reduce the size.');
+                                                                }
+                                                            }
+                                                        };
+                                                    }),
+
                                                 TextInput::make('prod_weight')
                                                     ->label(fn($get) => $get('prod_unit') === 'kg' ? 'Product Weight kilograms (kg)' : 'Product Weight grams (g)')
                                                     ->required()
                                                     ->numeric()
-                                                    ->maxValue(fn($get) => $get('prod_unit') === 'kg' ? 50 : 1000)
+                                                    ->maxValue(fn($get) => $get('prod_unit') === 'kg' ? 50 : 50000)
                                                     ->suffix(fn($get) => $get('prod_unit') === 'kg' ? 'kg' : 'g')
-                                                    ->hidden(fn($get) => $get('prod_unit') === 'pcs' || $get('prod_unit') === 'diff_size'),
+                                                    ->hidden(fn($get) => $get('prod_unit') === 'pcs' || $get('prod_unit') === 'diff_size' || $get('prod_unit') === 'has_dimensions'),
 
                                                 TextInput::make('prod_quantity')
                                                     ->label('Product Quantity')
@@ -228,14 +299,14 @@ class ProductResource extends Resource
                                                     ->icons([false => 'heroicon-m-x-circle', true => 'heroicon-m-check-circle'])
                                                     ->default(true),
 
-                                                TextInput::make('shipping_cost')
-                                                    ->label('Shipping Cost')
-                                                    ->numeric()
-                                                    ->prefix('PHP')
-                                                    ->minValue(30)
-                                                    ->maxValue(50)
-                                                    ->required(fn($get) => $get('prod_requires_shipping') == true)
-                                                    ->hidden(fn($get) => $get('prod_requires_shipping') == false),
+                                                // TextInput::make('shipping_cost')
+                                                //     ->label('Shipping Cost')
+                                                //     ->numeric()
+                                                //     ->prefix('PHP')
+                                                //     ->minValue(30)
+                                                //     ->maxValue(50)
+                                                //     ->required(fn($get) => $get('prod_requires_shipping') == true)
+                                                //     ->hidden(fn($get) => $get('prod_requires_shipping') == false),
 
                                                 ToggleButtons::make('is_visible_to_market')
                                                     ->label('Visible in Market?')
@@ -561,6 +632,52 @@ class ProductResource extends Resource
                 // }),
 
 
+            ])
+            ->headerActions([
+                TableAction::make('shipping_cost')
+                    ->label('Standard Shipping Cost')
+                    ->icon('heroicon-m-truck')
+                    ->color('success')
+                    ->modalHeading('Standard Shipping Cost')
+                    ->modalSubmitAction(fn(StaticAction $action) => $action->label('Save'))
+                    ->modalCancelAction(fn(StaticAction $action) => $action->label('Close'))
+                    ->form([
+                        Section::make('Standard Shipping Cost')
+                            ->description('Set a standard shipping cost that will apply to all products with shipping enabled')
+                            ->schema([
+                                TextInput::make('shipping_cost')
+                                    ->label('Shipping Cost (₱)')
+                                    ->numeric()
+                                    ->required()
+                                    ->minValue(30)
+                                    ->maxValue(60)
+                                    ->prefix('₱')
+                                    ->default(60)
+                                    ->hint('This will be applied to all products that require shipping')
+                                    ->hintColor('warning'),
+
+                                \Filament\Forms\Components\Placeholder::make('affected_products')
+                                    ->label('Products Affected')
+                                    ->content(function () {
+                                        $count = Product::where('prod_requires_shipping', true)->count();
+                                        return "This will update {$count} products that require shipping";
+                                    }),
+                            ]),
+                    ])
+                    ->action(function (array $data) {
+                        $shippingCost = $data['shipping_cost'];
+
+                        // Update all products where prod_requires_shipping is true (1)
+                        $affectedCount = Product::where('prod_requires_shipping', true)
+                            ->update(['shipping_cost' => $shippingCost]);
+
+                        // Show success notification
+                        \Filament\Notifications\Notification::make()
+                            ->title('Shipping Cost Updated Successfully')
+                            ->body("Updated shipping cost to ₱{$shippingCost} for {$affectedCount} products")
+                            ->success()
+                            ->send();
+                    })
             ])
             ->filtersTriggerAction(
                 fn(TableAction $action) => $action

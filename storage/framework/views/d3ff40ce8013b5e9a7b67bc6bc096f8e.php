@@ -1,15 +1,11 @@
 <div>
 
     <!--[if BLOCK]><![endif]--><?php if(session()->has('selected_checkout_items') || session()->has('buy_now_product')): ?>
+        
         <div class="mb-6 ml-6 mt-4">
-            <a wire:navigate href="<?php echo e(route('checkout')); ?>"
-                class="inline-flex items-center px-4 py-2 bg-amber-600 border border-transparent rounded-md font-semibold text-xs text-black uppercase tracking-widest hover:bg-amber-700 focus:bg-amber-700 active:bg-amber-900 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-offset-2 transition ease-in-out duration-150">
-
-                Back to Checkout
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
-                    stroke="currentColor" class="size-6">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" />
-                </svg>
+            <a wire:navigate.hover href="<?php echo e(route('checkout')); ?>"
+                class="inline-flex items-center text-amber-600 hover:text-amber-700 font-semibold text-sm tracking-wide hover:underline transition ease-in-out duration-150">
+                back to checkout
             </a>
         </div>
     <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
@@ -78,7 +74,7 @@
                             All Categories
                         </a>
 
-                        <!--[if BLOCK]><![endif]--><?php $__empty_1 = true; $__currentLoopData = $categories->filter(fn($cat) => stripos($cat->prod_cat_name, $searchCat ?? '') !== false); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $prodCat): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
+                        <!--[if BLOCK]><![endif]--><?php $__empty_1 = true; $__currentLoopData = $this->categories; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $prodCat): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
                             <div wire:key="<?php echo e($prodCat->id); ?>">
                                 <a wire:click.prevent="filterByCategoryAndOrder(<?php echo e($prodCat->id); ?>, '<?php echo e($sortBy); ?>')"
                                     class="flex items-center gap-x-3.5 py-2 px-3 rounded-lg text-sm text-gray-800 hover:bg-gray-100 focus:outline-none focus:bg-gray-100 dark:text-neutral-400 dark:hover:bg-neutral-700 dark:hover:text-neutral-300 dark:focus:bg-neutral-700 cursor-pointer">
@@ -142,7 +138,7 @@
         <!-- Grid -->
         <div class="grid grid-cols-2 gap-3 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-4">
 
-            <!--[if BLOCK]><![endif]--><?php $__empty_1 = true; $__currentLoopData = $this->getProducts(); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $product): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
+            <!--[if BLOCK]><![endif]--><?php $__empty_1 = true; $__currentLoopData = $this->getProducts; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $product): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
                 <div wire:key="product-<?php echo e($product->id); ?>"
                     class="group flex flex-col border border-gray-200 hover:border-transparent hover:shadow-lg focus:outline-none focus:border-transparent focus:shadow-lg transition duration-300 rounded-xl p-4 dark:border-neutral-700 dark:hover:border-transparent dark:hover:shadow-black/40 dark:focus:border-transparent dark:focus:shadow-black/40">
                     <p
@@ -169,7 +165,7 @@
 
 
                     <div class="aspect-w-16 aspect-h-11">
-                        <a wire:navigate href="<?php echo e(route('page.singleProd', ['prod_slug' => $product->prod_slug])); ?>">
+                        <a wire:navigate.hover href="<?php echo e(route('page.singleProd', ['prod_slug' => $product->prod_slug])); ?>">
 
                             
 
@@ -191,6 +187,10 @@
                             <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
                             <!--[if BLOCK]><![endif]--><?php if($product->prod_unit == 'g'): ?>
                                 <?php echo e(' - ' . number_format($product->prod_weight, 2) . $product->prod_unit); ?>
+
+                            <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
+                            <!--[if BLOCK]><![endif]--><?php if($product->prod_unit == 'has_dimensions'): ?>
+                                <br><?php echo e('Dimensions:'.$product->prod_length . ' x ' . $product->prod_width . ' x ' . $product->prod_height . ' cm'); ?>
 
                             <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
                         </h5>
@@ -291,7 +291,7 @@ if (isset($__slots)) unset($__slots);
     </div>
 
     <div class="mt-2 flex justify-start ml-6">
-        <?php echo e($this->getProducts()->links('vendor.pagination.shop-pagination')); ?>
+        <?php echo e($this->getProducts->links('vendor.pagination.shop-pagination')); ?>
 
     </div>
 

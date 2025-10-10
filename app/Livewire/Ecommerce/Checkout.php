@@ -10,6 +10,7 @@ use App\Helpers\CheckOutHelper;
 use App\Models\Ecommerce\Order;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Locked;
+use App\Helpers\PostalCodeHelper;
 use App\Models\Ecommerce\Address;
 use App\Models\Ecommerce\Product;
 use Livewire\Attributes\Computed;
@@ -55,9 +56,12 @@ class Checkout extends Component
     #[Locked]
     public $region_id = 7; //region VI (western visayas)
 
-    public $cities = [];
-    public $barangays = [];
-    public $selectedRegion, $selectedProvince, $selectedCity, $selectedBarangay;
+    // public $cities = [];
+    // public $barangays = [];
+    public $street;
+
+    #[Locked]
+    public $selectedRegion, $selectedProvince, $selectedCity, $selectedBarangay, $postal_code;
 
     public $card_name;
     public $card_number;
@@ -87,36 +91,38 @@ class Checkout extends Component
     //billing address properties
     public $billing_city;
     public $billing_brgy;
-    public $bil_barangays = [];
-    public $bil_cities = [];
+    public $bil_postalCode;
+    // public $bil_barangays = [];
+    // public $bil_cities = [];
     public $billingSearchCity = '';
     public $billingSearchBrgy = '';
+    public $bil_street;
+
+    public $total_weight = 0;
 
     // public $originalQuantities = [];
 
     protected $listeners = [
         'confirmedCancelOrder' => 'confirmedCancelOrder',
+        'removeItem' => 'removeItem',
     ];
 
     public function mount()
     {
         $this->itemId =  session('buy_now_product');
 
-        $this->getCheckoutItems();
-        $this->loadUserAddress();
-        $this->calculateTotalShipping();
-        $this->calculateSubtotal();
         $this->selectedRegion = $this->region_id;
         $this->selectedProvince = '0645'; //provincce_code of negroos occidental
 
         // Load cities for the province
-        $this->cities = PhilippineCity::where('province_code', $this->selectedProvince)
-            //->limit(10)
-            ->get();
-        //dd($this->cities);
+        // $this->getCities();
+        // $this->getBillingCities();
 
-        $this->bil_cities = PhilippineCity::where('province_code', $this->selectedProvince)
-            ->get();
+       // $this->getCheckoutItems();
+        //$this->getTotalWeight();
+        $this->loadUserAddress();
+        $this->calculateTotalShipping();
+        $this->calculateSubtotal();
 
         // // Load barangays if a city is already selected
         // if ($this->selectedCity) {
@@ -138,53 +144,194 @@ class Checkout extends Component
         return app(ProductDiscountHelper::class);
     }
 
+    private function PostalCodeHelper()
+    {
+        return app(PostalCodeHelper::class);
+    }
+
+    #[Computed()]
+    public function cities()
+    {
+        $query = PhilippineCity::where('province_code', $this->selectedProvince);
+
+        if (!empty($this->searchCity)) {
+            $query->where('name', 'like', '%' . $this->searchCity . '%');
+        }
+
+        return $query->get();
+    }
+
+
+    #[Computed()]
+    public function barangays()
+    {
+        if (!$this->selectedCity) {
+            return collect();
+        }
+
+        $query = PhilippineBarangay::where('city_code', $this->selectedCity);
+
+        if (!empty($this->searchBrgy)) {
+            $query->where('name', 'like', '%' . $this->searchBrgy . '%');
+        }
+
+        return $query->get();
+    }
+
+
+    #[Computed()]
+    public function bil_barangays()
+    {
+        if (!$this->billing_city) {
+            return collect();
+        }
+
+        $query = PhilippineBarangay::where('city_code', $this->billing_city);
+
+        if (!empty($this->billingSearchBrgy)) {
+            $query->where('name', 'like', '%' . $this->billingSearchBrgy . '%');
+        }
+
+        return $query->get();
+    }
+
+    #[Computed()]
+    public function bil_cities()
+    {
+        $query = PhilippineCity::where('province_code', $this->selectedProvince);
+
+        if (!empty($this->billingSearchCity)) {
+            $query->where('name', 'like', '%' . $this->billingSearchCity . '%');
+        }
+
+        return $query->get();
+    }
+
+ 
     // address search
     public function updatedSearchCity()
     {
-        $this->cities = PhilippineCity::where('province_code', $this->selectedProvince)
-            ->where('name', 'like', '%' . $this->searchCity . '%')
-            //->limit(10)
-            ->get();
+        $this->calculateSubtotal();
+    }
+
+    public function updatedSameAsBilling()
+    {
+        $this->getCheckoutItems();
+        $this->calculateSubtotal();
     }
     // address search
     public function updatedSearchBrgy()
     {
-        $this->barangays = PhilippineBarangay::where('city_code', $this->selectedCity)
-            ->where('name', 'like', '%' . $this->searchBrgy . '%')
-            //->limit(10)
-            ->get();
+        $this->calculateSubtotal();
     }
 
-    //billing address search
-    public function updatedBillingSearchCity()
+    // //billing address search
+    // public function updatedBillingSearchCity()
+    // {
+
+    //     $this->bil_cities = PhilippineCity::where('province_code', $this->selectedProvince)
+    //         ->where('name', 'like', '%' . $this->billingSearchCity . '%')
+    //         ->get();
+    //     // $this->loadUserAddress();
+    // }
+
+    // for shipping address display the selected city if my ara kng wla display something else
+    #[Computed]
+    public function selectedCityName()
     {
-        $this->bil_cities = PhilippineCity::where('province_code', $this->selectedProvince)
-            ->where('name', 'like', '%' . $this->billingSearchCity . '%')
-            ->get();
+        if (!$this->selectedCity) {
+            return 'Select or Search City';
+        }
+
+        return PhilippineCity::where('code', $this->selectedCity)->value('name') ?? '';
+    }
+
+
+    // for shipping adddress
+    protected function getPostalCodeForSelectedCity()
+    {
+        if ($this->selectedCity) {
+            $city = PhilippineCity::where('code', $this->selectedCity)->first();
+
+            if ($city) {
+                $cityName = $city->name;
+                $this->postal_code = $this->PostalCodeHelper()->getPostalCodeByCityName($cityName);
+            }
+        }
+    }
+
+    //for billing address
+    protected function getBillingPostalCodeForSelectedCity()
+    {
+        if ($this->billing_city) {
+            $city = PhilippineCity::where('code', $this->billing_city)->first();
+
+            if ($city) {
+                $cityName = $city->name;
+                $this->bil_postalCode = $this->PostalCodeHelper()->getPostalCodeByCityName($cityName);
+            }
+        }
+    }
+
+
+    // for shipping address display the selected barangay if my ara kng wla display something else
+    #[Computed]
+    public function selectedBrgyName()
+    {
+        if (!$this->selectedBarangay) {
+            return 'Select or Search Barangay';
+        }
+
+        return PhilippineBarangay::where('name', $this->selectedBarangay)->value('name') ?? '';
+    }
+
+    // for billing address display the selected city if my ara kng wla display something else
+    #[Computed]
+    public function selectedBillingCityName()
+    {
+        if (!$this->billing_city) {
+            return 'Select or Search City';
+        }
+
+        return PhilippineCity::where('code', $this->billing_city)->value('name') ?? '';
+    }
+
+    // for billing address display the selected barangay if my ara kng wla display something else
+    #[Computed]
+    public function selectedBillingBrgyName()
+    {
+        if (!$this->billing_brgy) {
+            return 'Select or Search Barangay';
+        }
+
+        return PhilippineBarangay::where('name', $this->billing_brgy)->value('name') ?? '';
     }
 
     //billing address search
     public function updatedBillingSearchBrgy()
     {
-        $this->bil_barangays = PhilippineBarangay::where('city_code', $this->billing_city)
-            ->where('name', 'like', '%' . $this->billingSearchBrgy . '%')
-            ->get();
+        //  $this->loadUserAddress();
+        $this->calculateSubtotal();
     }
 
-
+    #[Computed()]
     public function getCheckoutItems()
     {
         if (!Auth::check()) {
-            return redirect()->route('filament.auth.auth.login');
+            return redirect()->route('login');
         }
         // Handle single product checkout ((buy now)
-        $this->isBuyNowMode = session()->get('buy_now_mode', false);
+        $this->isBuyNowMode = session()->get('buy_now_product');
+        //  dd($this->isBuyNowMode);
         if ($this->isBuyNowMode) {
-            $this->checkoutItems = $this->checkoutHelper()->getBuynowItem();
-            return;
+            // $this->checkoutItems = $this->checkoutHelper()->getBuynowItem();
+            // return;
+            return $this->checkoutHelper()->getBuynowItem();
         }
+
         // Handle cart checkout
-        $this->checkoutItems = $this->checkoutHelper()->getCheckoutItems();
+        //$this->checkoutItems = $this->checkoutHelper()->getNormalCheckoutItems();
+        return $this->checkoutHelper()->getNormalCheckoutItems();
     }
 
     //calculate subtotal
@@ -193,10 +340,10 @@ class Checkout extends Component
         $this->itemsTotal = 0;
         $this->totalDiscount = 0; // Initialize discount total
 
-        $this->itemsTotal = $this->checkoutItems->sum(function ($item) {
+        $this->itemsTotal =  $this->getCheckoutItems->sum(function ($item) {
             $product = $item->product;
             $originalPrice = $item->variant->price ?? $product->prod_price;
-            $discountedPrice = $this->ProductDiscountHelper()->getDiscountedPrice($product);
+            $discountedPrice = $this->ProductDiscountHelper()->getDiscountedPrice($product, $item);
             $finalPrice = $discountedPrice ?? $originalPrice;
             $this->isDiscounted[$item->id] = $finalPrice;
 
@@ -214,14 +361,17 @@ class Checkout extends Component
     //calculate total shipping
     protected function calculateTotalShipping()
     {
-        $this->totalShipping = $this->checkoutHelper()->calculateTotalShipping($this->checkoutItems, $this->selectedCity);
+        $this->totalShipping = $this->checkoutHelper()->calculateTotalShipping($this->getCheckoutItems, $this->selectedCity);
     }
-
 
 
     protected function loadUserAddress()
     {
-        $userAddress = Address::where('user_id', Auth::id())->first();
+        //$userAddress = Address::orderBy('created_at', 'desc')->first();
+        $userAddress = Address::query()
+            ->where('user_id', Auth::id())
+            ->latest()
+            ->first();
 
         if ($userAddress) {
 
@@ -240,7 +390,10 @@ class Checkout extends Component
 
                 if ($barangay) {
                     $this->selectedBarangay = $barangay->name;
+                    $this->street = ucwords(strtolower($userAddress->street));
                 }
+                // this is for shipping
+                $this->getPostalCodeForSelectedCity();
             }
         }
     }
@@ -261,18 +414,22 @@ class Checkout extends Component
             //    'payment_method' => 'required|in:gcash,card,paymaya,grab_pay'
             'selectedCity' => 'required',
             'selectedBarangay' => 'required',
-            'shipping_method' => 'required',
+            // 'shipping_method' => 'required',
             'notes' => 'nullable|max:1000',
+            'shipping_method' => 'required|in:COD,e-wallet,gcash,paymaya,grab_pay,card',
+            'street' => 'required',
         ];
+
         if ($this->same_as_billing == false) {
             $rules['billing_city'] = 'required';
             $rules['billing_brgy'] = 'required';
+            $rules['bil_street'] = 'required';
         }
         // $rules['checkoutItems'] = 'min:1';
 
-        if ($this->shipping_method === 'e-wallet') {
-            $rules['shipping_method'] = 'required|in:gcash,card,paymaya,grab_pay';
-        }
+        // if ($this->shipping_method === 'e-wallet') {
+        //     $rules['shipping_method'] = 'required|in:gcash,card,paymaya,grab_pay';
+        // }
 
         if ($this->shipping_method === 'card') {
             // $this->card_number = preg_replace('/\D/', '', $this->card_number);
@@ -291,169 +448,59 @@ class Checkout extends Component
             'selectedCity' => 'city',
             'selectedBarangay' => 'barangay',
             'shipping_method' => 'payment method',
+            'street' => 'street',
+            'bil_street' => 'billing street',
 
         ];
     }
-    //place order
-    // public function placeOrder()
-    // {
 
-    //     $validatedData = $this->validate();
-    //     if ($this->shipping_method === 'e-wallet' && !$this->payment_method) {
-    //         $this->addError('payment_method', 'Please select a specific e-wallet.');
-    //         return;
-    //     }
-    //     if ($this->checkoutItems->isEmpty()){
-    //         $this->alert('error', '', [
-    //             'position' => 'top-end',
-    //             'timer' => 3000,
-    //             'toast' => true,
-    //             'text' => 'Please add items before placing an order.',
-    //         ]);
-    //         return;
-    //     }
+    protected function getTotalWeight()
+    {
+        $totalWeight = 0;
+        foreach ($this->getCheckoutItems as $item) {
+            $productUnit = $item->product->prod_unit;
+            $weight = $item->product->prod_weight;
+            $quantity = $item->quantity;
 
-    //     $sanitizedData = $this->sanitizeInput($validatedData);
+            $cost_weight_kg = 0;
+            $cost_weight_g = 0;
+            $dimentions = 0;
 
-    //     $brgyName = PhilippineBarangay::where('name', $sanitizedData['selectedBarangay'])->value('name');
-    //     $cityName = PhilippineCity::where('code', $sanitizedData['selectedCity'])->value('name');
+            if ($productUnit == 'kg') {
+                $totalWeight += $weight * $quantity;
+                //dd($totalWeight);
+                // $cost_weight_kg = $totalWeight * 15;
+            }
 
-    //     $order = Order::create([
-    //         'user_id' => Auth::id(),
-    //         'shipping_method' => $sanitizedData['shipping_method'],
-    //         'notes' => $sanitizedData['notes'],
-    //         'shipping_price' => $this->totalShipping,
-    //         'total' => $this->subtotal,
-    //         'payment_status' => 'pending',
-    //         'order_num' => $this->checkoutHelper()->generateOrderNumber()
-    //     ]);
+            if ($productUnit == 'g') {
+                $weightInKg = $weight / 1000;
+                $totalWeight += $weightInKg * $quantity;
+                // $cost_weight_g = $totalWeight * 15;
+            }
 
-    //     if($this->same_as_billing == true){
-    //         $order->billingAddress()->create([
-    //             'bil_city' => $cityName,
-    //             'bil_barangay' => $brgyName
-    //         ]);
-    //     }
-
-    //     if($this->same_as_billing == false)
-    //     {
-    //         $bil_brgyName = PhilippineBarangay::where('name', $sanitizedData['billing_brgy'])->value('name');
-    //         $bil_cityName = PhilippineCity::where('code', $sanitizedData['billing_city'])->value('name');
-
-    //         $order->billingAddress()->create([
-    //             'bil_city' => $bil_cityName,
-    //             'bil_barangay' => $bil_brgyName
-    //         ]);
-    //     }
-
-
-
-    //     if (in_array($this->shipping_method, ['gcash', 'paymaya', 'grab_pay', 'card'])) {
-    //         try {
-
-    //             $this->paymentCreateIntent($this->subtotal);
-    //             $this->paymentIntent = Paymongo::paymentIntent()->find($this->paymentIntent_id)->getAttributes();
-    //             $this->paymentCreateMethod($sanitizedData);
-
-    //             $order->update([
-    //                 'payment_intent_id' => $this->paymentIntent_id
-    //             ]);
-
-    //             //webhooks ara sa payment controller
-    //             $attachedPaymentIntent = $this->createPaymentIntent->attach($this->paymentMethod->id, route('payment.callback'));
-
-    //             $this->processOrderItems($order);
-
-    //             // For redirect-based payments
-    //             if (isset($attachedPaymentIntent->next_action['redirect']['url'])) {
-
-    //                 return redirect()->away($attachedPaymentIntent->next_action['redirect']['url']);
-    //             }
-
-    //             // For immediate payments (like cards)
-    //             if ($attachedPaymentIntent->status === 'succeeded') {
-    //                 $order->update(['payment_status' => 'completed']);
-    //                 $this->alert('success', '', [
-    //                     'position' => 'top-end',
-    //                     'timer' => 3000,
-    //                     'toast' => true,
-    //                     'text' => 'Product ordered!',
-    //                 ]);
-    //                 session()->forget([
-    //                     'buy_now_product',
-    //                     'buy_now_mode',
-    //                     'buy_now_quantity',
-    //                     'cart_quantities',
-    //                     'selected_checkout_items'
-    //                 ]);
-    //                 return redirect()->route('page.shop');
-    //             }
-
-    //             $order->update(['payment_status' => 'failed']);
-    //             $this->alert('warning', '', [
-    //                 'position' => 'top-end',
-    //                 'timer' => 3000,
-    //                 'toast' => true,
-    //                 'text' => 'Payment processing failed. Please try again.',
-    //             ]);
-    //             return redirect()->route('page.shop');
-    //         } catch (\Exception $e) {
-    //             $order->delete();
-
-    //             $this->alert('warning', '', [
-    //                 'position' => 'top-end',
-    //                 'timer' => 3000,
-    //                 'toast' => true,
-    //                 'text' => 'Payment processing failed: ' . $e->getMessage(),
-    //             ]);
-
-    //             return redirect()->route('checkout');
-    //         }
-    //     }
-
-    //     // $zipCode = PhilippineCity::where('code', $sanitizedData['selectedCity'])->value('province_code');
-    //     // dd($zipCode);
-
-    //     // For non-payment method orders
-    //     $this->processOrderItems($order);
-    //     //check if user has already an address if my ara eh update lng else create new address
-    //     Address::updateOrCreate(
-    //         ['user_id' => Auth::id()], // check if user has already an address
-    //         [
-
-    //             'barangay' => $brgyName,
-    //             'city' => $cityName,
-    //         ]
-    //     );
-    //     session()->forget([
-    //         'buy_now_product',
-    //         'buy_now_mode',
-    //         'buy_now_quantity',
-    //         'cart_quantities',
-    //         'selected_checkout_items'
-    //     ]);
-
-    //     $this->reset();
-    //     $this->alert('success', '', [
-    //         'position' => 'top-end',
-    //         'timer' => 3000,
-    //         'toast' => true,
-    //         'text' => 'Product ordered!',
-    //     ]);
-    //     return redirect()->route('page.shop');
-    // }
+            if ($productUnit == 'has_dimensions') {
+                $productLentgth = $item->product->prod_length;
+                $productWidth = $item->product->prod_width;
+                $productHeight = $item->product->prod_height;
+                $dimensional_weight = ($productLentgth * $productWidth * $productHeight) / 3500;
+                $totalWeight += $dimensional_weight * $quantity;
+                // $dimentions = $dimentional_weight * 15;
+            }
+        }
+        return $totalWeight;
+    }
 
 
     public function placeOrder()
     {
         $validatedData = $this->validate();
 
-        if ($this->shipping_method === 'e-wallet' && !$this->payment_method) {
-            $this->addError('payment_method', 'Please select a specific e-wallet.');
+        if ($this->shipping_method === 'e-wallet') {
+            $this->addError('shipping_method', 'Please select a specific e-wallet.');
             return;
         }
-
-        if ($this->checkoutItems->isEmpty()) {
+        $this->getCheckoutItems();
+        if ($this->getCheckoutItems->isEmpty()) {
             $this->alert('error', '', [
                 'position' => 'top-end',
                 'timer' => 3000,
@@ -462,6 +509,19 @@ class Checkout extends Component
             ]);
             return;
         }
+
+        $totalWeight = $this->getTotalWeight();
+
+        if ($totalWeight > 50) {
+            $this->alert('error', '', [
+                'position' => 'top-end',
+                'timer' => 3000,
+                'toast' => true,
+                'text' => 'Order weight must be less than 50kg. Total weight: ' . $totalWeight . 'kg',
+            ]);
+            return;
+        }
+
 
         $sanitizedData = $this->sanitizeInput($validatedData);
 
@@ -493,12 +553,30 @@ class Checkout extends Component
 
                 // Create order record
                 $order = Order::create($orderData);
+                // $order->shippingAddresses()->create([
+                //     'barangay' => $brgyName,
+                //     'city' => $cityName,
+                //     'user_id' => auth()->user()->id
+                // ]);
+                // Update user address
+
+                Address::updateOrCreate([
+                    'user_id' => Auth::id(),
+                    'order_id' => $order->id,
+                    'barangay' => $brgyName,
+                    'city' => $cityName,
+                    'postal_code' => $this->postal_code,
+                    'street' => $sanitizedData['street'],
+                ]);
+
 
                 // Add billing address
                 if ($this->same_as_billing == true) {
                     $order->billingAddress()->create([
                         'bil_city' => $cityName,
-                        'bil_barangay' => $brgyName
+                        'bil_barangay' => $brgyName,
+                        'postal_code' => $this->postal_code,
+                        'street' => ucwords($sanitizedData['street'])
                     ]);
                 }
 
@@ -508,7 +586,9 @@ class Checkout extends Component
 
                     $order->billingAddress()->create([
                         'bil_city' => $bil_cityName,
-                        'bil_barangay' => $bil_brgyName
+                        'bil_barangay' => $bil_brgyName,
+                        'postal_code' => $this->bil_postalCode,
+                        'street' => $sanitizedData['bil_street'],
                     ]);
                 }
 
@@ -529,13 +609,21 @@ class Checkout extends Component
                     $order->update(['payment_status' => 'completed']);
 
                     // Update user address
-                    Address::updateOrCreate(
-                        ['user_id' => Auth::id()],
-                        [
-                            'barangay' => $brgyName,
-                            'city' => $cityName,
-                        ]
-                    );
+                    // $order->shippingAddresses()->create([
+                    //     'barangay' => $brgyName,
+                    //     'city' => $cityName,
+                    //     'user_id' => auth()->user()->id
+                    // ]);
+                    Address::updateOrCreate([
+                        'user_id' => Auth::id(),
+                        'order_id' => $order->id,
+                        'barangay' => $brgyName,
+                        'city' => $cityName,
+                        'postal_code' => $this->postal_code,
+                        'street' => $sanitizedData['street'],
+
+                    ]);
+
 
                     // Clear session data
                     session()->forget([
@@ -554,7 +642,7 @@ class Checkout extends Component
                         'toast' => true,
                         'text' => 'Product ordered!',
                     ]);
-                    return redirect()->route('page.shop');
+                    return $this->redirect(route('page.shop'));
                 } else {
                     // Payment failed
                     throw new \Exception('Payment processing failed with status: ' . $attachedPaymentIntent->status);
@@ -568,7 +656,9 @@ class Checkout extends Component
             if ($this->same_as_billing == true) {
                 $order->billingAddress()->create([
                     'bil_city' => $cityName,
-                    'bil_barangay' => $brgyName
+                    'bil_barangay' => $brgyName,
+                    'postal_code' => $this->postal_code,
+                    'street' => $sanitizedData['street']
                 ]);
             }
 
@@ -578,7 +668,9 @@ class Checkout extends Component
 
                 $order->billingAddress()->create([
                     'bil_city' => $bil_cityName,
-                    'bil_barangay' => $bil_brgyName
+                    'bil_barangay' => $bil_brgyName,
+                    'postal_code' => $this->bil_postalCode,
+                    'street' => $sanitizedData['bil_street']
                 ]);
             }
 
@@ -586,13 +678,20 @@ class Checkout extends Component
             $this->processOrderItems($order);
 
             // Update user address
-            Address::updateOrCreate(
-                ['user_id' => Auth::id()],
-                [
-                    'barangay' => $brgyName,
-                    'city' => $cityName,
-                ]
-            );
+            Address::updateOrCreate([
+                'user_id' => Auth::id(),
+                'order_id' => $order->id,
+                'barangay' => $brgyName,
+                'city' => $cityName,
+                'postal_code' => $this->postal_code,
+                'street' => $sanitizedData['street']
+
+            ]);
+            // $order->shippingAddresses()->create([
+            //     'barangay' => $brgyName,
+            //     'city' => $cityName,
+            //     'user_id' => auth()->user()->id
+            // ]);
 
             // Clear session data
             session()->forget([
@@ -623,8 +722,9 @@ class Checkout extends Component
                 'toast' => true,
                 'text' => 'Order processing failed: ' . $e->getMessage(),
             ]);
+            // dd($e->getMessage());
 
-            return redirect()->route('checkout');
+            return $this->redirect(route('checkout'));
         }
     }
 
@@ -689,17 +789,6 @@ class Checkout extends Component
     //      ->get();
     // }
 
-    public function updatedSelectedRegion($value)
-    {
-        // PhilippineRegion::where('id', $this->region_id)->first();
-    }
-
-    // public function updatedSelectedCity()
-    // {
-
-
-    // }
-
     public function selectCity($value)
     {
         $this->selectedCity = $value;
@@ -710,6 +799,8 @@ class Checkout extends Component
             ->get();
         // reset selected barangay if my changes sa city kg recalculate shipping and subtotal
         $this->selectedBarangay = null;
+        $this->street = null;
+        $this->getPostalCodeForSelectedCity();
         $this->getCheckoutItems();
         $this->calculateTotalShipping();
         $this->calculateSubtotal();
@@ -723,36 +814,50 @@ class Checkout extends Component
             //->limit(10)
             ->get();
         $this->billing_brgy = null;
+        $this->bil_street = null;
+        $this->getBillingPostalCodeForSelectedCity();
+        $this->getCheckoutItems();
+        $this->calculateTotalShipping();
+        $this->calculateSubtotal();
     }
 
     //for billing address select brgy correspond sa city
     public function bilSelectBrgy($value)
     {
         $this->billing_brgy = $value;
+        $this->getCheckoutItems();
+        $this->calculateTotalShipping();
+        $this->calculateSubtotal();
     }
 
     public function selectBrgy($value)
     {
         $this->selectedBarangay = $value;
+        $this->getCheckoutItems();
+        $this->calculateTotalShipping();
+        $this->calculateSubtotal();
         //dd($this->selectedBarangay);
     }
 
     protected function processOrderItems(Order $orders)
     {
         $this->checkoutHelper()
-            ->getOrderItems($orders, $this->checkoutItems, $this->isDiscounted);
+            ->getOrderItems($orders,$this->getCheckoutItems, $this->isDiscounted);
     }
 
     public function increaseQuantity($id = null)
     {
+
         if ($this->isBuyNowMode) {
-            $success = $this->checkoutHelper()->buyNowModeIncreaseQuantity($id, $this->checkoutItems);
+            $success = $this->checkoutHelper()->buyNowModeIncreaseQuantity($id, $this->getCheckoutItems);
         } else {
             $success = $this->checkoutHelper()->cartModeIncreaseQuantity($id);
         }
 
         if ($success) {
             $this->getCheckoutItems();
+            $this->getTotalWeight();
+            $this->calculateTotalShipping();
             $this->calculateSubtotal();
         } else {
             $this->getCheckoutItems();
@@ -768,24 +873,27 @@ class Checkout extends Component
 
     public function cancelOrder()
     {
-        $this->getCheckoutItems();
-        $this->alert('question', 'Are you sure you want to cancel this order?', [
-            'position' => 'center',
-            'timer' => false,
-            'toast' => false,
-            'showConfirmButton' => true,
-            'showCancelButton' => true,
-            'confirmButtonText' => 'Yes',
-            'cancelButtonText' => 'No',
-            'onConfirmed' => 'confirmedCancelOrder',
-        ]);
+
+        // $this->alert('question', 'Are you sure you want to cancel this order?', [
+        //     'position' => 'center',
+        //     'timer' => false,
+        //     'toast' => false,
+        //     'showConfirmButton' => true,
+        //     'showCancelButton' => true,
+        //     'confirmButtonText' => 'Yes',
+        //     'cancelButtonText' => 'No',
+        //     'onConfirmed' => 'confirmedCancelOrder',
+        // ]);
+        $this->confirmedCancelOrder();
+        // $this->getCheckoutItems();
     }
 
     public function confirmedCancelOrder()
     {
         $this->reset(['checkoutItems', 'shipping_method', 'notes', 'card_name', 'card_number', 'expiration_month', 'expiration_year', 'cvv']);
-        session()->forget(['selected_checkout_items', 'buy_now_product', 'buy_now_mode', 'buy_now_quantity', 'cart_quantities']);
-        return to_route('page.shop');
+        session()->forget(['selected_checkout_items', 'normal_checkout', 'buy_now_product', 'buy_now_mode', 'buy_now_quantity', 'cart_quantities']);
+        //return to_route('page.shop');
+        return $this->redirect(route('page.shop'));
     }
 
 
@@ -793,12 +901,16 @@ class Checkout extends Component
     {
         if ($this->itemId) {
             // Buy Now mode
-            $this->checkoutHelper()->buyNowModeDecreaseQuantity($id, $this->checkoutItems);
+            $this->checkoutHelper()->buyNowModeDecreaseQuantity($id, $this->getCheckoutItems);
+            $this->getCheckoutItems();
+            $this->getTotalWeight();
             $this->calculateSubtotal();
         } else {
             // Cart mode
             $this->checkoutHelper()->cartModeDecreaseQuantity($id);
             $this->getCheckoutItems();
+            $this->getTotalWeight();
+            $this->calculateTotalShipping();
             $this->calculateSubtotal();
         }
     }
@@ -809,13 +921,13 @@ class Checkout extends Component
     public function render()
     {
         return view('livewire.ecommerce.checkout', [
-            'checkoutItems' => $this->checkoutItems,
+            //'checkoutItems' => $this->checkoutItems,
             'subtotal' => $this->subtotal,
             'totalShipping' => $this->totalShipping,
-            'barangays' => $this->barangays, //address
-            'cities' => $this->cities, // address
-            'billing_cities' => $this->bil_cities, // billing address
-            'billing_barangays' => $this->bil_barangays, // billing address
+            // 'barangays' => $this->barangays, //address
+            // 'cities' => $this->cities, // address
+            // 'billing_cities' => $this->bil_cities, // billing address
+            // 'billing_barangays' => $this->bil_barangays, // billing address
             'itemsTotal' => $this->itemsTotal,
             'totalDiscount' => $this->totalDiscount,
         ]);

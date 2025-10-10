@@ -64,6 +64,11 @@ class Order extends Model
         return $this->hasMany(BillingAddress::class);
     }
 
+    public function shippingAddresses(): HasMany
+    {
+        return $this->hasMany(Address::class,'order_id');
+    }
+
     public function orderItems(): HasMany
     {
         return $this->hasMany(OrderItem::class);

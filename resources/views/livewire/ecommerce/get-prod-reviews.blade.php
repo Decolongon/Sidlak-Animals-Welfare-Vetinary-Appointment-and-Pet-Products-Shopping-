@@ -2,8 +2,8 @@
 
     <div class="p-4">
         <h2 class="text-lg font-semibold mb-4"></h2>
-        @forelse($prod_reviews as $review)
-            <div class="mb-4 p-4 border rounded-lg bg-white dark:bg-neutral-900">
+        @forelse($this->getProdReviews as $review)
+            <div class="mb-4 p-4 border rounded-lg bg-white dark:bg-neutral-900" wire:key="reviews{{ $review->id }}">
 
                 <div class="flex items-center gap-x-3">
                     <img class="w-10 h-10 rounded-full"

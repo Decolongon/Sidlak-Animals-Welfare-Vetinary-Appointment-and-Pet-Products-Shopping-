@@ -3,7 +3,7 @@
         class="z-50 flex flex-wrap w-full py-4 text-sm sm:justify-start sm:flex-nowrap bg-slate-50 dark:bg-neutral-800 lg:static">
         <nav class="flex flex-wrap items-center justify-between w-full px-4 mx-auto max-w-7xl basis-full"
             aria-label="Global">
-            <a class="flex-none text-xl font-semibold sm:order-1 dark:text-white" href="<?php echo e(route('page.home')); ?>">
+            <a class="flex-none text-xl font-semibold sm:order-1 dark:text-white" wire:navigate.hover href="<?php echo e(route('page.home')); ?>">
                 <img src="<?php echo e(asset('imgs/sdas-logo.png')); ?>" class="h-auto w-14" alt="" srcset="">
             </a>
             <div class="flex items-center sm:order-3 gap-x-2">
@@ -31,16 +31,17 @@ if (isset($__slots)) unset($__slots);
 ?>
 
                     <?php endif; ?>
-
+                
                     <?php if(auth()->guard()->guest()): ?>
-                        <a href="<?php echo e(route('filament.auth.auth.login')); ?>"
+                        <a  href="<?php echo e(route('login')); ?>"
                             class="inline-flex items-center px-3 py-2 text-sm font-medium text-black border border-gray-200 gap-x-2 rounded-xl hover:bg-gray-100 disabled:opacity-50 disabled:pointer-events-none dark:border-neutral-700 dark:hover:bg-white/10 dark:text-white dark:hover:text-white">
                             <?php echo e(__('Sign in')); ?>
 
                         </a>
 
                         
-                            <a href="<?php echo e(route('filament.auth.auth.register')); ?>"
+                        
+                            <a  href="<?php echo e(route('register')); ?>"
                                 class="inline-flex items-center px-3 py-2 text-sm font-medium text-black transition border border-transparent gap-x-2 rounded-xl bg-amber-400 hover:bg-amber-500 disabled:opacity-50 disabled:pointer-events-none focus:outline-none focus:bg-amber-500">
                                 <?php echo e(__('Sign Up')); ?>
 
@@ -134,7 +135,7 @@ if (isset($__slots)) unset($__slots);
                                 </div>
                                 <div class="py-2 mt-2 first:pt-0 last:pb-0">
 
-                                    <a wire:navigate
+                                    <a wire:navigate.hover
                                         class="flex items-center gap-x-3.5 py-2 px-3 rounded-lg text-sm text-gray-800 hover:bg-gray-100 focus:ring-2 focus:ring-amber-500 dark:text-neutral-400 dark:hover:bg-neutral-700 dark:hover:text-neutral-300"
                                         href="<?php echo e(route('profile.show')); ?>">
                                         <svg class="flex-shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24"
@@ -149,7 +150,7 @@ if (isset($__slots)) unset($__slots);
 
                                     </a>
 
-                                    <a wire:navigate
+                                    <a wire:navigate.hover
                                         class="flex items-center gap-x-3.5 py-2 px-3 rounded-lg text-sm text-gray-800 hover:bg-gray-100 focus:ring-2 focus:ring-amber-500 dark:text-neutral-400 dark:hover:bg-neutral-700 dark:hover:text-neutral-300"
                                         href="<?php echo e(route('view-order')); ?>">
                                          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
@@ -162,7 +163,7 @@ if (isset($__slots)) unset($__slots);
                                     </a>
                                   
                                     
-                                    <a href="<?php echo e(Auth::user()->roles()->exists() ? route('filament.admin.pages.dashboard') : route('dashboard')); ?>"
+                                    <a  wire:navigate.hover href="<?php echo e(Auth::user()->roles()->exists() ? route('filament.admin.pages.dashboard') : route('dashboard')); ?>"
                                         class="flex items-center gap-x-3.5 py-2 px-3 rounded-lg text-sm text-gray-800 hover:bg-gray-100 focus:ring-2 focus:ring-amber-500 dark:text-neutral-400 dark:hover:bg-neutral-700 dark:hover:text-neutral-300">
                                         <svg class="flex-shrink-0 size-4" width="24" height="24"
                                             xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"

@@ -25,6 +25,9 @@ return new class extends Migration
             $table->decimal('shipping_cost')->nullable();
             $table->boolean('is_visible_to_market')->nullable()->default(false);
             $table->string('prod_unit')->default('pcs');
+            $table->decimal('prod_length')->nullable();
+            $table->decimal('prod_width')->nullable();
+            $table->decimal('prod_height')->nullable();
             //$table->decimal('price_per_kg')->nullable();
             $table->decimal('prod_weight')->nullable(); // pila ka kilo ang eh baligya
             // $table->json('prod_image'); // if it is true it will display In Stock else Out of Stock

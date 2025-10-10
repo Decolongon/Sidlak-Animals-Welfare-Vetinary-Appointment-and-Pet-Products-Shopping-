@@ -2,15 +2,17 @@
 
 namespace App\Livewire\Ecommerce;
 
-use App\Helpers\ProductDiscountHelper;
 use Livewire\Component;
+use Livewire\Attributes\On;
 use Livewire\Attributes\Layout;
 
 use Livewire\Attributes\Locked;
 use App\Models\Ecommerce\Product;
 use Illuminate\Support\Facades\Auth;
+use App\Helpers\ProductDiscountHelper;
 use App\Models\Ecommerce\ProductReview;
 use Jantinnerezo\LivewireAlert\LivewireAlert;
+use Livewire\Attributes\Computed;
 
 class SingleProd extends Component
 {
@@ -23,7 +25,7 @@ class SingleProd extends Component
     public $activeTab = 'description';
     public $count_reviews = 0;
 
-    protected $listeners = ['reviewAdded' => 'updateReviewCount'];
+   // protected $listeners = ['reviewAdded' => 'updateReviewCount'];
 
     #[Locked]
     public $productId;
@@ -38,7 +40,7 @@ class SingleProd extends Component
         $this->prod_slug = $prod_slug;
         $this->getSingleProd();
         $this->countReviews();
-        $this->getRelatedProduct();
+       // $this->getRelatedProduct();
     }
 
     //get specific product
@@ -72,10 +74,11 @@ class SingleProd extends Component
     }
 
     //get Related Product
+    #[Computed()]
     public function getRelatedProduct()
     {
         $categoryIds = $this->product->productCategories->pluck('id')->toArray();
-        $this->relatedProduct = Product::with([
+        $relatedProducts = Product::with([
             'images',
             'productCategories',
             'productDiscounts' => function ($query) {
@@ -91,11 +94,14 @@ class SingleProd extends Component
             ->get();
 
         // Compute discounts for each related product
-        $this->prodDiscountRender($this->relatedProduct);
-        $this->relatedProduct->each(function ($product) {
+        $this->prodDiscountRender($relatedProducts);
+
+        $relatedProducts->each(function ($product) {
             $product->primary_image = $product->images->where('is_primary', true)->first()
                 ?? $product->images->first();
         });
+
+        return $relatedProducts;
     }
 
 
@@ -109,15 +115,16 @@ class SingleProd extends Component
         app(ProductDiscountHelper::class)->calculateDiscountedPrice($prod);
     }
 
-    public function updateReviewCount($productId)
-    {
-        if ($this->product && $this->product->id == $productId) {
-            $this->countReviews(); // Refresh the product data
-        }
-    }
+    // public function updateReviewCount($productId)
+    // {
+    //     if ($this->product && $this->product->id == $productId) {
+    //         $this->countReviews(); // Refresh the product data
+    //     }
+    // }
 
 
     // count how many reviews per product
+    #[On('reviewAdded')]
     public function countReviews()
     {
         if ($this->product) {
@@ -126,6 +133,8 @@ class SingleProd extends Component
         }
     }
 
+
+    // #[On('buyNowSize')]
     public function buyNow($productId)
     {
         if (!Auth::check()) {
@@ -138,17 +147,32 @@ class SingleProd extends Component
             return redirect()->route('login');
         }
 
-    // $buyNowItems = session()->get('buy_now_product', []);
-    
-    // // // Check if this product is already in buy now items
-    // if (!in_array($productId, $buyNowItems)) {
-    //     $buyNowItems[] = $productId;
-    //     session()->put('buy_now_product', $buyNowItems);
-    // }
-        session()->put('buy_now_mode', true);
-        session()->put('buy_now_product', $productId);
+        // $buyNowItems = session()->get('buy_now_product', []);
 
-        return redirect()->route('checkout');
+        // // // Check if this product is already in buy now items
+        // if (!in_array($productId, $buyNowItems)) {
+        //     $buyNowItems[] = $productId;
+        //     session()->put('buy_now_product', $buyNowItems);
+        // }
+
+        // $existingCheckoutItems = session()->get('selected_checkout_items', []);
+
+        // if (!empty($existingCheckoutItems)) {
+        //     $this->alert('warning', '', [
+        //         'position' => 'top-end',
+        //         'timer' => 5000,
+        //         'showCloseButton' => true,
+        //         'toast' => true,
+        //         'text' => 'You have pending checkout items.',
+        //     ]);
+        //     return;
+        // }
+       // session()->put('buy_now_mode', true);
+        session()->put('buy_now_product', $productId);
+        session()->forget('selected_checkout_items');
+
+        //return redirect()->route('checkout');
+        return $this->redirect(route('checkout'));
     }
 
     #[Layout('layouts.app')]
@@ -162,7 +186,6 @@ class SingleProd extends Component
         if ($this->relatedProduct) {
             // $this->prodDiscountRender($this->relatedProduct);
             $this->getRelatedProduct();
-          
         }
 
         return view(
@@ -170,7 +193,7 @@ class SingleProd extends Component
             [
                 'product' => $this->product,
                 'count_reviews' => $this->count_reviews,
-                'relatedProducts' => $this->relatedProduct
+               // 'relatedProducts' => $this->relatedProduct
             ]
 
         );

@@ -285,7 +285,7 @@ unset($__errorArgs, $__bag); ?><!--[if ENDBLOCK]><![endif]-->
                                             id="appointment_category_id" multiple
                                             wire:model.live="appointment_category_id"
                                             class="py-2.5 px-4 block w-full border border-gray-200 dark:border-neutral-700 rounded-lg sm:text-sm focus:border-amber-500 focus:ring-amber-500 dark:bg-neutral-900 dark:text-neutral-100">
-                                            <!--[if BLOCK]><![endif]--><?php $__currentLoopData = $appointmentCategories; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $category): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                            <!--[if BLOCK]><![endif]--><?php $__currentLoopData = $this->getAppointmentCat; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $category): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                                                 <!--[if BLOCK]><![endif]--><?php if($category->doctorschedules->isNotEmpty()): ?>
                                                 <option value="<?php echo e($category->id); ?>">
                                                     <?php echo e(ucwords($category->appoint_cat_name)); ?>
@@ -313,7 +313,7 @@ unset($__errorArgs, $__bag); ?><!--[if ENDBLOCK]><![endif]-->
                                             <h3 class="font-medium text-amber-800 dark:text-amber-200 mb-2">Selected
                                                 Services</h3>
                                             <ul class="list-disc pl-5 space-y-1 text-amber-700 dark:text-amber-300">
-                                                <!--[if BLOCK]><![endif]--><?php $__currentLoopData = $appointmentCategories->whereIn('id', $appointment_category_id); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $service): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                                <!--[if BLOCK]><![endif]--><?php $__currentLoopData = $this->getAppointmentCat->whereIn('id', $appointment_category_id); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $service): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                                                     <li><?php echo e($service->appoint_cat_name); ?> -
                                                         ₱<?php echo e(number_format($service->price, 2)); ?></li>
                                                 <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><!--[if ENDBLOCK]><![endif]-->
@@ -636,7 +636,7 @@ unset($__errorArgs, $__bag); ?><!--[if ENDBLOCK]><![endif]-->
                                                         <p class="text-sm text-gray-600 dark:text-neutral-400">Services
                                                         </p>
                                                         <ul class="mt-1 space-y-1">
-                                                            <!--[if BLOCK]><![endif]--><?php $__currentLoopData = $appointmentCategories->whereIn('id', $appointment_category_id); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $service): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                                            <!--[if BLOCK]><![endif]--><?php $__currentLoopData = $this->getAppointmentCat->whereIn('id', $appointment_category_id); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $service): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                                                                 <li class="flex justify-between">
                                                                     <span
                                                                         class="font-medium text-gray-800 dark:text-neutral-100"><?php echo e($service->appoint_cat_name); ?></span>

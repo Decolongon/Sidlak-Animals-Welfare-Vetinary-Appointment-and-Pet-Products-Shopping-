@@ -1,7 +1,7 @@
 @component('mail::message')
 # Hello, {{ $user->name }}
 
-Your veterinary appointment status has been updated.
+{{-- Your veterinary appointment status has been updated. --}}
 
 @switch($status)
     @case(\App\Enums\AppointmentStatusEnum::Approved)
@@ -12,11 +12,13 @@ Here are the details of your booked services:
 @foreach ($booked_services as $service)
 - **Service:** {{ $service['appoint_cat_name'] }}
 @if($service['appoint_cat_description'] ?? false)
-  **Description:** {{ $service['appoint_cat_description'] }}
+ <br> **Description:** {{ $service['appoint_cat_description'] }}
 @endif
 @endforeach
 
 **Payment Method:** {{ $payment_method }}
+<br>**Total:** {{ $total }}
+<br>**Payment Status:** {{$payment_status}}
 
 **Your Appointment Date:** {{  \Carbon\Carbon::parse($date_to_visit_clinic)->format('l, F j, Y \a\t g:i A') }}
 
@@ -39,9 +41,9 @@ Sorry for the inconvenience.
 Your appointment status has been updated. Please check your account for details.
 @endswitch
 
-@component('mail::button', ['url' => url('/appointments')])
+{{-- @component('mail::button', ['url' => url('/appointments')])
 View My Appointments
-@endcomponent
+@endcomponent --}}
 
 Thanks, <br>
 **{{ config('app.name') }} Veterinary Team**

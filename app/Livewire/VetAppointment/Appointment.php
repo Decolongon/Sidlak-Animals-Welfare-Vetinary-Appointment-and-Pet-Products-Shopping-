@@ -5,14 +5,15 @@ namespace App\Livewire\VetAppointment;
 use Livewire\Component;
 use Livewire\Attributes\Title;
 use Livewire\Attributes\Layout;
+use Livewire\Attributes\Computed;
+use Livewire\Attributes\Validate;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
+use Luigel\Paymongo\Facades\Paymongo;
 use App\Models\Appointment\VetSchedule;
 use Jantinnerezo\LivewireAlert\LivewireAlert;
 use App\Models\Appointment\AppointmentCategory;
 use App\Models\Appointment\Appointment as VetAppointment;
-use Livewire\Attributes\Validate;
-use Luigel\Paymongo\Facades\Paymongo;
 
 class Appointment extends Component
 {
@@ -51,7 +52,7 @@ class Appointment extends Component
 
     public function mount()
     {
-        $this->getAppointmentCat();
+       // $this->getAppointmentCat();
         $this->getVetSchedule();
     }
 
@@ -155,6 +156,7 @@ class Appointment extends Component
         return $rules;
     }
 
+    #[Computed()]
     public function getAppointmentCat()
     {
         return AppointmentCategory::with([
@@ -428,7 +430,7 @@ class Appointment extends Component
     public function render()
     {
         return view('livewire.vet-appointment.appointment', [
-            'appointmentCategories' => $this->getAppointmentCat(),
+           // 'appointmentCategories' => $this->getAppointmentCat(),
             'schedules' => $this->getVetSchedule(),
             'amount' => $this->getTotalPrice(),
         ]);

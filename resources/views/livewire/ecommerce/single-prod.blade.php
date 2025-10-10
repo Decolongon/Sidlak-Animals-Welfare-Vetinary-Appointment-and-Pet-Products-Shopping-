@@ -1,4 +1,23 @@
-<div> {{-- Open --}}
+<div x-data="{
+    activeImage: '{{ asset(Storage::url($primary_image->url)) }}',
+    currentIndex: 0,
+    images: [
+        @foreach ($product->images as $image)
+            '{{ asset(Storage::url($image->url)) }}', @endforeach
+    ],
+    setActiveImage(url, index) {
+        this.activeImage = url;
+        this.currentIndex = index;
+    },
+    nextImage() {
+        this.currentIndex = (this.currentIndex + 1) % this.images.length;
+        this.activeImage = this.images[this.currentIndex];
+    },
+    prevImage() {
+        this.currentIndex = (this.currentIndex - 1 + this.images.length) % this.images.length;
+        this.activeImage = this.images[this.currentIndex];
+    }
+}"> {{-- Open --}}
 
     <!-- Main Product Container -->
     <div class="bg-white dark:bg-[#262626] p-6 rounded-lg shadow-md mt-10">
@@ -6,14 +25,37 @@
         <div class="grid md:grid-cols-2 gap-6" wire:ignore>
             <!-- Product Image -->
             <div class="relative">
-                <img class="w-full h-[200px] md:h-[300px] lg:h-[350px] object-cover rounded-xl"
-                    src="{{ asset(Storage::url($primary_image->url)) }}" alt="{{ $product->prod_slug }}">
+                <img id="main-product-image" class="w-full h-[200px] md:h-[300px] lg:h-[350px] object-cover rounded-xl"
+                    :src="activeImage" alt="{{ $product->prod_slug }}">
+
+                <!-- Navigation Arrows -->
+                @if ($product && $product->images->count() > 1)
+                    <div class="absolute inset-0 flex items-center justify-between p-4">
+                        <button @click="prevImage()"
+                            class="bg-black/50 hover:bg-black/70 text-white p-2 rounded-full transition-all duration-200">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M15 19l-7-7 7-7"></path>
+                            </svg>
+                        </button>
+                        <button @click="nextImage()"
+                            class="bg-black/50 hover:bg-black/70 text-white p-2 rounded-full transition-all duration-200">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7">
+                                </path>
+                            </svg>
+                        </button>
+                    </div>
+                @endif
             </div>
 
             <!-- Product Details -->
             <div>
-                <h1 class="text-2xl font-bold text-black dark:text-white">
+                <h1 class="text-2xl text-black dark:text-white">
                     {{ ucwords($product->prod_name) }}
+                    @if($product->prod_unit == 'has_dimensions')
+                       <br>Dimensions: {{$product->prod_length}} x {{$product->prod_width}} x {{$product->prod_height}} cm
+                    @endif
                 </h1>
                 <p class="text-black dark:text-white mt-2">
                     {{ ucfirst($product->prod_short_description) }}
@@ -42,16 +84,14 @@
                 @if ($product->prod_unit !== 'diff_size')
                     <p
                         class="mt-2 
-                         {{ $product->prod_quantity > 10 ? 
-                         'text-green-600 dark:text-green-400' : 
-                         'text-orange-500 dark:text-orange-500' }}">
+                         {{ $product->prod_quantity > 10 ? 'text-green-600 dark:text-green-400' : 'text-orange-500 dark:text-orange-500' }}">
 
                         @if ($product->prod_quantity > 10)
                             In Stock
                         @elseif ($product->prod_quantity > 1 && $product->prod_quantity <= 10)
                             Low in Stock ({{ (int) $product->prod_quantity }})
                         @else
-                          {{-- do nothing if out of stock --}}
+                            {{-- do nothing if out of stock --}}
                         @endif
                     </p>
                 @endif
@@ -85,60 +125,24 @@
             </div>
         </div>
 
-      
-  <!-- Image Slider (if multiple images) -->
-        @if ($product && $product->images->count() > 1) 
-              <div data-hs-carousel='{
-                "loadingClasses": "opacity-0",
-                "dotsItemClasses": "hs-carousel-active:bg-blue-700 hs-carousel-active:border-blue-700 size-3 border border-gray-400 rounded-full cursor-pointer dark:border-neutral-600 dark:hs-carousel-active:bg-blue-400 dark:hs-carousel-active:border-blue-400",
-                "slidesQty": { "xs": 1, "lg": 3 },
-                "isDraggable": false,
-                "passiveListeners": false
-            }'
-                wire:ignore class="relative mt-10">
-                <!-- Carousel Container -->
-                <div class="hs-carousel w-full overflow-hidden bg-white dark:bg-[#1f1f1f] rounded-lg shadow-lg">
-                    <!-- Carousel Slides -->
-                    <div class="relative min-h-56 -mx-1">
-                        <div
-                            class="hs-carousel-body absolute top-0 bottom-0 start-0 flex flex-nowrap opacity-0 cursor-grab transition-transform duration-700 hs-carousel-dragging:transition-none hs-carousel-dragging:cursor-grabbing">
-                            @foreach ($product->images as $image)
-                                <div class="hs-carousel-slide px-1">
-                                    <div
-                                        class="flex justify-center items-center w-full h-full bg-gray-100 dark:bg-neutral-900 p-3 rounded-md">
-                                        <img loading="lazy" src="{{ asset(Storage::url($image->url)) }}"
-                                            alt="{{ $product->prod_slug }}"
-                                            class="max-h-40 object-contain rounded-md shadow-md border dark:border-neutral-700 bg-white dark:bg-neutral-900 p-2" />
-                                    </div>
-                                </div>
-                            @endforeach
+
+        <!-- Image Gallery (if multiple images) -->
+        @if ($product && $product->images->count() > 1)
+            <div class="mt-4">
+                <div class="flex space-x-2 overflow-x-auto pb-2">
+                    @foreach ($product->images as $index => $image)
+                        <div class="flex-shrink-0">
+                            <img src="{{ asset(Storage::url($image->url)) }}" alt="{{ $product->prod_slug }}"
+                                class="h-20 w-20 object-cover rounded-md cursor-pointer border-2 transition-all duration-200"
+                                :class="currentIndex === {{ $index }} ? 'border-amber-500' :
+                                    'border-transparent hover:border-amber-500'"
+                                @click="setActiveImage('{{ asset(Storage::url($image->url)) }}', {{ $index }})" />
                         </div>
-                    </div>
+                    @endforeach
                 </div>
-
-                <!-- Carousel Navigation Buttons -->
-                <button type="button"
-                    class="hs-carousel-prev hs-carousel-disabled:opacity-50 hs-carousel-disabled:pointer-events-none absolute inset-y-0 start-0 flex items-center justify-center w-11.5 h-full text-gray-800 hover:bg-gray-800/10 focus:outline-none focus:bg-gray-800/10 dark:text-white dark:hover:text-blue-400 rounded-s-lg">
-                    <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                        stroke="currentColor">
-                        <path d="m15 18-6-6 6-6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-                    </svg>
-                </button>
-                <button type="button"
-                    class="hs-carousel-next hs-carousel-disabled:opacity-50 hs-carousel-disabled:pointer-events-none absolute inset-y-0 end-0 flex items-center justify-center w-11.5 h-full text-gray-800 hover:bg-gray-800/10 focus:outline-none focus:bg-gray-800/10 dark:text-white dark:hover:text-blue-400 rounded-e-lg">
-                    <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                        stroke="currentColor">
-                        <path d="m9 18 6-6-6-6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-                    </svg>
-                </button>
-
-                <!-- Carousel Dots -->
-                <div class="hs-carousel-pagination flex justify-center absolute bottom-3 inset-x-0 gap-x-2"></div>
-            </div> 
-
-
-         
+            </div>
         @endif
+
         <!-- Tabs Section -->
         <div class="mt-6 border-t border-gray-400 dark:border-gray-700 pt-4">
             <!-- Tabs Navigation -->
@@ -193,7 +197,7 @@
                         </template>
                     </div>
 
-                    @if (isset($relatedProducts) && $relatedProducts->isNotEmpty())
+                    @if (isset($this->getRelatedProduct) && $this->getRelatedProduct->isNotEmpty())
                         <!-- Related Products Section -->
                         {{-- @if ($relatedProducts->isNotEmpty()) --}}
                         <div class="col-span-full text-center py-10">
@@ -207,24 +211,33 @@
                         <div class="max-w-[85rem] px-4 py-10 sm:px-6 lg:px-8 lg:py-14 mx-auto scroll-visible"
                             wire:ignore>
                             <div class="grid grid-cols-2 gap-3 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-4">
-                                @forelse($relatedProducts as $product)
+                                @forelse($this->getRelatedProduct as $product)
                                     <div wire:key="product-{{ $product->id }}"
                                         class="group flex flex-col border border-gray-200 hover:border-transparent hover:shadow-lg focus:outline-none focus:border-transparent focus:shadow-lg transition duration-300 rounded-xl p-4 dark:border-neutral-700 dark:hover:border-transparent dark:hover:shadow-black/40 dark:focus:border-transparent dark:focus:shadow-black/40">
                                         <!-- Stock & Discount Info -->
                                         <p
                                             class="text-xs flex justify-between items-center gap-x-2 text-green-500 dark:text-green-400 mb-2">
-                                            @if ($product->discounted_price !== null)
+                                            @if ($product->discounted_price !== null && $product->prod_unit !== 'diff_size')
                                                 {{ ucwords($product->productDiscounts->first()?->discount_name) }}
                                             @endif
-                                            <span
-                                                class="{{ $product->prod_quantity > 10 ? 'text-green-500' : 'text-red-500' }}">
-                                                {{ $product->prod_quantity > 10 ? 'In Stock' : 'Low in Stock ' . ($product->prod_unit == 'kg' ? (float) $product->prod_quantity . ' kg left' : (int) $product->prod_quantity . ' left') }}
-                                            </span>
+
+                                            @if ($product->prod_unit !== 'diff_size')
+                                                @if ($product->prod_quantity < 1)
+                                                    <span class="text-red-500">Out of Stock</span>
+                                                @elseif ($product->prod_quantity <= 10)
+                                                    <span class="text-orange-500">Low in Stock
+                                                        {{ (int) $product->prod_quantity }}
+                                                        left
+                                                    </span>
+                                                @else
+                                                    <span class="text-green-500">In Stock</span>
+                                                @endif
+                                            @endif
                                         </p>
 
                                         <!-- Product Image & Info -->
                                         <div class="aspect-w-16 aspect-h-11">
-                                            <a wire:navigate
+                                            <a wire:navigate.hover
                                                 href="{{ route('page.singleProd', ['prod_slug' => $product->prod_slug]) }}">
 
                                                 <img class="w-full h-[180px] md:h-[200px] lg:h-[250px] object-cover rounded-xl"
@@ -260,7 +273,9 @@
                                                         <span
                                                             class="text-green-600 font-semibold ml-2">{{ $product->discount_label }}</span>
                                                     @else
-                                                        ₱{{ number_format($product->prod_price, 2) }}
+                                                        @if ($product->prod_unit !== 'diff_size')
+                                                            ₱{{ number_format($product->prod_price, 2) }}
+                                                        @endif
                                                     @endif
                                                 </p>
                                             </div>
@@ -298,13 +313,6 @@
                     @livewire('ecommerce.product-reviews-form', ['product_id' => $product->id])
                 </div>
             @endif
-
-
-
-
         </div>
     </div>
-
-
-
 </div> {{-- Close --}}

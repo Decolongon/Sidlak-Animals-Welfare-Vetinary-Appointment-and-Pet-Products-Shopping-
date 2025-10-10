@@ -17,12 +17,13 @@ return new class extends Migration
             $table->foreignIdFor(Order::class, 'order_id')->constrained()->cascadeOnDelete();
             $table->string('bil_country')->nullable()->default('Philippines');
             $table->string('bil_province')->nullable()->default('Negros Occidental');
-           // $table->string('street')->nullable();
+            $table->string('street')->nullable();
             $table->string('bil_city')->nullable();
             $table->string('bil_barangay')->nullable();
-            // $table->string('zip')->nullable();
+            //$table->string('zip')->nullable();
+            $table->string('postal_code')->nullable();
             $table->string('bil_complete_address')
-                ->storedAs('CONCAT(bil_barangay," ", bil_city, " ", bil_province, " ", bil_country)');
+                ->storedAs('CONCAT(street," ",bil_barangay," ", bil_city, " ", postal_code," ", bil_province, " ", bil_country)');
             $table->timestamps();
         });
     }

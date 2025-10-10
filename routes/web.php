@@ -36,7 +36,7 @@ Route::middleware([
     'auth:sanctum',
     config('jetstream.auth_session'),
     'verified',
-    'adminMiddleware',
+   'adminMiddleware',
 ])->group(function () {
 
 
@@ -50,15 +50,15 @@ Route::middleware([
 
 });
 
-//override ang login default ni fortify
-Route::get('/login', function () {
-    return redirect()->route('filament.auth.auth.login');
-})->name('login');
+// //override ang login default ni fortify
+// Route::get('/login', function () {
+//     return redirect()->route('filament.auth.auth.login');
+// })->name('login');
 
-//override ang register default ni fortify
-Route::get('/register', function () {
-    return redirect()->route('filament.auth.auth.register');
-})->name('register');
+// //override ang register default ni fortify
+// Route::get('/register', function () {
+//     return redirect()->route('filament.auth.auth.register');
+// })->name('register');
 
 
 Route::middleware('adminMiddleware')->group(function () {

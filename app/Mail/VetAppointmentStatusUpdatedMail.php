@@ -22,6 +22,8 @@ class VetAppointmentStatusUpdatedMail extends Mailable
     public array $booked_services;
     public $payment_method;
     public $date_to_visit_clinic;
+    public $total;
+    public $payment_status;
 
     /**
      * Create a new message instance.
@@ -38,6 +40,8 @@ class VetAppointmentStatusUpdatedMail extends Mailable
        $this->booked_services = $appointment->categories()->get()->toArray();
        $this->payment_method = $appointment->payment_method;
        $this->date_to_visit_clinic = $appointment->appoint_sched;
+       $this->total = $appointment->total_amount;
+       $this->payment_status = $appointment->payment_status;
     }
 
     /**
@@ -62,7 +66,9 @@ class VetAppointmentStatusUpdatedMail extends Mailable
                 'status' => $this->status,
                 'booked_services' => $this->booked_services,
                 'payment_method' => $this->payment_method,
-                'date_to_visit_clinic' => $this->date_to_visit_clinic
+                'date_to_visit_clinic' => $this->date_to_visit_clinic,
+                'total' => $this->total,
+                'payment_status' => $this->payment_status
             ]
         );
     }

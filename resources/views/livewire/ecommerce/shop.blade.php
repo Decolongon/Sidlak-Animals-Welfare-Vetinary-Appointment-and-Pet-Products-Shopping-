@@ -1,7 +1,7 @@
 <div>
 
     @if (session()->has('selected_checkout_items') || session()->has('buy_now_product'))
-        <div class="mb-6 ml-6 mt-4">
+        {{-- <div class="mb-6 ml-6 mt-4">
             <a wire:navigate href="{{ route('checkout') }}"
                 class="inline-flex items-center px-4 py-2 bg-amber-600 border border-transparent rounded-md font-semibold text-xs text-black uppercase tracking-widest hover:bg-amber-700 focus:bg-amber-700 active:bg-amber-900 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-offset-2 transition ease-in-out duration-150">
 
@@ -10,6 +10,12 @@
                     stroke="currentColor" class="size-6">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" />
                 </svg>
+            </a>
+        </div> --}}
+        <div class="mb-6 ml-6 mt-4">
+            <a wire:navigate.hover href="{{ route('checkout') }}"
+                class="inline-flex items-center text-amber-600 hover:text-amber-700 font-semibold text-sm tracking-wide hover:underline transition ease-in-out duration-150">
+                back to checkout
             </a>
         </div>
     @endif
@@ -77,7 +83,7 @@
                             All Categories
                         </a>
 
-                        @forelse ($categories->filter(fn($cat) => stripos($cat->prod_cat_name, $searchCat ?? '') !== false) as $prodCat)
+                        @forelse ($this->categories as $prodCat)
                             <div wire:key="{{ $prodCat->id }}">
                                 <a wire:click.prevent="filterByCategoryAndOrder({{ $prodCat->id }}, '{{ $sortBy }}')"
                                     class="flex items-center gap-x-3.5 py-2 px-3 rounded-lg text-sm text-gray-800 hover:bg-gray-100 focus:outline-none focus:bg-gray-100 dark:text-neutral-400 dark:hover:bg-neutral-700 dark:hover:text-neutral-300 dark:focus:bg-neutral-700 cursor-pointer">
@@ -150,7 +156,7 @@
         <!-- Grid -->
         <div class="grid grid-cols-2 gap-3 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-4">
 
-            @forelse($this->getProducts() as $product)
+            @forelse($this->getProducts as $product)
                 <div wire:key="product-{{ $product->id }}"
                     class="group flex flex-col border border-gray-200 hover:border-transparent hover:shadow-lg focus:outline-none focus:border-transparent focus:shadow-lg transition duration-300 rounded-xl p-4 dark:border-neutral-700 dark:hover:border-transparent dark:hover:shadow-black/40 dark:focus:border-transparent dark:focus:shadow-black/40">
                     <p
@@ -175,7 +181,7 @@
 
 
                     <div class="aspect-w-16 aspect-h-11">
-                        <a wire:navigate href="{{ route('page.singleProd', ['prod_slug' => $product->prod_slug]) }}">
+                        <a wire:navigate.hover href="{{ route('page.singleProd', ['prod_slug' => $product->prod_slug]) }}">
 
                             {{-- images, route for product description and reviews --}}
 
@@ -199,6 +205,9 @@
                             @endif
                             @if ($product->prod_unit == 'g')
                                 {{ ' - ' . number_format($product->prod_weight, 2) . $product->prod_unit }}
+                            @endif
+                            @if ($product->prod_unit == 'has_dimensions')
+                                <br>{{ 'Dimensions:'.$product->prod_length . ' x ' . $product->prod_width . ' x ' . $product->prod_height . ' cm'}}
                             @endif
                         </h5>
                         <p class="mt-5 text-gray-600 dark:text-neutral-400"></p>
@@ -272,7 +281,7 @@
     </div>
 
     <div class="mt-2 flex justify-start ml-6">
-        {{ $this->getProducts()->links('vendor.pagination.shop-pagination') }}
+        {{ $this->getProducts->links('vendor.pagination.shop-pagination') }}
     </div>
 
 

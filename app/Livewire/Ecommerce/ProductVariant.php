@@ -6,6 +6,7 @@ use Livewire\Component;
 use App\Models\Ecommerce\Cart;
 use Livewire\Attributes\Locked;
 use App\Models\Ecommerce\Product;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Session;
 use Jantinnerezo\LivewireAlert\LivewireAlert;
 use App\Models\Ecommerce\ProductImage as ProductVariantSize;
@@ -21,7 +22,7 @@ class ProductVariant extends Component
 
     #[Locked]
     public $selectedSize;
-    
+
     #[Locked]
     public $price = 0;
 
@@ -88,7 +89,7 @@ class ProductVariant extends Component
     {
         $size = ProductVariantSize::find($this->selectedSize)->sizes;
         return Cart::where('product_id', $product->id)
-            ->where('size',$size)
+            ->where('size', $size)
             ->where(function ($query) {
                 $query->when(
                     $this->isLoggedIn,
@@ -127,10 +128,10 @@ class ProductVariant extends Component
         ]);
     }
 
-   
+
     protected function createNewCartItem()
     {
-       // dd($this->selectedSize);
+        // dd($this->selectedSize);
         $size = ProductVariantSize::find($this->selectedSize)->sizes;
         Cart::create([
             'product_id' => $this->product_id,
@@ -138,7 +139,7 @@ class ProductVariant extends Component
             'session_id' => $this->sessionId,
             'quantity' => 1,
             'size' => $size
-           
+
         ]);
     }
 
@@ -155,5 +156,30 @@ class ProductVariant extends Component
                 'product' => $this->product
             ]
         );
+    }
+
+    public function buyNowWithSize()
+    {
+        if (! Auth::check()) {
+            $this->alert('warning', '', [
+                'position' => 'top-end',
+                'timer' => 3000,
+                'toast' => true,
+                'text' => 'You must login first',
+            ]);
+            return redirect()->route('login');
+        }
+        $selectedVariant = ProductVariantSize::find($this->selectedSize);
+        session()->put('buy_now_product', [
+            'product_id' => $this->product_id,
+            'variant_id' => $this->selectedSize,
+            'size' => $selectedVariant ? $selectedVariant->sizes : null,
+            'quantity' => 1
+        ]);
+
+        session()->forget('selected_checkout_items');
+
+        //return redirect()->route('checkout');
+        return $this->redirect(route('checkout'));
     }
 }

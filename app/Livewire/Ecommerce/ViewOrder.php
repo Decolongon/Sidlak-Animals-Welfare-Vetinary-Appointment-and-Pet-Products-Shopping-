@@ -6,6 +6,7 @@ use Livewire\Component;
 use App\Models\Ecommerce\Order;
 use Livewire\Attributes\Layout;
 use App\Helpers\ProductDiscountHelper;
+use Livewire\Attributes\Computed;
 use Livewire\Attributes\Locked;
 use Livewire\WithPagination;
 
@@ -20,9 +21,10 @@ class ViewOrder extends Component
 
     public function mount()
     {
-        $this->getOrders();
+        //$this->getOrders();
     }
 
+    #[Computed()]
     public function getOrders()
     {
         $query = Order::with(['product.productDiscounts' => function ($query) {
@@ -37,9 +39,9 @@ class ViewOrder extends Component
             $query->where('order_status', '=', "{$this->statusFilter}");
         }
 
-        $this->orders = $query->take(10)->get();
+        $orders = $query->take(10)->get();
         // Process variants for each order item
-        $this->orders->each(function ($order) {
+        $orders->each(function ($order) {
             $order->orderItems->each(function ($item) {
                 if (
                     $item->product &&
@@ -63,7 +65,8 @@ class ViewOrder extends Component
         //     }
         // }
 
-        $this->getPrimaryImage($this->orders);
+        $this->getPrimaryImage($orders);
+        return $orders;
     }
 
     // public function filter($filter)
@@ -158,7 +161,7 @@ class ViewOrder extends Component
     public function render()
     {
         return view('livewire.ecommerce.view-order', [
-            'orders' => $this->orders,
+            //'orders' => $this->orders,
         ]);
     }
 }

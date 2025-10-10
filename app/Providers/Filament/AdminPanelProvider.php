@@ -35,7 +35,7 @@ class AdminPanelProvider extends PanelProvider
             ->default()
             ->id('admin')
             ->path('admin')
-            // ->login()
+            ->login()
             ->sidebarCollapsibleOnDesktop()
             // ->sidebarFullyCollapsibleOnDesktop()
             ->colors([
@@ -107,8 +107,8 @@ class AdminPanelProvider extends PanelProvider
                     ]),
             ])
             ->authMiddleware([
-                RoleBaseMiddleware::class,
-               // AdminMiddleware::class
+               RoleBaseMiddleware::class,
+              // AdminMiddleware::class
             ]);
         // ->plugins([
         //     FilamentShieldPlugin::make(),

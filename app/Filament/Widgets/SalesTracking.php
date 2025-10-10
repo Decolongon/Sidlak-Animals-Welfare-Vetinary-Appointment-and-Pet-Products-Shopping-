@@ -36,7 +36,7 @@ class SalesTracking extends ChartWidget
         $salesData = $this->getSalesData();
         $totalSales = array_sum($salesData);
 
-        return 'The sales tracking chart shows the monthly sales for the year ' . $this->filter . '. Total sales: ' . number_format($totalSales, 2);
+        return 'The sales tracking chart shows the monthly sales for the year ' . $this->filter . '.';
     }
 
     protected function getFilters(): ?array

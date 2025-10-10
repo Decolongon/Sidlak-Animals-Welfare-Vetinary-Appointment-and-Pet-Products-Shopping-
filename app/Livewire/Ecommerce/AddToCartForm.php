@@ -34,7 +34,7 @@ class AddToCartForm extends Component
     {
         $this->initializeSession();
         $this->user_id = Auth::id();
-        $this->migrateGuestCartToUser();
+        //$this->migrateGuestCartToUser();
        // $this->getCartItems();
     }
 
@@ -47,17 +47,17 @@ class AddToCartForm extends Component
     }
 
     //store ang cart if user is logged in else sa session
-    protected function migrateGuestCartToUser(): void
-    {
-        if ($this->user_id && Session::has('guest_session_id')) {
-            Cart::where('session_id', $this->session_id)
-                ->update([
-                    'user_id' => $this->user_id,
-                    'session_id' => null
-                ]);
-            Session::forget('guest_session_id');
-        }
-    }
+    // protected function migrateGuestCartToUser(): void
+    // {
+    //     if ($this->user_id && Session::has('guest_session_id')) {
+    //         Cart::where('session_id', $this->session_id)
+    //             ->update([
+    //                 'user_id' => $this->user_id,
+    //                 'session_id' => null
+    //             ]);
+    //         Session::forget('guest_session_id');
+    //     }
+    // }
 
     public function addToCart(): void
     {

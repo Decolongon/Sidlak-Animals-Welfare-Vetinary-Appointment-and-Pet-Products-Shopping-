@@ -20,7 +20,7 @@
     <div class="p-4">
 
         <!-- Select All Checkbox -->
-        @if (count($this->getCarts()) > 0)
+        @if (count($this->getCarts) > 0)
             <div class="flex items-center mb-4">
                 <input type="checkbox" name="selectAll" wire:model="selectAll" wire:click="toggleSelectAll"
                     class="mr-2 rounded border-gray-300 text-indigo-600 shadow-sm focus:ring focus:ring-indigo-200">
@@ -31,7 +31,7 @@
 
         {{-- <div class="flex flex-col gap-4"> --}}
         <div class="flex flex-col gap-4 max-h-[70vh] overflow-y-auto pr-2 pb-28">
-            @forelse ($this->getCarts() as $cart)
+            @forelse ($this->getCarts as $cart)
                 <div class="p-4 border rounded-lg shadow dark:border-neutral-700 dark:shadow-gray-900"
                     wire:key="{{ $cart->id }}">
                     <div class="flex items-center justify-between">

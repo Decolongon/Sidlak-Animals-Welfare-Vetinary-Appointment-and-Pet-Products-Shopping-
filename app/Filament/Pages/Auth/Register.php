@@ -48,45 +48,45 @@ class Register extends RegistrationPage
 
                         ]),
 
-                    Step::make('Address')
-                        ->schema([
-                            Select::make('city')
-                                ->label('Select City')
-                                ->required()
-                                ->options(
-                                    PhilippineCity::where('province_code', '0645')
-                                        ->get()
-                                        ->pluck('name', 'code')
-                                        ->toArray()
+                    // Step::make('Address')
+                    //     ->schema([
+                    //         Select::make('city')
+                    //             ->label('Select City')
+                    //             ->required()
+                    //             ->options(
+                    //                 PhilippineCity::where('province_code', '0645')
+                    //                     ->get()
+                    //                     ->pluck('name', 'code')
+                    //                     ->toArray()
 
-                                )
-                                ->live()
-                                ->optionsLimit(5)
-                                ->afterStateUpdated(function ($set) {
-                                    $set('barangay', null); // Reset barangay when city changes
-                                })
-                                ->searchable(),
+                    //             )
+                    //             ->live()
+                    //             ->optionsLimit(5)
+                    //             ->afterStateUpdated(function ($set) {
+                    //                 $set('barangay', null); // Reset barangay when city changes
+                    //             })
+                    //             ->searchable(),
 
-                            Select::make('barangay')
-                                ->label('Select Barangay')
-                                ->required()
-                                ->options(
+                    //         Select::make('barangay')
+                    //             ->label('Select Barangay')
+                    //             ->required()
+                    //             ->options(
 
-                                    function ($get) {
-                                        $city = $get('city');
-                                        if (! $city) {
-                                            return [];
-                                        }
-                                        return PhilippineBarangay::where('city_code', $city)
-                                            ->get()
-                                            ->pluck('name', 'id')
-                                            ->toArray();
-                                    }
+                    //                 function ($get) {
+                    //                     $city = $get('city');
+                    //                     if (! $city) {
+                    //                         return [];
+                    //                     }
+                    //                     return PhilippineBarangay::where('city_code', $city)
+                    //                         ->get()
+                    //                         ->pluck('name', 'id')
+                    //                         ->toArray();
+                    //                 }
 
-                                )
-                                ->optionsLimit(5)
-                                ->searchable()
-                        ]),
+                    //             )
+                    //             ->optionsLimit(5)
+                    //             ->searchable()
+                    //     ]),
 
                     Step::make('Account Information')
                         ->schema([
@@ -107,7 +107,7 @@ class Register extends RegistrationPage
         //user model
         $user = $this->userData($sanitizedData);
         $this->mergeGuestCartToUser($user);
-        $this->createAddress($sanitizedData, $user);
+       // $this->createAddress($sanitizedData, $user);
 
         // //user proifle model
         // $this->userProfile($user,$sanitizedData);
@@ -125,8 +125,8 @@ class Register extends RegistrationPage
             'middle_initial' => trim(strip_tags($data['middle_initial'])),
             'email' => filter_var($data['email'], FILTER_SANITIZE_EMAIL),
             'password' => $data['password'],
-            'city' => strip_tags($data['city']),
-            'barangay' => strip_tags($data['barangay']),
+            // 'city' => strip_tags($data['city']),
+            // 'barangay' => strip_tags($data['barangay']),
         ];
     }
 

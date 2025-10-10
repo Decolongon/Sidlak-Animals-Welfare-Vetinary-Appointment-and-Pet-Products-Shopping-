@@ -32,6 +32,9 @@ class Product extends Model
         'prod_short_description',
         'is_visible_to_market',
         'shipping_cost',
+        'prod_length',
+        'prod_width',
+        'prod_height',
     ];
 
     /**

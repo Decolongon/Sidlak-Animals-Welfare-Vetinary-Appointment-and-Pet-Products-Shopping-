@@ -198,7 +198,7 @@
                                             id="appointment_category_id" multiple
                                             wire:model.live="appointment_category_id"
                                             class="py-2.5 px-4 block w-full border border-gray-200 dark:border-neutral-700 rounded-lg sm:text-sm focus:border-amber-500 focus:ring-amber-500 dark:bg-neutral-900 dark:text-neutral-100">
-                                            @foreach ($appointmentCategories as $category)
+                                            @foreach ($this->getAppointmentCat as $category)
                                                 @if($category->doctorschedules->isNotEmpty())
                                                 <option value="{{ $category->id }}">
                                                     {{ ucwords($category->appoint_cat_name) }}
@@ -218,7 +218,7 @@
                                             <h3 class="font-medium text-amber-800 dark:text-amber-200 mb-2">Selected
                                                 Services</h3>
                                             <ul class="list-disc pl-5 space-y-1 text-amber-700 dark:text-amber-300">
-                                                @foreach ($appointmentCategories->whereIn('id', $appointment_category_id) as $service)
+                                                @foreach ($this->getAppointmentCat->whereIn('id', $appointment_category_id) as $service)
                                                     <li>{{ $service->appoint_cat_name }} -
                                                         ₱{{ number_format($service->price, 2) }}</li>
                                                 @endforeach
@@ -488,7 +488,7 @@
                                                         <p class="text-sm text-gray-600 dark:text-neutral-400">Services
                                                         </p>
                                                         <ul class="mt-1 space-y-1">
-                                                            @foreach ($appointmentCategories->whereIn('id', $appointment_category_id) as $service)
+                                                            @foreach ($this->getAppointmentCat->whereIn('id', $appointment_category_id) as $service)
                                                                 <li class="flex justify-between">
                                                                     <span
                                                                         class="font-medium text-gray-800 dark:text-neutral-100">{{ $service->appoint_cat_name }}</span>

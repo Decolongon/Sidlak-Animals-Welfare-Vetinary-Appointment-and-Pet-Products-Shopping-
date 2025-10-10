@@ -21,7 +21,7 @@ class RoleBaseMiddleware
         $currentPanel = Filament::getCurrentPanel()?->getId();
 
         if (!$user || !$currentPanel) {
-            return redirect()->route('filament.auth.auth.login');
+            return redirect()->route('login');
             // return redirect(Filament::getPanel('auth')->getLoginUrl());
         }
 
@@ -38,6 +38,7 @@ class RoleBaseMiddleware
         if (empty($userRoles) && $currentPanel === 'auth') {
             // Session::flush();
             return redirect()->route('dashboard');
+           
         }
 
 
