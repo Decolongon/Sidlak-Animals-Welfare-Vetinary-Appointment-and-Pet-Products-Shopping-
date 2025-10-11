@@ -146,7 +146,7 @@
                                             <input type="number" id="pet_age" name="pet_age" wire:model="pet_age"
                                                 class="py-2.5 px-4 block w-full border border-gray-200 dark:border-neutral-700 rounded-lg sm:text-sm focus:border-amber-500 focus:ring-amber-500 dark:bg-neutral-900 dark:text-neutral-100">
 
-                                            <select name="pet_age_unit" id="pet_age_unit" wire:model="pet_age_unit"
+                                            <select name="pet_age_unit" id="pet_age_unit" wire:model.live="pet_age_unit"
                                                 class="py-2.5 px-4 border border-gray-200 dark:border-neutral-700 rounded-lg sm:text-sm focus:border-amber-500 focus:ring-amber-500 dark:bg-neutral-900 dark:text-neutral-100">
                                                 <option value="">Select</option>
                                                 <option value="years old">Years</option>
@@ -199,11 +199,11 @@
                                             wire:model.live="appointment_category_id"
                                             class="py-2.5 px-4 block w-full border border-gray-200 dark:border-neutral-700 rounded-lg sm:text-sm focus:border-amber-500 focus:ring-amber-500 dark:bg-neutral-900 dark:text-neutral-100">
                                             @foreach ($this->getAppointmentCat as $category)
-                                                @if($category->doctorschedules->isNotEmpty())
+                                                {{-- @if($category->doctorschedules->isNotEmpty()) --}}
                                                 <option value="{{ $category->id }}">
                                                     {{ ucwords($category->appoint_cat_name) }}
                                                 </option>
-                                                @endif
+                                                {{-- @endif --}}
                                             @endforeach
                                         </select>
 

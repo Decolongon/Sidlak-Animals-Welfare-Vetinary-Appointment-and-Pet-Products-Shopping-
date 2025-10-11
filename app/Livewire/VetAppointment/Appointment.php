@@ -52,7 +52,7 @@ class Appointment extends Component
 
     public function mount()
     {
-       // $this->getAppointmentCat();
+        // $this->getAppointmentCat();
         $this->getVetSchedule();
     }
 
@@ -77,12 +77,18 @@ class Appointment extends Component
                 'pet_name' => 'required|string|max:255',
                 'pet_type' => 'required|string|max:255',
                 'pet_breed' => 'required',
-                'pet_age' => 'required|max:20|min:1|numeric',
+                'pet_age' => 'required|min:1|numeric',
                 'pet_gender' => 'required',
                 'pet_age_unit' => 'required',
                 'pet_weight' => 'required|numeric|max:30',
                 'isPetVaccinated' => 'required',
             ];
+
+            if ($this->pet_age_unit === 'years old') {
+                $rules['pet_age'] .= '|max:20';
+            } elseif ($this->pet_age_unit === 'months') {
+                $rules['pet_age'] .= '|max:240'; // 20 years * 12 months = 240 months
+            }
         }
 
         if ($this->currentStep == 2) {
@@ -122,6 +128,13 @@ class Appointment extends Component
         }, $data);
     }
 
+    protected function messages()
+    {
+        return [
+            'pet_age.max' => 'Pet age must not be greater than 20 years old.',
+        ];
+    }
+
     protected function rules()
     {
         // $rules = [];
@@ -130,7 +143,7 @@ class Appointment extends Component
             'pet_name' => 'required|string|max:255',
             'pet_type' => 'required|string|max:255',
             'pet_breed' => 'required',
-            'pet_age' => 'required|max:20|min:1|numeric',
+            'pet_age' => 'required|min:1|numeric',
             'pet_gender' => 'required',
             'pet_age_unit' => 'required',
             'pet_weight' => 'required|numeric|max:30',
@@ -138,6 +151,12 @@ class Appointment extends Component
             'appointment_category_id' => 'required|array|min:1',
             'payment_method' => 'required',
         ];
+
+        if ($this->pet_age_unit === 'years old') {
+            $rules['pet_age'] .= '|max:20';
+        } elseif ($this->pet_age_unit === 'months') {
+            $rules['pet_age'] .= '|max:240'; // 20 years * 12 months = 240 months
+        }
 
         if ($this->payment_method === 'E-Wallets') {
             $rules['payment_method'] = 'required|in:gcash,card,paymaya,grab_pay';
@@ -430,7 +449,7 @@ class Appointment extends Component
     public function render()
     {
         return view('livewire.vet-appointment.appointment', [
-           // 'appointmentCategories' => $this->getAppointmentCat(),
+            // 'appointmentCategories' => $this->getAppointmentCat(),
             'schedules' => $this->getVetSchedule(),
             'amount' => $this->getTotalPrice(),
         ]);
