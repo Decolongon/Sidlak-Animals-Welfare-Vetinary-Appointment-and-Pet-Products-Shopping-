@@ -19,6 +19,7 @@ use Luigel\Paymongo\Traits\Request;
 use Illuminate\Support\Facades\Auth;
 use Luigel\Paymongo\Facades\Paymongo;
 use App\Helpers\ProductDiscountHelper;
+use Illuminate\Support\Facades\Session;
 use Woenel\Prpcmblmts\Models\PhilippineCity;
 use Jantinnerezo\LivewireAlert\LivewireAlert;
 use Woenel\Prpcmblmts\Models\PhilippineRegion;
@@ -118,7 +119,7 @@ class Checkout extends Component
         // $this->getCities();
         // $this->getBillingCities();
 
-       // $this->getCheckoutItems();
+        $this->getCheckoutItems();
         //$this->getTotalWeight();
         $this->loadUserAddress();
         $this->calculateTotalShipping();
@@ -207,7 +208,7 @@ class Checkout extends Component
         return $query->get();
     }
 
- 
+
     // address search
     public function updatedSearchCity()
     {
@@ -314,8 +315,8 @@ class Checkout extends Component
         $this->calculateSubtotal();
     }
 
-    #[Computed()]
-    public function getCheckoutItems()
+
+    protected function getCheckoutItems()
     {
         if (!Auth::check()) {
             return redirect()->route('login');
@@ -324,14 +325,14 @@ class Checkout extends Component
         $this->isBuyNowMode = session()->get('buy_now_product');
         //  dd($this->isBuyNowMode);
         if ($this->isBuyNowMode) {
-            // $this->checkoutItems = $this->checkoutHelper()->getBuynowItem();
-            // return;
-            return $this->checkoutHelper()->getBuynowItem();
+            $this->checkoutItems = $this->checkoutHelper()->getBuynowItem();
+            return;
+            //return $this->checkoutHelper()->getBuynowItem();
         }
 
         // Handle cart checkout
-        //$this->checkoutItems = $this->checkoutHelper()->getNormalCheckoutItems();
-        return $this->checkoutHelper()->getNormalCheckoutItems();
+        $this->checkoutItems = $this->checkoutHelper()->getNormalCheckoutItems();
+        //return $this->checkoutHelper()->getNormalCheckoutItems();
     }
 
     //calculate subtotal
@@ -340,7 +341,7 @@ class Checkout extends Component
         $this->itemsTotal = 0;
         $this->totalDiscount = 0; // Initialize discount total
 
-        $this->itemsTotal =  $this->getCheckoutItems->sum(function ($item) {
+        $this->itemsTotal =  $this->checkoutItems->sum(function ($item) {
             $product = $item->product;
             $originalPrice = $item->variant->price ?? $product->prod_price;
             $discountedPrice = $this->ProductDiscountHelper()->getDiscountedPrice($product, $item);
@@ -361,7 +362,7 @@ class Checkout extends Component
     //calculate total shipping
     protected function calculateTotalShipping()
     {
-        $this->totalShipping = $this->checkoutHelper()->calculateTotalShipping($this->getCheckoutItems, $this->selectedCity);
+        $this->totalShipping = $this->checkoutHelper()->calculateTotalShipping($this->checkoutItems, $this->selectedCity);
     }
 
 
@@ -381,7 +382,7 @@ class Checkout extends Component
                 $this->selectedCity = $city->code;
 
                 // Load specific barangay base sa city na gin select n user
-                $this->barangays = PhilippineBarangay::where('city_code', $this->selectedCity)->get();
+                //$this->barangays = PhilippineBarangay::where('city_code', $this->selectedCity)->get();
 
                 // Find and set the barangay this only works if user my ga exist na nga daan na address
                 $barangay = PhilippineBarangay::where('name', $userAddress->barangay)
@@ -457,7 +458,7 @@ class Checkout extends Component
     protected function getTotalWeight()
     {
         $totalWeight = 0;
-        foreach ($this->getCheckoutItems as $item) {
+        foreach ($this->checkoutItems as $item) {
             $productUnit = $item->product->prod_unit;
             $weight = $item->product->prod_weight;
             $quantity = $item->quantity;
@@ -500,7 +501,7 @@ class Checkout extends Component
             return;
         }
         $this->getCheckoutItems();
-        if ($this->getCheckoutItems->isEmpty()) {
+        if ($this->checkoutItems->isEmpty()) {
             $this->alert('error', '', [
                 'position' => 'top-end',
                 'timer' => 3000,
@@ -794,14 +795,12 @@ class Checkout extends Component
         $this->selectedCity = $value;
 
         // dd($this->selectedCity);
-        $this->barangays = PhilippineBarangay::where('city_code', $this->selectedCity)
-            //->limit(10)
-            ->get();
         // reset selected barangay if my changes sa city kg recalculate shipping and subtotal
         $this->selectedBarangay = null;
         $this->street = null;
         $this->getPostalCodeForSelectedCity();
         $this->getCheckoutItems();
+
         $this->calculateTotalShipping();
         $this->calculateSubtotal();
     }
@@ -810,9 +809,7 @@ class Checkout extends Component
     public function bilSelectCity($value)
     {
         $this->billing_city = $value;
-        $this->bil_barangays = PhilippineBarangay::where('city_code', $this->billing_city)
-            //->limit(10)
-            ->get();
+
         $this->billing_brgy = null;
         $this->bil_street = null;
         $this->getBillingPostalCodeForSelectedCity();
@@ -842,20 +839,21 @@ class Checkout extends Component
     protected function processOrderItems(Order $orders)
     {
         $this->checkoutHelper()
-            ->getOrderItems($orders,$this->getCheckoutItems, $this->isDiscounted);
+            ->getOrderItems($orders, $this->checkoutItems, $this->isDiscounted);
     }
 
     public function increaseQuantity($id = null)
     {
 
         if ($this->isBuyNowMode) {
-            $success = $this->checkoutHelper()->buyNowModeIncreaseQuantity($id, $this->getCheckoutItems);
+            $success = $this->checkoutHelper()->buyNowModeIncreaseQuantity($id, $this->checkoutItems);
         } else {
-            $success = $this->checkoutHelper()->cartModeIncreaseQuantity($id);
+            $success = $this->checkoutHelper()->cartModeIncreaseQuantity($id, $this->checkoutItems);
         }
 
         if ($success) {
             $this->getCheckoutItems();
+
             $this->getTotalWeight();
             $this->calculateTotalShipping();
             $this->calculateSubtotal();
@@ -873,25 +871,20 @@ class Checkout extends Component
 
     public function cancelOrder()
     {
-
-        // $this->alert('question', 'Are you sure you want to cancel this order?', [
-        //     'position' => 'center',
-        //     'timer' => false,
-        //     'toast' => false,
-        //     'showConfirmButton' => true,
-        //     'showCancelButton' => true,
-        //     'confirmButtonText' => 'Yes',
-        //     'cancelButtonText' => 'No',
-        //     'onConfirmed' => 'confirmedCancelOrder',
-        // ]);
         $this->confirmedCancelOrder();
         // $this->getCheckoutItems();
     }
 
     public function confirmedCancelOrder()
     {
-        $this->reset(['checkoutItems', 'shipping_method', 'notes', 'card_name', 'card_number', 'expiration_month', 'expiration_year', 'cvv']);
-        session()->forget(['selected_checkout_items', 'normal_checkout', 'buy_now_product', 'buy_now_mode', 'buy_now_quantity', 'cart_quantities']);
+        $this->reset();
+        session()->forget([
+            'buy_now_product',
+            'buy_now_mode',
+            'buy_now_quantity',
+            'cart_quantities',
+            'selected_checkout_items'
+        ]);
         //return to_route('page.shop');
         return $this->redirect(route('page.shop'));
     }
@@ -899,16 +892,18 @@ class Checkout extends Component
 
     public function decreaseQuantity($id = null)
     {
-        if ($this->itemId) {
+        if ($this->isBuyNowMode) {
             // Buy Now mode
-            $this->checkoutHelper()->buyNowModeDecreaseQuantity($id, $this->getCheckoutItems);
+            $this->checkoutHelper()->buyNowModeDecreaseQuantity($id, $this->checkoutItems);
             $this->getCheckoutItems();
+
             $this->getTotalWeight();
             $this->calculateSubtotal();
         } else {
             // Cart mode
-            $this->checkoutHelper()->cartModeDecreaseQuantity($id);
+            $this->checkoutHelper()->cartModeDecreaseQuantity($id, $this->checkoutItems);
             $this->getCheckoutItems();
+
             $this->getTotalWeight();
             $this->calculateTotalShipping();
             $this->calculateSubtotal();
@@ -921,7 +916,7 @@ class Checkout extends Component
     public function render()
     {
         return view('livewire.ecommerce.checkout', [
-            //'checkoutItems' => $this->checkoutItems,
+            'checkoutItems' => $this->checkoutItems,
             'subtotal' => $this->subtotal,
             'totalShipping' => $this->totalShipping,
             // 'barangays' => $this->barangays, //address

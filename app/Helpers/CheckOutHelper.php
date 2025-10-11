@@ -272,10 +272,11 @@ class CheckOutHelper
     }
 
     // cart mode decrease quantity
-    public function cartModeDecreaseQuantity($id = null)
+    public function cartModeDecreaseQuantity($id = null, $checkoutItems)
     {
-        $cartItem = Cart::where('user_id', Auth::id())->where('id', $id)->first();
+       // $cartItem = Cart::where('user_id', Auth::id())->where('id', $id)->first();
 
+        $cartItem = $checkoutItems->where('id', $id)->first();
         $currentQuantity = session()->get("cart_quantities.{$cartItem->id}", $cartItem->quantity);
 
         if ($cartItem && $currentQuantity > 1) {
@@ -314,12 +315,14 @@ class CheckOutHelper
 
 
     // cart mode increase quantity
-    public function cartModeIncreaseQuantity($id = null)
+    public function cartModeIncreaseQuantity($id = null, $checkoutItems)
     {
-        $cartItem = Cart::with(['product.images'])
-            ->where('user_id', Auth::id())
-            ->where('id', $id)
-            ->first();
+        // $cartItem = Cart::with(['product.images'])
+        //     ->where('user_id', Auth::id())
+        //     ->where('id', $id)
+        //     ->first();
+
+        $cartItem = $checkoutItems->where('id', $id)->first();
 
         if ($cartItem) {
             $product = $cartItem->product;

@@ -24,7 +24,7 @@
                                         </tr>
                                     </thead>
                                     <tbody class="divide-y divide-gray-200 dark:divide-neutral-700">
-                                        @foreach ($this->getCheckoutItems as $item)
+                                        @foreach ($checkoutItems as $item)
                                             <tr wire:key="item-{{ $item->id }}">
                                                 <td class="px-3 py-4 text-sm text-gray-800 dark:text-neutral-200">
                                                     <div class="flex items-center">
