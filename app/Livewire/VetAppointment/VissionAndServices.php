@@ -17,7 +17,7 @@ class VissionAndServices extends Component
 
     #[Computed()]
     public function getServiceSched(){
-       return AppointmentCategory::with(['doctorschedules','doctor'])->get();
+       return AppointmentCategory::get();
     }
 
     public function render()

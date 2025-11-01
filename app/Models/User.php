@@ -121,6 +121,11 @@ class User extends Authenticatable
         return $this->belongsToMany(BlogPost::class, 'blog_post_like')->withTimestamps();
     }
 
+    public function docotorSchedules(): HasMany
+    {
+        return $this->hasMany(DoctorSchedule::class);
+    }
+
 
     public function canAccessPanel(Panel $panel): bool
     {
@@ -182,7 +187,7 @@ class User extends Authenticatable
     // vet doctor services
     public function doctorservices(): HasMany
     {
-        return $this->hasMany(AppointmentCategory::class);
+        return $this->hasMany(AppointmentCategory::class,'doctor_id');
     }
 
     public function address(): HasOne

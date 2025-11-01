@@ -12,6 +12,7 @@ use App\Livewire\Ecommerce\GetCart;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Session;
 use Jantinnerezo\LivewireAlert\LivewireAlert;
+use Livewire\Attributes\Computed;
 
 class AddToCartForm extends Component
 {
@@ -82,7 +83,8 @@ class AddToCartForm extends Component
     }
 
     //get existing cart kng my ara
-    protected function getExistingCartItem(Product $product): ?Cart
+    #[Computed()]
+    public function getExistingCartItem(Product $product): ?Cart
     {
         return Cart::where('product_id', $product->id)
             ->where(function ($query) {

@@ -4,8 +4,8 @@
 {{-- Your veterinary appointment status has been updated. --}}
 
 @switch($status)
-    @case(\App\Enums\AppointmentStatusEnum::Approved)
-**Your appointment has been confirmed!** 🎉
+    @case(\App\Enums\AppointmentStatusEnum::Booked)
+**Your appointment has been booked!** 🎉
 
 Here are the details of your booked services:
 

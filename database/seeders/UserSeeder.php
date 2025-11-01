@@ -31,7 +31,7 @@ class UserSeeder extends Seeder
             'email_verified_at' => now(),
             'password' => bcrypt('qwerty12345'),
         ]);
-       
+
         //admin for shop
         $admin_shop = User::factory()->create([
             'name' => 'shop',
@@ -45,14 +45,25 @@ class UserSeeder extends Seeder
 
         //admin for vet
         $admin_vet = User::factory()->create([
-            'name' => 'vetinary',
-            'email' => 'vet@gmail.com',
+            'name' => 'Dr. Gelera',
+            'email' => 'gelera@gmail.com',
             'email_verified_at' => now(),
             'password' => bcrypt('qwerty12345'),
         ]);
         $role_vet = Role::create(['name' => 'admin_vet']);
         $admin_vet->assignRole($role_vet);
-       
+
+
+        //secretary for clinic
+        $secretary_vet = User::factory()->create([
+            'name' => 'Secretary',
+            'email' => 'secretary@gmail.com',
+            'email_verified_at' => now(),
+            'password' => bcrypt('qwerty12345'),
+        ]);
+        $sec_vet = Role::create(['name' => 'secretary_vet']);
+        $secretary_vet->assignRole($sec_vet);
+
 
         $totalUsers = 15;
         $progressBar = $this->command->getOutput()->createProgressBar($totalUsers);

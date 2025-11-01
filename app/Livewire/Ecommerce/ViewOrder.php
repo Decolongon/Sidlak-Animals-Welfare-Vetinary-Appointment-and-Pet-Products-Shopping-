@@ -3,25 +3,25 @@
 namespace App\Livewire\Ecommerce;
 
 use Livewire\Component;
+use Livewire\Attributes\On;
+use Livewire\WithPagination;
 use App\Models\Ecommerce\Order;
 use Livewire\Attributes\Layout;
-use App\Helpers\ProductDiscountHelper;
-use Livewire\Attributes\Computed;
 use Livewire\Attributes\Locked;
-use Livewire\WithPagination;
+use Livewire\Attributes\Computed;
+use App\Helpers\ProductDiscountHelper;
 
 class ViewOrder extends Component
 {
     public $orders;
     public $statusFilter = 'all'; // default filter
     public $counter = 0;
-    
+
     #[Locked]
     public $orderId;
 
-    public function mount()
-    {
-        //$this->getOrders();
+    public function mount() {
+        $this->checkOrderStatusChanges();
     }
 
     #[Computed()]
@@ -91,7 +91,52 @@ class ViewOrder extends Component
     }
 
 
+    public function checkOrderStatusChanges()
+    {
+        $currentOrders = $this->getOrders;
 
+        $previousOrderStatuses = session('order_statuses', []);
+
+        $currentOrderStatuses = [];
+        $hasStatusChanged = false;
+
+        foreach ($currentOrders as $order) {
+            $currentOrderStatuses[$order->id] = $order->order_status;
+
+            // Check if status has changed from previous session
+            if (
+                isset($previousOrderStatuses[$order->id]) &&
+                $previousOrderStatuses[$order->id] !== $order->order_status
+            ) {
+                $hasStatusChanged = true;
+
+                // Store the updated status message
+                session()->flash(
+                    'order_status_updated',
+                    "Order #{$order->order_num} status has been updated to: " .
+                        ucfirst($order->order_status)
+                );
+            }
+        }
+
+        // If any status changed, flush relevant sessions
+        if ($hasStatusChanged) {
+           session()->forget([
+                'order_statuses',
+           ]);
+        }
+
+        // Update session with current order statuses
+        session(['order_statuses' => $currentOrderStatuses]);
+    }
+
+    // You can call this method when component mounts or when orders are updated
+    public function updated($property)
+    {
+        if ($property === 'statusFilter') {
+            $this->checkOrderStatusChanges();
+        }
+    }
 
 
     public function updatedStatusFilter()
@@ -107,13 +152,13 @@ class ViewOrder extends Component
         // $this->counter = 5;
         // while ($this->counter > 0) {
 
-            // $this->stream(
-            //     to: 'count',
-            //     content: $this->counter,
-            //     replace: true,
-            // );
+        // $this->stream(
+        //     to: 'count',
+        //     content: $this->counter,
+        //     replace: true,
+        // );
 
-            //sleep(1);
+        //sleep(1);
         //     $this->counter--;
 
         //     if ($this->counter == 0) {
@@ -126,7 +171,7 @@ class ViewOrder extends Component
 
     public function processCancelOrder($id)
     {
-        
+
         $order = Order::findOrFail($id);
         $order->order_status = 'cancelled';
 
@@ -147,8 +192,8 @@ class ViewOrder extends Component
                 $product->save();
             }
         }
-       $order->save();
-       $this->resetOrder();
+        $order->save();
+        $this->resetOrder();
     }
 
     public function resetOrder()

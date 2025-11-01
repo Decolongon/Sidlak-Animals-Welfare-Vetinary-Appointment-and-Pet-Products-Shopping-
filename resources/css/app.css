@@ -6,3 +6,6 @@
 [x-cloak] {
     display: none;
 }
+
+
+@import "tw-prose";

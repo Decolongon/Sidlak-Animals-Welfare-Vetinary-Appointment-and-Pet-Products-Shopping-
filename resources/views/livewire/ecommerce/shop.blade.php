@@ -12,15 +12,23 @@
                 </svg>
             </a>
         </div> --}}
-        <div class="mb-6 ml-6 mt-4">
-            <a wire:navigate.hover href="{{ route('checkout') }}"
+        <div class="flex items-center gap-4 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 mt-6 -mb-6">
+            <a wire:navigate href="{{ route('checkout') }}"
                 class="inline-flex items-center text-amber-600 hover:text-amber-700 font-semibold text-sm tracking-wide hover:underline transition ease-in-out duration-150">
                 back to checkout
             </a>
         </div>
     @endif
+
+    @if (session()->has('message'))
+        <div class="flex items-center gap-4 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 mt-6 -mb-6">
+            {{-- <div class="bg-green-100 border border-green-400 px-4 py-3 rounded relative" role="alert"> --}}
+                <p class="text-green-700">{{ session('message') }}</p>
+            {{-- </div> --}}
+        </div>
+    @endif
     {{-- sorting menu  BY CATEGORIES --}}
-    <div class="flex items-center gap-4 mt-10 ml-6">
+    <div class="flex items-center gap-4 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 mt-6 -mb-6">
 
         <!-- Sorting Menu -->
         <div class="hs-dropdown relative inline-flex" wire:ignore.self x-data="{ showSortOptions: false }">
@@ -137,6 +145,7 @@
 
 
 
+
     {{-- @if (session()->has('message'))
         <div class="bg-green-200 text-green-800 p-2 mb-4">
             {{ session('message') }}
@@ -181,7 +190,7 @@
 
 
                     <div class="aspect-w-16 aspect-h-11">
-                        <a wire:navigate.hover href="{{ route('page.singleProd', ['prod_slug' => $product->prod_slug]) }}">
+                        <a wire:navigate href="{{ route('page.singleProd', ['prod_slug' => $product->prod_slug]) }}">
 
                             {{-- images, route for product description and reviews --}}
 
@@ -207,7 +216,7 @@
                                 {{ ' - ' . number_format($product->prod_weight, 2) . $product->prod_unit }}
                             @endif
                             @if ($product->prod_unit == 'has_dimensions')
-                                <br>{{ 'Dimensions:'.$product->prod_length . ' x ' . $product->prod_width . ' x ' . $product->prod_height . ' cm'}}
+                                <br>{{ 'Dimensions:' . $product->prod_length . ' x ' . $product->prod_width . ' x ' . $product->prod_height . ' cm' }}
                             @endif
                         </h5>
                         <p class="mt-5 text-gray-600 dark:text-neutral-400"></p>

@@ -25,7 +25,7 @@
                 <div class="flex items-center justify-between mb-4">
                     <div>
                         <h2 class="text-lg font-bold text-gray-800 dark:text-white">Clinic Hours</h2>
-                        <p class="text-sm text-gray-500 dark:text-neutral-400">Veterinary service availability</p>
+                        <p class="text-sm text-gray-500 dark:text-neutral-400"></p>
                     </div>
 
                     <!-- Status Badge -->

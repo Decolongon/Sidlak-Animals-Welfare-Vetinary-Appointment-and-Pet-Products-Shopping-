@@ -637,6 +637,11 @@ class OrderResource extends Resource
                                 'order_status' => $data['order_status'],
                                 'payment_status' => $data['payment_status'],
                             ]);
+
+                            $newOrderStatusLabel = OrderStatusEnum::tryFrom($data['order_status'])?->getLabel() ?? $data['order_status'];
+                           
+                           
+
                             Notification::make()
                                 ->title('Status Updated Successfully')
                                 ->success()

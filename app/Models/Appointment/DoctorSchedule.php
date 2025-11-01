@@ -9,7 +9,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class DoctorSchedule extends Model
 {
     protected $fillable = [
-        'service_id',
+        'doctor_id',
         'days',
         'start_time',
         'end_time',
@@ -24,8 +24,8 @@ class DoctorSchedule extends Model
 
     ];
 
-    public function service(): BelongsTo
+    public function doctor(): BelongsTo
     {
-        return $this->belongsTo(AppointmentCategory::class, 'service_id');
+        return $this->belongsTo(User::class, 'doctor_id');
     }
 }

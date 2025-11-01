@@ -14,14 +14,14 @@ class OrderObserver
     public function created(Order $order): void
     {
 
-        if ($order->user) {
-            Mail::to($order->user->email)
-                ->send(new OrderStatusMail(
-                    $order->user,
-                    $order->order_status,
-                    $order
-                ));
-        }
+        // if ($order->user) {
+        //     Mail::to($order->user->email)
+        //         ->send(new OrderStatusMail(
+        //             $order->user,
+        //             $order->order_status,
+        //             $order
+        //         ));
+        // }
     }
 
     /**
@@ -29,16 +29,18 @@ class OrderObserver
      */
     public function updated(Order $order): void
     {
-        if ($order->wasChanged('order_status')) {
-            if ($order->user) {
-                Mail::to($order->user->email)
-                    ->send(new OrderStatusMail(
-                        $order->user,
-                        $order->order_status,
-                        $order
-                    ));
-            }
-        }
+        // if ($order->wasChanged('order_status')) {
+        //     if ($order->user) {
+        //         Mail::to($order->user->email)
+        //             ->send(new OrderStatusMail(
+        //                 $order->user,
+        //                 $order->order_status,
+        //                 $order
+        //             ));
+        //     }
+        // }
+
+     
     }
 
     /**

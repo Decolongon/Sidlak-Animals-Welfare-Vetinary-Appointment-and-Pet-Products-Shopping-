@@ -15,7 +15,7 @@
                 <span class="block text-white text-sm sm:text-base">Dog Food</span>
                 <span class="block text-white text-lg sm:text-xl md:text-3xl leading-tight">Redefining pet care for millions of beloved companions.</span>
                 <div class="mt-5">
-                  <a  class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-xl bg-amber-400 hover:bg-amber-500 text-black border border-transparent focus:outline-hidden disabled:opacity-50 disabled:pointer-events-none" wire:navigate.hover href="{{ route('page.shop') }}">
+                  <a  class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-xl bg-amber-400 hover:bg-amber-500 text-black border border-transparent focus:outline-hidden disabled:opacity-50 disabled:pointer-events-none" wire:navigate href="{{ route('page.shop') }}">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-6">
                       <path fill-rule="evenodd" d="M7.5 6v.75H5.513c-.96 0-1.764.724-1.865 1.679l-1.263 12A1.875 1.875 0 0 0 4.25 22.5h15.5a1.875 1.875 0 0 0 1.865-2.071l-1.263-12a1.875 1.875 0 0 0-1.865-1.679H16.5V6a4.5 4.5 0 1 0-9 0ZM12 3a3 3 0 0 0-3 3v.75h6V6a3 3 0 0 0-3-3Zm-3 8.25a3 3 0 1 0 6 0v-.75a.75.75 0 0 1 1.5 0v.75a4.5 4.5 0 1 1-9 0v-.75a.75.75 0 0 1 1.5 0v.75Z" clip-rule="evenodd" />
                     </svg>
@@ -59,7 +59,7 @@
                 <span class="block text-white text-sm sm:text-base"></span>
                 <span class="block text-white text-lg sm:text-xl md:text-3xl leading-tight">Setting a new standard for pets and the people who love them.</span>
                 <div class="mt-5">
-                  <a  class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-xl bg-amber-400 hover:bg-amber-500 text-black border border-transparent focus:outline-hidden disabled:opacity-50 disabled:pointer-events-none" wire:navigate.hover href="{{ route('page.shop') }}">
+                  <a  class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-xl bg-amber-400 hover:bg-amber-500 text-black border border-transparent focus:outline-hidden disabled:opacity-50 disabled:pointer-events-none" wire:navigate href="{{ route('page.shop') }}">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-6">
                       <path fill-rule="evenodd" d="M7.5 6v.75H5.513c-.96 0-1.764.724-1.865 1.679l-1.263 12A1.875 1.875 0 0 0 4.25 22.5h15.5a1.875 1.875 0 0 0 1.865-2.071l-1.263-12a1.875 1.875 0 0 0-1.865-1.679H16.5V6a4.5 4.5 0 1 0-9 0ZM12 3a3 3 0 0 0-3 3v.75h6V6a3 3 0 0 0-3-3Zm-3 8.25a3 3 0 1 0 6 0v-.75a.75.75 0 0 1 1.5 0v.75a4.5 4.5 0 1 1-9 0v-.75a.75.75 0 0 1 1.5 0v.75Z" clip-rule="evenodd" />
                     </svg>
@@ -196,7 +196,7 @@
         </footer> --}}
 
         <div class="mt-8 lg:mt-14">
-          <a class="py-3 px-4 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg bg-amber-400 hover:bg-amber-500 text-black   disabled:opacity-50  dark:bg-amber dark:text-neutral-800" wire:navigate.hover href="{{route('appointment')}}">
+          <a class="py-3 px-4 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg bg-amber-400 hover:bg-amber-500 text-black   disabled:opacity-50  dark:bg-amber dark:text-neutral-800" wire:navigate href="{{route('appointment')}}">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
               <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 0 0 6 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 0 1 6 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 0 1 6-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0 0 18 18a8.967 8.967 0 0 0-6 2.292m0-14.25v14.25" />
             </svg>

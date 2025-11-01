@@ -110,8 +110,6 @@ class Checkout extends Component
 
     public function mount()
     {
-        $this->itemId =  session('buy_now_product');
-
         $this->selectedRegion = $this->region_id;
         $this->selectedProvince = '0645'; //provincce_code of negroos occidental
 
@@ -356,7 +354,7 @@ class Checkout extends Component
             return $finalPrice * $item->quantity;
         });
 
-        $this->subtotal = $this->itemsTotal + $this->totalShipping;
+        $this->subtotal = $this->itemsTotal + $this->totalShipping + 0.12;
     }
 
     //calculate total shipping
@@ -518,7 +516,7 @@ class Checkout extends Component
                 'position' => 'top-end',
                 'timer' => 3000,
                 'toast' => true,
-                'text' => 'Order weight must be less than 50kg. Total weight: ' . $totalWeight . 'kg',
+                'text' => 'Order weight must be less than or equal to 50kg. Total weight: ' . $totalWeight . 'kg',
             ]);
             return;
         }
@@ -561,6 +559,9 @@ class Checkout extends Component
                 // ]);
                 // Update user address
 
+
+
+
                 Address::updateOrCreate([
                     'user_id' => Auth::id(),
                     'order_id' => $order->id,
@@ -602,9 +603,9 @@ class Checkout extends Component
                 // For redirect-based payments
                 if (isset($attachedPaymentIntent->next_action['redirect']['url'])) {
                     DB::commit();
+
                     return redirect()->away($attachedPaymentIntent->next_action['redirect']['url']);
                 }
-
                 // payments (like cards)
                 if ($attachedPaymentIntent->status === 'succeeded') {
                     $order->update(['payment_status' => 'completed']);
@@ -643,6 +644,9 @@ class Checkout extends Component
                         'toast' => true,
                         'text' => 'Product ordered!',
                     ]);
+
+
+
                     return $this->redirect(route('page.shop'));
                 } else {
                     // Payment failed
@@ -694,7 +698,7 @@ class Checkout extends Component
             //     'user_id' => auth()->user()->id
             // ]);
 
-            // Clear session data
+            //Clear session data
             session()->forget([
                 'buy_now_product',
                 'buy_now_mode',
@@ -889,21 +893,19 @@ class Checkout extends Component
         return $this->redirect(route('page.shop'));
     }
 
-
     public function decreaseQuantity($id = null)
     {
         if ($this->isBuyNowMode) {
             // Buy Now mode
             $this->checkoutHelper()->buyNowModeDecreaseQuantity($id, $this->checkoutItems);
             $this->getCheckoutItems();
-
+            $this->calculateTotalShipping();
             $this->getTotalWeight();
             $this->calculateSubtotal();
         } else {
             // Cart mode
             $this->checkoutHelper()->cartModeDecreaseQuantity($id, $this->checkoutItems);
             $this->getCheckoutItems();
-
             $this->getTotalWeight();
             $this->calculateTotalShipping();
             $this->calculateSubtotal();

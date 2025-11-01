@@ -15,10 +15,10 @@
 
 
         <!-- Cart Count -->
-        <!--[if BLOCK]><![endif]--><?php if($this->cartCount > 0): ?>
+        <!--[if BLOCK]><![endif]--><?php if($this->getCartCount > 0): ?>
             <span
                 class="mb-10 -mr-5 -translate-x-1/2 translate-y-1/2 bg-yellow-500 text-white dark:bg-white dark:bg-black dark:text-black rounded-full text-xs font-bold px-2 py-0">
-                <?php echo e($this->cartCount); ?>
+                <?php echo e($this->getCartCount); ?>
 
            </span>
         <?php endif; ?><!--[if ENDBLOCK]><![endif]-->

@@ -63,6 +63,7 @@ use Filament\Infolists\Components\Section as ComponentsSection;
 use App\Filament\Resources\Ecommerce\ProductResource\RelationManagers;
 
 
+
 class ProductResource extends Resource
 {
     protected static ?string $model = Product::class;
@@ -652,8 +653,27 @@ class ProductResource extends Resource
                                     ->minValue(30)
                                     ->maxValue(60)
                                     ->prefix('₱')
-                                    ->default(60)
+                                    ->columns(2)
+                                    ->default(function () {
+                                        $product = Product::where('prod_requires_shipping', true)->first();
+                                        return $product ? $product->shipping_cost : 60;
+                                    })
                                     ->hint('This will be applied to all products that require shipping')
+                                    ->hintColor('warning'),
+
+                                TextInput::make('additional_fee')
+                                    ->label('Additional Fee (₱)')
+                                    ->numeric()
+                                    ->required()
+                                    ->minValue(5)
+                                    ->maxValue(20)
+                                    ->default(function () {
+                                        $product = Product::where('prod_requires_shipping', true)->first();
+                                        return $product ? $product->additional_fee : 5;
+                                    })
+                                    ->prefix('₱')
+                                    ->columns(2)
+                                    ->hint('Additional flat fee added to per-kilo shipping calculations')
                                     ->hintColor('warning'),
 
                                 \Filament\Forms\Components\Placeholder::make('affected_products')
@@ -662,19 +682,23 @@ class ProductResource extends Resource
                                         $count = Product::where('prod_requires_shipping', true)->count();
                                         return "This will update {$count} products that require shipping";
                                     }),
-                            ]),
+                            ])->columns(2),
                     ])
                     ->action(function (array $data) {
                         $shippingCost = $data['shipping_cost'];
+                        $additionalFee = $data['additional_fee'];
 
                         // Update all products where prod_requires_shipping is true (1)
                         $affectedCount = Product::where('prod_requires_shipping', true)
-                            ->update(['shipping_cost' => $shippingCost]);
+                            ->update([
+                                'shipping_cost' => $shippingCost,
+                                'additional_fee' => $additionalFee,
+                            ]);
 
                         // Show success notification
                         \Filament\Notifications\Notification::make()
                             ->title('Shipping Cost Updated Successfully')
-                            ->body("Updated shipping cost to ₱{$shippingCost} for {$affectedCount} products")
+                            ->body("Updated shipping cost to ₱{$shippingCost} and additional fee to ₱{$additionalFee} for {$affectedCount} products")
                             ->success()
                             ->send();
                     })
@@ -809,9 +833,7 @@ class ProductResource extends Resource
 
     public static function getRelations(): array
     {
-        return [
-            //
-        ];
+        return [];
     }
 
     public static function getRecordSubNavigation(Page $page): array
@@ -819,6 +841,7 @@ class ProductResource extends Resource
         return $page->generateNavigationItems([
             Pages\ViewProduct::class,
             Pages\EditProduct::class,
+            Pages\ProductReviews::class
         ]);
     }
 
@@ -1087,6 +1110,7 @@ class ProductResource extends Resource
             'create' => Pages\CreateProduct::route('/create'),
             'edit' => Pages\EditProduct::route('/{record}/edit'),
             'view' => Pages\ViewProduct::route('/{record}'),
+            'reviews' => Pages\ProductReviews::route('/{record}/reviews'),
         ];
     }
 }

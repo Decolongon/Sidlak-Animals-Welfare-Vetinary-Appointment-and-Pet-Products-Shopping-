@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\VetAppointment;
 
 use Filament\Forms;
+use App\Models\User;
 use Filament\Tables;
 use Filament\Forms\Set;
 use Filament\Forms\Form;
@@ -13,6 +14,7 @@ use Filament\Resources\Resource;
 use Filament\Resources\Pages\Page;
 use Filament\Forms\Components\Grid;
 use Filament\Forms\Components\Hidden;
+use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Section;
 use Filament\Support\Enums\FontWeight;
 use Filament\Navigation\NavigationItem;
@@ -56,8 +58,36 @@ class AppointmentCategoryResource extends Resource
                         Section::make()
                             ->schema([
                                 Hidden::make('doctor_id')
-                                    ->default(auth()->user()->id)
+                                    ->default(fn() => auth()->user()->id)
+                                    // ->disabled(function () {
+                                    //     if (auth()->user()->hasAnyRole(['super_admin', 'super-admin', 'admin_vet'])) {
+                                    //         return true;
+                                    //     }
+                                    //     return false;
+                                    // })
+                                    // ->dehydrated()
                                     ->columnSpanFull(),
+
+                                // Select::make('doctor_id')
+                                //     ->options(User::role('admin_vet')->pluck('name', 'id'))
+                                //     ->searchable()
+                                //     ->required()
+                                //     ->hiddenOn('edit')
+                                //     ->disabled(function () {
+                                //         if (auth()->user()->hasAnyRole(['secretary_vet', 'super_admin', 'super-admin'])) {
+                                //             return false;
+                                //         }
+                                //         return true;
+                                //     })
+                                //     ->hidden(function () {
+                                //         if (auth()->user()->hasAnyRole(['admin_vet'])) {
+                                //             return true;
+                                //         }
+                                //         return false;
+                                //     })
+                                //     ->dehydrated()
+                                //     ->label('Veterinarian')
+                                //     ->optionsLimit(5),
 
                                 TextInput::make('appoint_cat_name')
                                     ->required()
@@ -112,6 +142,9 @@ class AppointmentCategoryResource extends Resource
     {
         return $table
             ->columns([
+                 Tables\Columns\TextColumn::make('doctor.name')
+                 ->label('Assigned Doctor'),
+                 
                 Tables\Columns\TextColumn::make('appoint_cat_name')
                     ->searchable()
                     ->sortable()
@@ -140,7 +173,7 @@ class AppointmentCategoryResource extends Resource
                 ])->tooltip('Actions')
             ])
             ->modifyQueryUsing(function (Builder $query) {
-                if (auth()->user()->hasAnyRole(['super_admin', 'super-admin'])) {
+                if (auth()->user()->hasAnyRole(['super_admin', 'super-admin','secretary_vet'])) {
                     return $query;
                 }
                 return $query->where('doctor_id', auth()->user()->id);
@@ -161,7 +194,7 @@ class AppointmentCategoryResource extends Resource
     public static function getRelations(): array
     {
         return [
-            DoctorschedulesRelationManager::class
+            //DoctorschedulesRelationManager::class
         ];
     }
 

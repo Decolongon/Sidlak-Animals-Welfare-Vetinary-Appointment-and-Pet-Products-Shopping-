@@ -63,14 +63,14 @@ class StatsEcommerceOverview extends BaseWidget
                 ->url(route('filament.admin.resources.ecommerce.products.index'))
                 ->color('primary'),
 
-            // Stat::make('Total Sales', Order::where('order_status', 'delivered')
-            //     ->whereYear('created_at', $this->currentYear)
-            //     ->where('payment_status', 'completed')
-            //     ->sum('total'))
-            //     ->chart([3, 1, 5, 2, 7, 3, 9, 8, 10])
-            //     ->color('info')
-            //     ->descriptionIcon('heroicon-o-currency-pound', IconPosition::Before)
-            //     ->description('Total Sales '. $this->currentYear)
+            Stat::make('Total Sales', Order::where('order_status', 'delivered')
+                ->whereYear('created_at', $this->currentYear)
+                ->where('payment_status', 'completed')
+                ->sum('total'))
+                ->chart([3, 1, 5, 2, 7, 3, 9, 8, 10])
+                ->color('info')
+                ->descriptionIcon('heroicon-o-presentation-chart-line', IconPosition::Before)
+                ->description('Total Sales '. $this->currentYear)
 
 
 

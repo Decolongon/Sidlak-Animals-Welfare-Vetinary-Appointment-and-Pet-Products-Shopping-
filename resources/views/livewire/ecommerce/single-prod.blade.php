@@ -20,12 +20,12 @@
 }"> {{-- Open --}}
 
     <!-- Main Product Container -->
-    <div class="bg-white dark:bg-[#262626] p-6 rounded-lg shadow-md mt-10">
+    <div class="bg-white dark:bg-[#262626] p-6 rounded-lg shadow-md mt-10 mx-auto max-w-7xl">
         <!-- Product Image & Details Grid -->
         <div class="grid md:grid-cols-2 gap-6" wire:ignore>
             <!-- Product Image -->
             <div class="relative">
-                <img id="main-product-image" class="w-full h-[200px] md:h-[300px] lg:h-[350px] object-cover rounded-xl"
+                <img id="main-product-image" class="w-full h-[400px] md:h-[452px] lg:h-[550px] object-cover rounded-xl"
                     :src="activeImage" alt="{{ $product->prod_slug }}">
 
                 <!-- Navigation Arrows -->
@@ -185,7 +185,7 @@
                         expanded: true,
                         fullText: @js($product->prod_description ?? ''),
                         shortText: @js(Str::limit($product->prod_description ?? '', 300, '...'))
-                    }" x-init class="mt-2 text-gray-800 dark:text-white">
+                    }" x-init class="mt-2 prose prose-sm prose-gray max-w-none dark:prose-invert">
                         <div :class="expanded ? '' : 'line-clamp-4'" class="text-gray-800 dark:text-white"
                             x-html="expanded ? fullText : shortText"></div>
                         <template x-if="fullText && shortText && fullText.length > shortText.length">
@@ -237,7 +237,7 @@
 
                                         <!-- Product Image & Info -->
                                         <div class="aspect-w-16 aspect-h-11">
-                                            <a wire:navigate.hover
+                                            <a wire:navigate
                                                 href="{{ route('page.singleProd', ['prod_slug' => $product->prod_slug]) }}">
 
                                                 <img class="w-full h-[180px] md:h-[200px] lg:h-[250px] object-cover rounded-xl"

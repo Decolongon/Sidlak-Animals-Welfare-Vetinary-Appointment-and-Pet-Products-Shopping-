@@ -1,4 +1,4 @@
-<div>
+<div class="bg-transparent">
     {{-- Close your eyes. Count to one. That is how long forever feels. --}}
 
     <!-- Icon Blocks -->
@@ -11,7 +11,7 @@
                         Our vision
                     </h2>
                     <p class="mt-3 text-gray-800 dark:text-neutral-400">
-                        We’re here to keep your pets healthy and happy. From regular checkups to urgent care, our
+                        We're here to keep your pets healthy and happy. From regular checkups to urgent care, our
                         veterinary clinic makes it easy to book appointments and get trusted, compassionate care. Let us
                         be your partner in giving your pets the love and care they deserve.
                     </p>
@@ -109,7 +109,7 @@
 
             <!-- Card -->
             @foreach ($this->getServiceSched as $service)
-                <a wire:navigate.hover href="{{ route('service',['appoint_cat_slug' => $service->appoint_cat_slug]) }}" wire:key="service-{{ $service->id }}"
+                <a wire:navigate href="{{ route('service',['appoint_cat_slug' => $service->appoint_cat_slug]) }}" wire:key="service-{{ $service->id }}"
                     class="group flex flex-col bg-white border border-gray-200 shadow-2xs rounded-xl hover:shadow-md focus:outline-hidden focus:shadow-md transition dark:bg-neutral-900 dark:border-neutral-800">
                     <div class="h-48 overflow-hidden">
                         <img class="w-full h-full object-cover rounded-t-xl"

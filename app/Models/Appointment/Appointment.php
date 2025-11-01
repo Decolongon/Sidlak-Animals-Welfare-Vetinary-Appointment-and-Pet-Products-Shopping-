@@ -12,7 +12,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class Appointment extends Model
 {
-   
+
     protected $fillable = [
         'user_id',
         'appointment_category_id',
@@ -52,15 +52,23 @@ class Appointment extends Model
 
     public function categories(): BelongsToMany
     {
-        return $this->belongsToMany(AppointmentCategory::class, 'appointment_appointment_category', 'appointment_id', 'appointment_category_id')->withTimestamps();
+        return $this->belongsToMany(
+            AppointmentCategory::class,
+            'appointment_appointment_category',
+            'appointment_id',
+            'appointment_category_id'
+        )
+            // ->with('is_approved')
+            ->withTimestamps();
     }
 
-    public function user():BelongsTo
+
+    public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }
 
-    public function vetSchedules():belongsTo
+    public function vetSchedules(): belongsTo
     {
         return $this->belongsTo(VetSchedule::class);
     }

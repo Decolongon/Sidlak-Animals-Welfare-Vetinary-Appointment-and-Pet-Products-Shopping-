@@ -16,10 +16,30 @@ class CreateAppointmentApplication extends CreateRecord
     }
     protected function mutateFormDataBeforeCreate(array $data): array
     {
-        $data['pet_age'] = $data['pet_age']. ' '. ucwords($data['pet_age_unit']);
+        $data['pet_age'] = $data['pet_age'] . ' ' . ucwords($data['pet_age_unit']);
         unset($data['pet_age_unit']);
         return $data;
     }
 
-   
+
+    // protected function afterCreate(): void
+    // {
+    //     $data = $this->form->getState();
+    //     $record = $this->getRecord();
+
+    //     // Handle category approvals for new appointments
+    //     if (isset($data['categories'])) {
+    //         $syncData = [];
+    //         foreach ($data['categories'] as $categoryId) {
+    //             $isApproved = $data['appointment_status'] === 'approved' &&
+    //                 (isset($data['approved_categories']) ?
+    //                     in_array($categoryId, $data['approved_categories']) :
+    //                     true);
+
+    //             $syncData[$categoryId] = ['is_approved' => $isApproved];
+    //         }
+
+    //         $record->categories()->sync($syncData);
+    //     }
+    // }
 }

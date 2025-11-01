@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\VetAppointment;
 
 use Filament\Forms;
+use App\Models\User;
 use Filament\Tables;
 use Filament\Forms\Get;
 use Filament\Forms\Set;
@@ -37,12 +38,12 @@ use Illuminate\Database\Eloquent\Collection;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\MarkdownEditor;
 use App\Models\Appointment\AppointmentCategory;
+use Filament\Tables\Actions\Action as TableAction;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Filament\Infolists\Components\Section as InfoSection;
 use Filament\Infolists\Components\TextEntry\TextEntrySize;
 use Filament\Infolists\Components\Group as ComponentsGroup;
 use Filament\Infolists\Components\Section as ComponentsSection;
-use Filament\Tables\Actions\Action as TableAction;
 use App\Filament\Resources\VetAppointment\AppointmentApplicationResource\Pages;
 use App\Filament\Resources\VetAppointment\AppointmentApplicationResource\RelationManagers;
 
@@ -140,12 +141,31 @@ class AppointmentApplicationResource extends Resource
 
                         ToggleButtons::make('appointment_status')
                             ->options(AppointmentStatusEnum::class)
-                            ->default(AppointmentStatusEnum::Pending)
+                            //->default(AppointmentStatusEnum::Pending)
                             ->dehydrated()
                             ->inline()
                             ->required()
                             ->reactive()
                             ->label('Appointment Status'),
+
+                        // Forms\Components\Select::make('approved_categories')
+                        //     ->label('Select Services to Approve')
+                        //     ->options(function ($record) {
+                        //         return $record->categories->pluck('appoint_cat_name', 'id')->toArray();
+                        //     })
+                        //     ->optionsLimit(5)
+                        //     ->default(fn($record) => $record->categories->pluck('id')->toArray()) // Select all by default
+                        //     ->hidden(
+                        //         fn(Get $get, $record) =>
+                        //         $get('appointment_status') !== 'approved' ||
+                        //             $record->categories->count() <= 1
+                        //     )
+                        //     ->multiple()
+                        //     ->preload()
+                        //     ->searchable(),
+                        // ->columns(2)
+                        // ->columnSpan(2)
+                        //->required(),
 
                         DateTimePicker::make('appoint_sched')
                             ->required()
@@ -237,11 +257,11 @@ class AppointmentApplicationResource extends Resource
                                 'Over the Counter' => 'Over the Counter',
                             ]),
 
-                        TextInput::make('total_amount')
-                            ->disabled()
-                            ->dehydrated()
-                            ->numeric()
-                            ->label('Total Amount'),
+                        // TextInput::make('total_amount')
+                        //     ->disabled()
+                        //     ->dehydrated()
+                        //     ->numeric()
+                        //     ->label('Total Amount'),
 
 
                     ])->columns([
@@ -267,13 +287,14 @@ class AppointmentApplicationResource extends Resource
                     ->searchable()
                     ->sortable()
                     ->label('Pet Owner')
+                    ->description(fn(Appointment $record): string => str()->limit($record->user->email, 40))
                     ->formatStateUsing(fn($state) => ucfirst($state)),
 
-                Tables\Columns\TextColumn::make('user.email')
-                    ->searchable()
-                    ->sortable()
-                    ->label('Email')
-                    ->formatStateUsing(fn($state) => $state),
+                // Tables\Columns\TextColumn::make('user.email')
+                //     ->searchable()
+                //     ->sortable()
+                //     ->label('Email')
+                //     ->formatStateUsing(fn($state) => $state),
 
 
 
@@ -281,6 +302,8 @@ class AppointmentApplicationResource extends Resource
                     ->searchable()
                     ->wrap()
                     ->html()
+                    ->listWithLineBreaks()
+                    ->limitList(3)
                     ->color('info')
                     ->badge()
                     ->label('Service')
@@ -324,10 +347,43 @@ class AppointmentApplicationResource extends Resource
                     ->dateTime('M d, Y')
                     ->sortable()
                     ->searchable()
-                    ->toggleable(isToggledHiddenByDefault: true)
+                    //->toggleable(isToggledHiddenByDefault: true)
                     ->formatStateUsing(fn($state) => Carbon::parse($state)->format('M d, Y g:i A'))
             ])
+            ->modifyQueryUsing(function (Builder $query) {
+                // If the current user is a vet doctor, only show their assigned appointments
+                if (auth()->user()->hasRole('admin_vet')) {
+                    return $query->whereHas('categories', function ($q) {
+                        $q->where('doctor_id', auth()->id());
+                    });
+                }
+                return $query;
+            })
             ->filters([
+
+                // SelectFilter::make('doctor_id')
+                //     ->label('Doctor')
+                //     ->options(User::role('admin_vet')->pluck('name', 'id'))
+                //     ->preload()
+                //     ->searchable()
+                //     ->multiple()
+                //     ->query(function (Builder $query, $state) {
+                //         if (!empty($state) && is_array($state)) {
+                //             $doctorIds = collect($state)
+                //                 ->filter(fn($id) => !empty($id) && is_numeric($id))
+                //                 ->unique()
+                //                 ->values()
+                //                 ->toArray();
+
+                //             if (!empty($doctorIds)) {
+                //                 return $query->whereHas('categories', function ($q) use ($doctorIds) {
+                //                     $q->whereIn('doctor_id', $doctorIds);
+                //                 });
+                //             }
+                //         }
+                //         return $query;
+                //     }),
+
 
                 SelectFilter::make('payment_status')
                     ->label('Payment Status')
@@ -399,6 +455,28 @@ class AppointmentApplicationResource extends Resource
                                         ->label('Appointment Status')
                                         ->columnSpan(2),
 
+
+                                    // Forms\Components\Select::make('approved_categories')
+                                    //     ->label('Select Services to Approve')
+                                    //     ->options(function ($record) {
+                                    //         return $record->categories->pluck('appoint_cat_name', 'id')->toArray();
+                                    //     })
+                                    //     ->optionsLimit(5)
+                                    //     ->default(fn($record) => $record->categories->pluck('id')->toArray()) // Select all by default
+                                    //     ->hidden(
+                                    //         fn(Get $get, $record) =>
+                                    //         $get('appointment_status') !== 'approved' ||
+                                    //             $record->categories->count() <= 1
+                                    //     )
+                                    //     ->multiple()
+                                    //     ->preload()
+                                    //     ->searchable()
+                                    //     ->columns(2)
+                                    //     ->columnSpan(2)
+                                    //     ->required(),
+
+
+
                                     DateTimePicker::make('appoint_sched')
                                         ->required()
                                         ->seconds(false)
@@ -428,8 +506,29 @@ class AppointmentApplicationResource extends Resource
                             $updateData = [
                                 'appointment_status' => $data['appointment_status'],
                                 'payment_status' => $data['payment_status'],
-                                'appoint_sched' => $data['appoint_sched'] ?? null,
+                                //'appoint_sched' => $data['appoint_sched'] ?? null,
                             ];
+
+                            if ($data['appointment_status'] === 'approved' && isset($data['appoint_sched'])) {
+                                $updateData['appoint_sched'] = $data['appoint_sched'];
+                                // if ($record->categories->count() > 1 && isset($data['approved_categories'])) {
+                                //     // Sync only the approved categories
+                                //     $syncData = [];
+                                //     foreach ($record->categories as $category) {
+                                //         $syncData[$category->id] = [
+                                //             'is_approved' => in_array($category->id, $data['approved_categories'])
+                                //         ];
+                                //     }
+                                // } else {
+                                //     foreach ($record->categories as $category) {
+                                //         $syncData[$category->id] = ['is_approved' => true];
+                                //     }
+                                //     $record->categories()->sync($syncData);
+                                // }
+                            } else if ($data['appointment_status'] !== 'approved') {
+                                // Keep the existing appoint_sched values
+                                $updateData['appoint_sched'] = $record->appoint_sched;
+                            }
 
                             // if($data['appointment_status'] === AppointmentStatusEnum::Approved) {
                             //     $updateData['appoint_sched'] = $data['appoint_sched'];
@@ -467,16 +566,16 @@ class AppointmentApplicationResource extends Resource
                                         ->columnSpan(2)
                                         ->label('Appointment Status'),
 
-                                    DateTimePicker::make('appoint_sched')
-                                        ->required()
-                                        ->seconds(false)
-                                        // ->default(fn($record) => $record->appoint_sched ?? now()->addDays(1))
-                                        ->minDate(now()->startOfDay())
-                                        ->maxDate(now()->addWeek()->endOfDay())
-                                        ->hidden(fn(Get $get) => $get('appointment_status') !== 'approved')
-                                        ->dehydrated()
-                                        ->columnSpan(1)
-                                        ->label('Schedule Date'),
+                                    // DateTimePicker::make('appoint_sched')
+                                    //     ->required()
+                                    //     ->seconds(false)
+                                    //     // ->default(fn($record) => $record->appoint_sched ?? now()->addDays(1))
+                                    //     ->minDate(now()->startOfDay())
+                                    //     ->maxDate(now()->addWeek()->endOfDay())
+                                    //     ->hidden(fn(Get $get) => $get('appointment_status') !== 'approved')
+                                    //     ->dehydrated()
+                                    //     ->columnSpan(1)
+                                    //     ->label('Schedule Date'),
 
                                     ToggleButtons::make('payment_status')
                                         ->options(PaymentStatusEnum::class)
@@ -492,11 +591,18 @@ class AppointmentApplicationResource extends Resource
                         ])
                         ->action(function (Collection $records, array $data) {
                             foreach ($records as $record) {
-                                $record->update([
+                                $updateData = [
                                     'appointment_status' => $data['appointment_status'],
                                     'payment_status' => $data['payment_status'],
-                                    'appoint_sched' => $data['appoint_sched'] ?? null,
-                                ]);
+                                ];
+
+                                if ($data['appointment_status'] === 'approved' && isset($data['appoint_sched'])) {
+                                    $updateData['appoint_sched'] = $data['appoint_sched'];
+                                } else if ($data['appointment_status'] !== 'approved') {
+                                    $updateData['appoint_sched'] = $record->appoint_sched;
+                                }
+
+                                $record->update($updateData);
                             }
                             Notification::make()
                                 ->title('Updates Successfuly')
@@ -544,48 +650,116 @@ class AppointmentApplicationResource extends Resource
     {
         return $infolist
             ->schema([
-                InfoSection::make()
-                    ->columns(2)
+                // Pet Information Section
+                InfoSection::make('Pet Information')
+                    ->icon('heroicon-o-heart')
+                    ->columns(3)
                     ->schema([
                         TextEntry::make('pet_name')
                             ->label('Pet Name')
                             ->formatStateUsing(fn(string $state): string => ucwords($state))
                             ->size(TextEntry\TextEntrySize::Large)
-                            ->weight(FontWeight::ExtraBold),
+                            ->weight(FontWeight::ExtraBold)
+                            ->icon('heroicon-o-user'),
 
                         TextEntry::make('pet_type')
-                            ->label('Pet Type')
+                            ->label('Type')
                             ->formatStateUsing(fn(string $state): string => ucfirst($state))
-                            ->size(TextEntry\TextEntrySize::Large)
-                            ->weight(FontWeight::ExtraBold),
+                            ->size(TextEntry\TextEntrySize::Medium)
+                            ->weight(FontWeight::SemiBold)
+                            ->icon('heroicon-o-tag'),
 
                         TextEntry::make('pet_breed')
-                            ->label('Pet Breed')
+                            ->label('Breed')
                             ->formatStateUsing(fn(string $state): string => ucfirst($state))
-                            ->size(TextEntry\TextEntrySize::Large)
-                            ->weight(FontWeight::ExtraBold),
+                            ->size(TextEntry\TextEntrySize::Medium)
+                            ->weight(FontWeight::SemiBold)
+                            ->icon('heroicon-o-sparkles'),
 
                         TextEntry::make('pet_gender')
-                            ->label('Pet Gender')
+                            ->label('Gender')
                             ->formatStateUsing(fn(string $state): string => ucfirst($state))
-                            ->size(TextEntry\TextEntrySize::Large)
-                            ->weight(FontWeight::ExtraBold),
+                            ->size(TextEntry\TextEntrySize::Medium)
+                            ->weight(FontWeight::SemiBold)
+                            ->icon('heroicon-o-queue-list'),
 
                         TextEntry::make('pet_age')
-                            ->label('Pet Age')
-                            ->size(TextEntry\TextEntrySize::Large)
-                            ->weight(FontWeight::ExtraBold),
+                            ->label('Age')
+                            ->size(TextEntry\TextEntrySize::Medium)
+                            ->weight(FontWeight::SemiBold)
+                            ->icon('heroicon-o-calendar'),
 
                         TextEntry::make('pet_weight')
-                            ->label('Pet Weight (kg)')
-                            ->size(TextEntry\TextEntrySize::Large)
-                            ->weight(FontWeight::ExtraBold),
+                            ->label('Weight')
+                            ->suffix(' kg')
+                            ->size(TextEntry\TextEntrySize::Medium)
+                            ->weight(FontWeight::SemiBold)
+                            ->icon('heroicon-o-scale'),
 
                         TextEntry::make('isPetVaccinated')
-                            ->label('Is Pet Vaccinated?')
-                            ->formatStateUsing(fn($state) => $state ? '✅ Yes' : '❌ No')
+                            ->label('Vaccination Status')
+                            ->formatStateUsing(fn($state) => $state ? '✅ Vaccinated' : '❌ Not Vaccinated')
+                            ->size(TextEntry\TextEntrySize::Medium)
+                            ->weight(FontWeight::SemiBold)
+                            ->icon(fn($state) => $state ? 'heroicon-o-check-badge' : 'heroicon-o-x-circle'),
+                    ]),
 
-                    ])
+                // Appointment & Payment Section
+                InfoSection::make('Appointment & Payment Details')
+                    ->icon('heroicon-o-clipboard-document-list')
+                    ->columns(2)
+                    ->schema([
+                        TextEntry::make('appointment_status')
+                            ->label('Appointment Status')
+                            ->formatStateUsing(fn($state) => AppointmentStatusEnum::tryFrom($state)?->getLabel() ?? 'Unknown')
+                            ->color(fn($state) => AppointmentStatusEnum::tryFrom($state)?->getColor() ?? 'gray')
+                            ->size(TextEntry\TextEntrySize::Large)
+                            ->badge()
+                            ->weight(FontWeight::ExtraBold)
+                            ->icon('heroicon-o-clock'),
+
+                        TextEntry::make('payment_status')
+                            ->label('Payment Status')
+                            ->formatStateUsing(fn($state) => PaymentStatusEnum::tryFrom($state)?->getLabel() ?? 'Unknown')
+                            ->color(fn($state) => PaymentStatusEnum::tryFrom($state)?->getColor() ?? 'gray')
+                            ->size(TextEntry\TextEntrySize::Large)
+                            ->badge()
+                            ->weight(FontWeight::ExtraBold)
+                            ->icon('heroicon-o-credit-card'),
+
+                        TextEntry::make('total_amount')
+                            ->label('Total Amount')
+                            ->formatStateUsing(fn($state) => '₱' . number_format($state, 2))
+                            ->color('success')
+                            ->badge()
+                            ->size(TextEntry\TextEntrySize::Large)
+                            ->weight(FontWeight::ExtraBold)
+                            ->icon('heroicon-o-banknotes'),
+
+                        TextEntry::make('appoint_sched')
+                            ->label('Appointment Date & Time')
+                            ->formatStateUsing(fn($state) => Carbon::parse($state)->format('M d, Y g:i A'))
+                            ->size(TextEntry\TextEntrySize::Medium)
+                            ->weight(FontWeight::SemiBold)
+                            ->icon('heroicon-o-calendar-days'),
+
+                        TextEntry::make('payment_method')
+                            ->label('Payment Method')
+                            ->formatStateUsing(fn($state) => (strtolower(trim($state)) === 'over the counter' ? ucwords($state) : 'E-wallets/' . ucfirst($state)))
+                            ->size(TextEntry\TextEntrySize::Medium)
+                            ->badge()
+                            ->color(fn($state) => (strtolower(trim($state)) === 'over the counter' ? 'info' : 'success'))
+                            ->weight(FontWeight::SemiBold)
+                            ->icon('heroicon-o-wallet'),
+
+                        TextEntry::make('categories.appoint_cat_name')
+                            ->label('Services')
+                            ->formatStateUsing(fn($state) => ucwords($state))
+                            ->html()
+                            ->badge()
+                            ->color('info')
+                            ->icon('heroicon-o-wrench-screwdriver'),
+                    ]),
             ]);
     }
 }

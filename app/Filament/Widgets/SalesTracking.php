@@ -15,6 +15,8 @@ class SalesTracking extends ChartWidget
     protected static ?int $sort = 5;
     protected static string $color = 'primary';
     public ?string $filter = null;
+    protected int | string | array $columnSpan = 'full';
+    protected static ?string $maxHeight = '300px';
    // protected static ?string $pollingInterval = '60s';
 
     private YearFilterHelper $helper;
@@ -115,18 +117,23 @@ class SalesTracking extends ChartWidget
     protected function getLabels(): array
     {
         return [
-            'Jan',
-            'Feb',
-            'Mar',
-            'Apr',
+            'January',
+            'Febuary',
+            'March',
+            'April',
             'May',
-            'Jun',
-            'Jul',
-            'Aug',
-            'Sep',
-            'Oct',
-            'Nov',
-            'Dec',
+            'June',
+            'July',
+            'August',
+            'September',
+            'October',
+            'November',
+            'December',
         ];
     }
+
+
+    
+
+
 }

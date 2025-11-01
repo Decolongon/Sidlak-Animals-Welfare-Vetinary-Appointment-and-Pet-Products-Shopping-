@@ -1,49 +1,44 @@
 <?php
 
-namespace App\Filament\Resources\Ecommerce;
+namespace App\Filament\Resources\Ecommerce\ProductResource\Pages;
 
 use Carbon\Carbon;
 use Filament\Forms;
 use Filament\Tables;
+use Filament\Actions;
 use Filament\Forms\Form;
 use Filament\Tables\Table;
-use Filament\Resources\Resource;
-use App\Models\Ecommerce\Product;
 use Filament\Forms\Components\Grid;
-use Filament\Tables\Actions\Action;
 use Filament\Forms\Components\Group;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Section;
-use App\Models\Ecommerce\ProductReview;
 use Filament\Forms\Components\Textarea;
 use Filament\Tables\Columns\TextColumn;
-use App\Models\Ecommerce\ProductReviews;
-// use IbrahimBougaoua\FilamentRatingStar\Columns\Components\RatingStar;
 use Filament\Tables\Columns\ImageColumn;
 use Filament\Forms\Components\FileUpload;
-use Filament\Tables\Filters\SelectFilter;
 use Illuminate\Database\Eloquent\Builder;
+use Filament\Resources\Pages\ManageRelatedRecords;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
-use App\Filament\Resources\Ecommerce\ProductReviewsResource\Pages;
+use App\Filament\Resources\Ecommerce\ProductResource;
 use IbrahimBougaoua\FilamentRatingStar\Forms\Components\RatingStar;
-use App\Filament\Resources\Ecommerce\ProductReviewsResource\RelationManagers;
 use IbrahimBougaoua\FilamentRatingStar\Columns\Components\RatingStar as TableRatingStar;
-use IbrahimBougaoua\FilamentRatingStar\Entries\Components\RatingStar as InfolistRatingStar;
 
-class ProductReviewsResource extends Resource
+class ProductReviews extends ManageRelatedRecords
 {
-    protected static ?string $model = ProductReview::class;
-    protected static ?string $navigationGroup = 'Ecommerce';
-    protected static ?string $navigationIcon = 'heroicon-o-star';
-    protected static ?int $navigationSort = 4;
+    protected static string $resource = ProductResource::class;
 
-    public static function getNavigationBadge(): ?string
+    protected static string $relationship = 'reviews';
+
+    protected static ?string $navigationIcon = 'heroicon-o-star';
+
+    public static function getNavigationLabel(): string
     {
-        return static::getModel()::count();
+        return 'View Product Reviews';
     }
-    public static function form(Form $form): Form
+
+    public function form(Form $form): Form
     {
-        return $form
+       return $form
             ->schema([
                 Section::make('Product Review Information')
                     ->schema([
@@ -104,25 +99,26 @@ class ProductReviewsResource extends Resource
             ]);
     }
 
-    public static function table(Table $table): Table
+    public function table(Table $table): Table
     {
         return $table
+            ->recordTitleAttribute('rating')
             ->columns([
-                TextColumn::make('user.name')
+                 TextColumn::make('user.name')
                     ->label('Customer Name')
                     ->searchable()
                     ->sortable()
                     ->searchable(),
 
-                TextColumn::make('product.prod_name')
-                    ->sortable()
-                    ->searchable()
-                    ->label('Product Name')
-                    ->searchable(),
+                TextColumn::make('review')
+                    ->placeholder('No review')
+                    ->limit(20)
+                    ->label('Review'),
+                  
 
                 TableRatingStar::make('rating')
                     ->size('sm')
-                    ->summarize(\Filament\Tables\Columns\Summarizers\Average::make())
+                   // ->summarize(\Filament\Tables\Columns\Summarizers\Average::make())
                     ->label('Rating'),
 
                 // TextColumn::make('review')
@@ -133,6 +129,7 @@ class ProductReviewsResource extends Resource
                     ->height(50)
                     ->limit(1)
                     ->width(50)
+                    ->placeholder('No image uploaded')
                     ->label('Image Review'),
 
                 TextColumn::make('created_at')
@@ -140,58 +137,28 @@ class ProductReviewsResource extends Resource
                     ->formatStateUsing(fn($state) => Carbon::parse($state)->format('M d, Y g:i A'))
                     ->sortable(),
 
+
             ])
             ->filters([
-                SelectFilter::make('product.prod_name')
-                    ->relationship('product', 'prod_name')
-                    ->label('Product')
-                    ->options(Product::query()->pluck('prod_name', 'id'))
-                    ->searchable()
-                    ->preload()
-                    ->multiple()
-
+                //Tables\Filters\TrashedFilter::make()
             ])
-            ->filtersTriggerAction(
-                fn(Action $action) => $action
-                    ->button()
-                    ->slideOver()
-                    ->label('Filter'),
-            )
+            ->headerActions([
+                // Tables\Actions\CreateAction::make(),
+                // Tables\Actions\AssociateAction::make(),
+            ])
             ->actions([
                 Tables\Actions\ViewAction::make(),
-                Tables\Actions\ActionGroup::make([
-                    Tables\Actions\EditAction::make(),
-                    Tables\Actions\DeleteAction::make(),
-                ])->tooltip('Actions')
+                //Tables\Actions\EditAction::make(),
+               
             ])
             ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
-
-
-                ]),
-            ])->emptyStateActions([
-                Tables\Actions\CreateAction::make()
-                    ->icon('heroicon-m-plus')
-                    ->label(__('Create Product Review')),
+             
             ])
             ->emptyStateIcon('heroicon-o-star')
-            ->emptyStateHeading('No Product Reviews');
-    }
-
-    public static function getRelations(): array
-    {
-        return [
-            //
-        ];
-    }
-
-    public static function getPages(): array
-    {
-        return [
-            'index' => Pages\ListProductReviews::route('/'),
-            'create' => Pages\CreateProductReviews::route('/create'),
-            'edit' => Pages\EditProductReviews::route('/{record}/edit'),
-        ];
+            ->emptyStateHeading('No Reviews Found')
+            ->defaultSort('created_at', 'desc')
+            ->modifyQueryUsing(fn (Builder $query) => $query->withoutGlobalScopes([
+                SoftDeletingScope::class,
+            ]));
     }
 }

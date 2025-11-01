@@ -97,7 +97,7 @@ class AppServiceProvider extends ServiceProvider
     {
 
         Announcement::observe(AnnouncementObserver::class);
-        Appointment::observe(VetAppointmentObserver::class);
+        //Appointment::observe(VetAppointmentObserver::class);
         //Order::observe(OrderObserver::class);
     }
 
@@ -134,7 +134,7 @@ class AppServiceProvider extends ServiceProvider
             VetSchedule::class => VetSchedulePolicy::class,
             ProductDiscount::class => ProductDiscountPolicy::class,
             FreeshippingCity::class => FreeshippingCityPolicy::class,
-           // DoctorSchedule::class => DoctorSchedulePolicy::class,
+           DoctorSchedule::class => DoctorSchedulePolicy::class,
             //    User::class => UserPolicy::class,
 
         ];

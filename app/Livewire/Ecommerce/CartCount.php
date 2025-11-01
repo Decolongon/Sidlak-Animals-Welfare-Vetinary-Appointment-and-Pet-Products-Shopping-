@@ -9,6 +9,7 @@ use Livewire\Attributes\Title;
 use Livewire\Attributes\Layout;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Session;
+use Livewire\Attributes\Computed;
 
 class CartCount extends Component
 {
@@ -18,7 +19,8 @@ class CartCount extends Component
 
 
     #[On('cartUpdated')]
-    public function getCartCountProperty()
+    #[Computed()]
+    public function getCartCount()
     {
         if (Auth::check()) {
             //for authenticated users
@@ -31,8 +33,8 @@ class CartCount extends Component
 
    
 
-    #[Layout('layouts.app')]
-    #[Title('Cart Count')]
+    // #[Layout('layouts.app')]
+    // #[Title('Cart Count')]
     public function render()
     {
         return view('livewire.ecommerce.cart-count');

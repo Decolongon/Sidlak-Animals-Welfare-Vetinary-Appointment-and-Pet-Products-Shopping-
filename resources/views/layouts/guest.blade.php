@@ -24,10 +24,15 @@
     <main>
         {{ $slot }}
     </main>
-
+    
+    {{-- @livewire('ecommerce.get-cart') --}}
     <livewire:partials.footer />
+
+
+    <script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     @livewireScripts
     @vite(['resources/js/app.js'])
+   
     <script>
         if (typeof attrs === 'undefined') {
             let attrs = [

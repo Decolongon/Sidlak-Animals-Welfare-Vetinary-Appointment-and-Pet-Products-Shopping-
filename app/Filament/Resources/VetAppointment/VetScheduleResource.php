@@ -37,91 +37,103 @@ class VetScheduleResource extends Resource
     {
         return $form
             ->schema([
-            Section::make()
-                ->schema([
-                
-           
-                Hidden::make('user_id')
-                ->default(auth()->user()->id),
+                Section::make()
+                    ->schema([
 
-                DateTimePicker::make('vet_schedule_open')
-                ->required()
-                 ->minDate(now()->startOfDay())
-                //->displayFormat('F j, Y h:i A') //format full year, day, month, time
-                ->rule('after_or_equal:now')
-                ->live(onBlur: true)
-                //  ->native(false)
-                ->seconds(false)
-                ->date('F j, Y, g:i a')
-                ->hint('Must be today or later')
-                ->hintColor('warning')
-                ->label('Opening Time'),
 
-                DateTimePicker::make('vet_schedule_close')
-                ->required()
-                ->seconds(false)
-                ->minDate(fn (callable $get) => $get('vet_schedule_open'))
-               // ->native(false) 
-                  ->date('F j, Y, g:i a')
-                // ->displayFormat('F j, Y h:i A')
-                // ->rule(function ( $get) {
-                //     $openTime = $get('vet_shedule_open');
-                   
-                //     //dapat ang closing sched is greater than sa opening sched pero nd sa dapat mag lapaw sa date subong
-                //     return [
-                //         'after:' . $openTime,
-                //     ];
-                // })
-                ->rule(function ($get) {
-                    $open = $get('vet_schedule_open');
-            
-                    return function ($attribute, $value, $fail) use ($open) {
-                        if (!$open || !$value) return;
-            
-                        $openTime = Carbon::parse($open);
-                        $closeTime = Carbon::parse($value);
-                    //if ang user select data greater than the opening time throw error message
-                        if ($openTime->toDateString() !== $closeTime->toDateString()) {
-                            $fail('The closing time must be on the same date as the opening time.');
-                            //if ang time is less than or equal sa opening time throw error message
-                        } elseif ($closeTime->lessThanOrEqualTo($openTime)) {
-                            $fail('The closing time must be after the opening time.');
-                        }
-                    };
-                })
-                ->hint('After opening time, same day.')
-                ->hintColor('warning')
-                ->label('Closing Time'),
+                        Hidden::make('user_id')
+                            ->default(auth()->user()->id),
 
-                // ToggleButtons::make('is_the_same_schedule')
-                // ->required()
-                // ->boolean()
-                // ->label('Is the same schedule every day?')
-                // ->grouped()
-                // ->colors([
-                //     false => 'warning',
-                //     true => 'success',
-                // ])
-                // ->icons([
-                //     false => 'heroicon-m-x-circle',
-                //     true => 'heroicon-m-check-circle',
-                // ])
-                // ->default(false),
+                        DateTimePicker::make('vet_schedule_open')
+                            ->required()
+                            ->minDate(now()->startOfDay())
+                            //->rule('after_or_equal:today')
+                            //->displayFormat('F j, Y h:i A') //format full year, day, month, time
+                            ->rule(function () {
+                                return function ($attribute, $value, $fail) {
+                                    if (!$value) return;
 
-                TextInput::make('num_customers')
-                ->label('Enter the number of appointments you wish to accommodate')
-                ->required()
-                // ->columnSpanfull()
-                ->rules([
-                   'min:1',
-                   'max:50',
-                ])
-                ->numeric(),
-               
-                
-            ])->columns(2),
+                                    $selectedTime = Carbon::parse($value);
+                                    $currentTime = now()->second(0); // Remove seconds for comparison
 
-        ])->columns(2);
+                                    if ($selectedTime->lessThan($currentTime)) {
+                                        $fail('The opening time must be later.');
+                                    }
+                                };
+                            }) 
+                            ->live(onBlur: true)
+                            //  ->native(false)
+                            ->seconds(false)
+                            ->date('F j, Y, g:i a')
+                            ->hint('Must be today or later')
+                            ->hintColor('warning')
+                            ->label('Opening Time'),
+
+                        DateTimePicker::make('vet_schedule_close')
+                            ->required()
+                            ->seconds(false)
+                            ->minDate(fn(callable $get) => $get('vet_schedule_open'))
+                            // ->native(false) 
+                            ->date('F j, Y, g:i a')
+                            // ->displayFormat('F j, Y h:i A')
+                            // ->rule(function ( $get) {
+                            //     $openTime = $get('vet_shedule_open');
+
+                            //     //dapat ang closing sched is greater than sa opening sched pero nd sa dapat mag lapaw sa date subong
+                            //     return [
+                            //         'after:' . $openTime,
+                            //     ];
+                            // })
+                            ->rule(function ($get) {
+                                $open = $get('vet_schedule_open');
+
+                                return function ($attribute, $value, $fail) use ($open) {
+                                    if (!$open || !$value) return;
+
+                                    $openTime = Carbon::parse($open);
+                                    $closeTime = Carbon::parse($value);
+                                    //if ang user select data greater than the opening time throw error message
+                                    if ($openTime->toDateString() !== $closeTime->toDateString()) {
+                                        $fail('The closing time must be on the same date as the opening time.');
+                                        //if ang time is less than or equal sa opening time throw error message
+                                    } elseif ($closeTime->lessThanOrEqualTo($openTime)) {
+                                        $fail('The closing time must be after the opening time.');
+                                    }
+                                };
+                            })
+                            ->hint('After opening time, same day.')
+                            ->hintColor('warning')
+                            ->label('Closing Time'),
+
+                        // ToggleButtons::make('is_the_same_schedule')
+                        // ->required()
+                        // ->boolean()
+                        // ->label('Is the same schedule every day?')
+                        // ->grouped()
+                        // ->colors([
+                        //     false => 'warning',
+                        //     true => 'success',
+                        // ])
+                        // ->icons([
+                        //     false => 'heroicon-m-x-circle',
+                        //     true => 'heroicon-m-check-circle',
+                        // ])
+                        // ->default(false),
+
+                        // TextInput::make('num_customers')
+                        //     ->label('Enter the number of appointments you wish to accommodate')
+                        //     ->required()
+                        //     // ->columnSpanfull()
+                        //     ->rules([
+                        //         'min:1',
+                        //         'max:50',
+                        //     ])
+                        //     ->numeric(),
+
+
+                    ])->columns(2),
+
+            ])->columns(2);
     }
 
     public static function table(Table $table): Table
@@ -135,14 +147,14 @@ class VetScheduleResource extends Resource
                 // ->searchable(),
 
                 Tables\Columns\TextColumn::make('vet_schedule_open')
-                ->label('Opening Time')
-                ->sortable()
-                ->formatStateUsing(fn ($state) => date('F j, Y h:i A', strtotime($state))),
+                    ->label('Opening Time')
+                    ->sortable()
+                    ->formatStateUsing(fn($state) => date('F j, Y h:i A', strtotime($state))),
 
                 Tables\Columns\TextColumn::make('vet_schedule_close')
-                ->label('Closing Time')
-                ->sortable()
-                ->formatStateUsing(fn ($state) => date('F j, Y h:i A', strtotime($state))),
+                    ->label('Closing Time')
+                    ->sortable()
+                    ->formatStateUsing(fn($state) => date('F j, Y h:i A', strtotime($state))),
 
                 // Tables\Columns\IconColumn::make('is_the_same_schedule')
                 // ->boolean()
@@ -156,17 +168,15 @@ class VetScheduleResource extends Resource
                 //     true => 'heroicon-m-check-badge',
                 // ]),
 
-                TextColumn::make('num_customers')
-                ->label('Number of Appointments to Accommodate')
-                ->badge()
-                //->toggleable(isToggledHiddenByDefault: true)
-                ->sortable(),
+                // TextColumn::make('num_customers')
+                //     ->label('Number of Appointments to Accommodate')
+                //     ->badge()
+                //     //->toggleable(isToggledHiddenByDefault: true)
+                //     ->sortable(),
 
-              
+
             ])
-            ->filters([
-               
-            ])
+            ->filters([])
             ->actions([
                 Tables\Actions\ViewAction::make(),
                 Tables\Actions\ActionGroup::make([
@@ -180,8 +190,8 @@ class VetScheduleResource extends Resource
                 ]),
             ])->emptyStateActions([
                 Tables\Actions\CreateAction::make()
-                ->icon('heroicon-m-plus-circle')
-                ->label(__('Create Clinic Schedule')),
+                    ->icon('heroicon-m-plus-circle')
+                    ->label(__('Create Clinic Schedule')),
             ])->emptyStateIcon('heroicon-s-calendar-date-range')
             ->emptyStateHeading('No Clinic Schedules');
     }
@@ -191,7 +201,7 @@ class VetScheduleResource extends Resource
         return [
             VetinarySchedule::class
         ];
-    }   
+    }
 
     public static function getRelations(): array
     {
@@ -208,7 +218,4 @@ class VetScheduleResource extends Resource
             'edit' => Pages\EditVetSchedule::route('/{record}/edit'),
         ];
     }
-
-    
-    
 }

@@ -397,7 +397,8 @@ class GetCart extends Component
 
         // Store the merged array in session
         session()->put('selected_checkout_items', $mergedItems);
-        session()->forget('buy_now_product');
+        
+        session()->forget(['buy_now_product','buy_now_quantity']);
 
         //session()->put('selected_checkout_items', $this->selectedItems);
 
@@ -438,8 +439,8 @@ class GetCart extends Component
     }
 
 
-    #[Layout('layouts.app')]
-    #[Title('Cart')]
+    // #[Layout('layouts.app')]
+    // #[Title('Cart')]
     public function render()
     {
         return view('livewire.ecommerce.get-cart', [

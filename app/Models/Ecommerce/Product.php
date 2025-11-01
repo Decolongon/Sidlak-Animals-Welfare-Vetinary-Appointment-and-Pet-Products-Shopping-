@@ -35,6 +35,7 @@ class Product extends Model
         'prod_length',
         'prod_width',
         'prod_height',
+        'additional_fee'
     ];
 
     /**

@@ -22,6 +22,7 @@ use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\AuthenticateSession;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
+use App\Filament\Resources\AdminResource\Widgets\TopRates;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
 use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
@@ -57,6 +58,7 @@ class AdminPanelProvider extends PanelProvider
             ->colors([
                 'primary' => Color::Amber,
             ])
+            ->sideBarWidth('15rem')
             ->brandLogo(asset('imgs/sdas-logo.png'))
             ->brandLogoHeight('3rem')
             ->favicon(asset('imgs/sdas-logo.png'))
@@ -109,10 +111,10 @@ class AdminPanelProvider extends PanelProvider
             ->authMiddleware([
                RoleBaseMiddleware::class,
               // AdminMiddleware::class
-            ]);
+            ])
         // ->plugins([
         //     FilamentShieldPlugin::make(),
         // ]);
-        // ->databaseNotifications();
+        ->databaseNotifications();
     }
 }

@@ -169,7 +169,7 @@ class SingleProd extends Component
         // }
        // session()->put('buy_now_mode', true);
         session()->put('buy_now_product', $productId);
-        session()->forget('selected_checkout_items');
+        session()->forget(['selected_checkout_items', 'buy_now_quantity']);
 
         //return redirect()->route('checkout');
         return $this->redirect(route('checkout'));

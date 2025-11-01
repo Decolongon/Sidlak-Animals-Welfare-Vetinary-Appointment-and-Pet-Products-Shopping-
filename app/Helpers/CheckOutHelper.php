@@ -106,6 +106,8 @@ class CheckOutHelper
         $productUnit = $item->product->prod_unit;
         $weight = $item->product->prod_weight;
         $quantity = $item->quantity;
+        //get additional fee sa product na my kg
+        $additional_fee = $item->product->additional_fee;
 
         $cost_weight_kg = 0;
         $cost_weight_g = 0;
@@ -113,13 +115,13 @@ class CheckOutHelper
 
         if ($productUnit == 'kg') {
             $totalWeight = $weight * $quantity;
-            $cost_weight_kg = $totalWeight * 15;
+            $cost_weight_kg = $totalWeight * $additional_fee;
         }
 
         if ($productUnit == 'g') {
             $weightInKg = $weight / 1000;
             $totalWeight = $weightInKg * $quantity;
-            $cost_weight_g = $totalWeight * 15;
+            $cost_weight_g = $totalWeight * $additional_fee;
         }
 
         if ($productUnit == 'has_dimensions') {
@@ -128,7 +130,7 @@ class CheckOutHelper
             $productHeight = $item->product->prod_height;
             $totalWeight = ($productLentgth * $productWidth * $productHeight) / 3500;
             $dimentional_weight = $totalWeight * $quantity;
-            $dimentions = $dimentional_weight * 15;
+            $dimentions = $dimentional_weight * $additional_fee;
         }
 
         return $cost_weight_kg + $cost_weight_g + $dimentions;

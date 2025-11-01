@@ -2,15 +2,23 @@
 
     <!--[if BLOCK]><![endif]--><?php if(session()->has('selected_checkout_items') || session()->has('buy_now_product')): ?>
         
-        <div class="mb-6 ml-6 mt-4">
-            <a wire:navigate.hover href="<?php echo e(route('checkout')); ?>"
+        <div class="flex items-center gap-4 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 mt-6 -mb-6">
+            <a wire:navigate href="<?php echo e(route('checkout')); ?>"
                 class="inline-flex items-center text-amber-600 hover:text-amber-700 font-semibold text-sm tracking-wide hover:underline transition ease-in-out duration-150">
                 back to checkout
             </a>
         </div>
     <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
+
+    <?php if(session()->has('message')): ?>
+        <div class="flex items-center gap-4 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 mt-6 -mb-6">
+            
+                <p class="text-green-700"><?php echo e(session('message')); ?></p>
+            
+        </div>
+    <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
     
-    <div class="flex items-center gap-4 mt-10 ml-6">
+    <div class="flex items-center gap-4 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 mt-6 -mb-6">
 
         <!-- Sorting Menu -->
         <div class="hs-dropdown relative inline-flex" wire:ignore.self x-data="{ showSortOptions: false }">
@@ -129,6 +137,7 @@
 
 
 
+
     
     
 
@@ -165,7 +174,7 @@
 
 
                     <div class="aspect-w-16 aspect-h-11">
-                        <a wire:navigate.hover href="<?php echo e(route('page.singleProd', ['prod_slug' => $product->prod_slug])); ?>">
+                        <a wire:navigate href="<?php echo e(route('page.singleProd', ['prod_slug' => $product->prod_slug])); ?>">
 
                             
 
@@ -190,7 +199,7 @@
 
                             <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
                             <!--[if BLOCK]><![endif]--><?php if($product->prod_unit == 'has_dimensions'): ?>
-                                <br><?php echo e('Dimensions:'.$product->prod_length . ' x ' . $product->prod_width . ' x ' . $product->prod_height . ' cm'); ?>
+                                <br><?php echo e('Dimensions:' . $product->prod_length . ' x ' . $product->prod_width . ' x ' . $product->prod_height . ' cm'); ?>
 
                             <?php endif; ?><!--[if ENDBLOCK]><![endif]-->
                         </h5>

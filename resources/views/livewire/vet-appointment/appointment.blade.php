@@ -1,8 +1,8 @@
 <div>
 
-  @livewire('vet-appointment.vission-and-services')
+    @livewire('vet-appointment.vission-and-services')
 
-  <livewire:vet-appointment.clinic-hours :schedules="$schedules"/>
+    <livewire:vet-appointment.clinic-hours :schedules="$schedules" />
 
     @if (Auth::user())
         <!-- Vet form -->
@@ -20,14 +20,123 @@
                             Amount Due: {{ number_format($amount, 2) }}
                         </span>
                     @endif
+                    @if (session()->has('message'))
+                        {{-- <div class="flex items-center gap-4 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 mt-6 -mb-6"> --}}
+                            {{-- <div class="bg-green-100 border border-green-400 px-4 py-3 rounded relative" role="alert"> --}}
+                            <p class="text-green-700">{{ session('message') }}</p>
+                            {{-- </div> --}}
+                        {{-- </div> --}}
+                    @endif
                 </h2>
+                @if ($schedules['schedules'] && $schedules['isOpen'] && !empty($this->getAllAppointmentsForDropdown))
+                    {{-- @if ($schedules['schedules'] && $schedules['appointmentsCount'] < $schedules['schedules']->num_customers && !empty($this->getAllAppointmentsForDropdown)) --}}
+                    <div class="flex items-start gap-4 mb-6">
+                        <!-- Auto-fill Dropdown -->
+                        <div class="relative flex-1 max-w-xs" x-data="{ open: false }">
+                            <label class="block text-sm font-medium text-gray-700 dark:text-neutral-300 mb-2">
+                                Select Previous Pet
+                            </label>
+                            <div @click="open = !open"
+                                class="w-full px-3 py-2.5 border border-gray-300 dark:border-neutral-600 rounded-lg bg-white dark:bg-neutral-800 text-gray-900 dark:text-neutral-200 cursor-pointer flex justify-between items-center hover:border-gray-400 dark:hover:border-neutral-500 transition-colors text-sm">
+                                <span
+                                    class="{{ $selectedAppointmentId ? 'text-gray-900 dark:text-neutral-200' : 'text-gray-500 dark:text-neutral-400' }}">
+                                    @if ($selectedAppointmentId && $this->getSelectedPrevAppointment)
+                                        {{ $this->getSelectedPrevAppointment->pet_name }}
+                                    @else
+                                        Select Previous Pet
+                                    @endif
+                                </span>
+                                <div class="flex items-center gap-1">
+                                    @if ($selectedAppointmentId)
+                                        <button type="button" wire:click="clearSelectedAppointment" @click.stop
+                                            class="p-1 text-gray-400 hover:text-red-500 transition-colors"
+                                            title="Clear selection">
+                                            <svg class="w-3 h-3" fill="none" stroke="currentColor"
+                                                viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M6 18L18 6M6 6l12 12"></path>
+                                            </svg>
+                                        </button>
+                                    @endif
+                                    <svg class="w-4 h-4 text-gray-400 transition-transform duration-200"
+                                        :class="{ 'rotate-180': open }" fill="none" stroke="currentColor"
+                                        viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M19 9l-7 7-7-7"></path>
+                                    </svg>
+                                </div>
+                            </div>
 
-                @if ($schedules['schedules'] && $schedules['appointmentsCount'] < $schedules['schedules']->num_customers)
+                            <div x-show="open" @click.outside="open = false" x-transition x-cloak
+                                class="absolute z-20 w-full mt-1 bg-white dark:bg-neutral-800 border border-gray-200 dark:border-neutral-700 rounded-lg shadow-lg max-h-64 overflow-hidden">
+
+                                <!-- Search Input -->
+                                <div class="p-2 border-b border-gray-200 dark:border-neutral-700">
+                                    <div class="relative">
+                                        <input type="text" wire:model.live="searchTerm" placeholder="Search pets..."
+                                            class="w-full pl-8 pr-3 py-1.5 border border-gray-300 dark:border-neutral-600 rounded-md bg-white dark:bg-neutral-700 text-gray-900 dark:text-neutral-200 focus:outline-none focus:ring-2 focus:ring-amber-500 text-sm">
+                                        <svg class="absolute left-2.5 top-1/2 transform -translate-y-1/2 w-3.5 h-3.5 text-gray-400"
+                                            fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                                        </svg>
+                                    </div>
+                                </div>
+
+                                <!-- Loading State -->
+                                <div wire:loading class="p-3 text-center text-gray-500 dark:text-neutral-400 text-sm">
+                                    Loading...
+                                </div>
+
+                                <!-- Appointment List -->
+                                <div wire:loading.remove class="max-h-48 overflow-y-auto py-1">
+                                    @forelse($this->getAllAppointmentsForDropdown as $appointment)
+                                        <div class="px-3 py-2 hover:bg-gray-50 dark:hover:bg-neutral-700 cursor-pointer border-b border-gray-100 dark:border-neutral-600 last:border-b-0 transition-colors {{ $selectedAppointmentId == $appointment['id'] ? 'bg-amber-50 dark:bg-amber-900/20 border-amber-200 dark:border-amber-800' : '' }}"
+                                            wire:click="autoFillFromAppointment({{ $appointment['id'] }}); open=false">
+                                            <div class="flex justify-between items-start">
+                                                <div>
+                                                    <p
+                                                        class="font-medium text-gray-800 dark:text-neutral-200 text-sm flex items-center gap-2">
+                                                        {{ $appointment['pet_name'] }}
+                                                        @if ($selectedAppointmentId == $appointment['id'])
+                                                            <span class="text-amber-600 dark:text-amber-400">
+                                                                <svg class="w-3 h-3" fill="currentColor"
+                                                                    viewBox="0 0 20 20">
+                                                                    <path fill-rule="evenodd"
+                                                                        d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                                                                        clip-rule="evenodd"></path>
+                                                                </svg>
+                                                            </span>
+                                                        @endif
+                                                    </p>
+                                                    <p class="text-xs text-gray-600 dark:text-neutral-400 mt-0.5">
+                                                        {{ $appointment['pet_type'] }} • {{ $appointment['pet_breed'] }}
+                                                    </p>
+                                                    <p class="text-xs text-gray-500 dark:text-neutral-500 mt-0.5">
+                                                        {{ \Carbon\Carbon::parse($appointment['created_at'])->format('M j, Y') }}
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    @empty
+                                        <div class="px-3 py-2 text-gray-500 dark:text-neutral-400 text-center text-sm">
+                                            No previous appointments found
+                                        </div>
+                                    @endforelse
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                @endif
+
+
+                @if ($schedules['schedules'] && $schedules['isOpen'])
+                    {{-- @if ($schedules['schedules'] && $schedules['appointmentsCount'] < $schedules['schedules']->num_customers) --}}
                     <div>
                         <!-- Stepper -->
                         <div class="max-w-2xl mx-auto mb-8">
                             <div class="flex justify-between">
-                                @foreach ([1, 2, 3, 4] as $step)
+                                @foreach ([1, 2, 3, 4, 5] as $step)
                                     <div class="flex flex-col items-center">
                                         <div
                                             class="w-8 h-8 rounded-full flex items-center justify-center 
@@ -43,9 +152,12 @@
                                                 Services
                                             @endif
                                             @if ($step == 3)
-                                                Payment
+                                                Schedule
                                             @endif
                                             @if ($step == 4)
+                                                Payment
+                                            @endif
+                                            @if ($step == 5)
                                                 Review
                                             @endif
                                         </span>
@@ -59,7 +171,7 @@
                                     class="absolute top-0 left-0 h-1 bg-gray-200 dark:bg-neutral-700 w-full rounded-full">
                                 </div>
                                 <div class="absolute top-0 left-0 h-1 bg-amber-500 transition-all duration-300 rounded-full"
-                                    style="width: {{ (($currentStep - 1) / 3) * 100 }}%"></div>
+                                    style="width: {{ (($currentStep - 1) / 4) * 100 }}%"></div>
                             </div>
                         </div>
 
@@ -88,8 +200,10 @@
                                         <select id="pet_type" name="pet_type" wire:model="pet_type"
                                             class="py-2.5 px-4 block w-full border border-gray-200 dark:border-neutral-700 rounded-lg sm:text-sm focus:border-amber-500 focus:ring-amber-500 dark:bg-neutral-900 dark:text-neutral-100">
                                             <option value="">Select</option>
-                                            <option value="Dog">Dog</option>
-                                            <option value="Cat">Cat</option>
+                                            <option value="dog" {{ $pet_type == 'dog' ? 'selected' : '' }}>Dog
+                                            </option>
+                                            <option value="cat" {{ $pet_type == 'cat' ? 'selected' : '' }}>Cat
+                                            </option>
                                         </select>
                                         @error('pet_type')
                                             <p class="text-sm text-red-500">{{ $message }}</p>
@@ -116,8 +230,10 @@
                                         <select id="pet_gender" name="pet_gender" wire:model="pet_gender"
                                             class="py-2.5 px-4 block w-full border border-gray-200 dark:border-neutral-700 rounded-lg sm:text-sm focus:border-amber-500 focus:ring-amber-500 dark:bg-neutral-900 dark:text-neutral-100">
                                             <option value="">Select</option>
-                                            <option value="Male">Male</option>
-                                            <option value="Female">Female</option>
+                                            <option value="male" {{ $pet_gender == 'male' ? 'selected' : '' }}>Male
+                                            </option>
+                                            <option value="female" {{ $pet_gender == 'female' ? 'selected' : '' }}>
+                                                Female</option>
                                         </select>
                                         @error('pet_gender')
                                             <p class="text-sm text-red-500">{{ $message }}</p>
@@ -146,11 +262,15 @@
                                             <input type="number" id="pet_age" name="pet_age" wire:model="pet_age"
                                                 class="py-2.5 px-4 block w-full border border-gray-200 dark:border-neutral-700 rounded-lg sm:text-sm focus:border-amber-500 focus:ring-amber-500 dark:bg-neutral-900 dark:text-neutral-100">
 
-                                            <select name="pet_age_unit" id="pet_age_unit" wire:model.live="pet_age_unit"
+                                            <select name="pet_age_unit" id="pet_age_unit"
+                                                wire:model.live="pet_age_unit"
                                                 class="py-2.5 px-4 border border-gray-200 dark:border-neutral-700 rounded-lg sm:text-sm focus:border-amber-500 focus:ring-amber-500 dark:bg-neutral-900 dark:text-neutral-100">
                                                 <option value="">Select</option>
-                                                <option value="years old">Years</option>
-                                                <option value="months">Months</option>
+                                                <option value="years old"
+                                                    {{ $pet_age_unit == 'years old' ? 'selected' : '' }}>Years</option>
+                                                <option value="months"
+                                                    {{ $pet_age_unit == 'months' ? 'selected' : '' }}>
+                                                    Months</option>
                                             </select>
                                         </div>
                                         @error('pet_age')
@@ -169,8 +289,12 @@
                                             wire:model="isPetVaccinated"
                                             class="py-2.5 px-4 block w-full border border-gray-200 dark:border-neutral-700 rounded-lg sm:text-sm focus:border-amber-500 focus:ring-amber-500 dark:bg-neutral-900 dark:text-neutral-100">
                                             <option value="">Select</option>
-                                            <option value="1">Yes</option>
-                                            <option value="0">No</option>
+                                            <option value="1"
+                                                {{ $isPetVaccinated === true || $isPetVaccinated == '1' ? 'selected' : '' }}>
+                                                Yes</option>
+                                            <option value="0"
+                                                {{ $isPetVaccinated === true || $isPetVaccinated == '0' ? 'selected' : '' }}>
+                                                No</option>
                                         </select>
                                         @error('isPetVaccinated')
                                             <p class="text-sm text-red-500">{{ $message }}</p>
@@ -194,16 +318,25 @@
                                             Services
                                         </label>
 
-                                        <select x-ref="select" name="appointment_category_id"
+                                        {{-- <select x-ref="select" name="appointment_category_id"
                                             id="appointment_category_id" multiple
                                             wire:model.live="appointment_category_id"
                                             class="py-2.5 px-4 block w-full border border-gray-200 dark:border-neutral-700 rounded-lg sm:text-sm focus:border-amber-500 focus:ring-amber-500 dark:bg-neutral-900 dark:text-neutral-100">
                                             @foreach ($this->getAppointmentCat as $category)
-                                                {{-- @if($category->doctorschedules->isNotEmpty()) --}}
                                                 <option value="{{ $category->id }}">
                                                     {{ ucwords($category->appoint_cat_name) }}
                                                 </option>
-                                                {{-- @endif --}}
+                                            @endforeach
+                                        </select> --}}
+
+                                        <select name="appointment_category_id"
+                                            id="appointment_category_id"
+                                            wire:model.live="appointment_category_id"
+                                            class="py-2.5 px-4 block w-full border border-gray-200 dark:border-neutral-700 rounded-lg sm:text-sm focus:border-amber-500 focus:ring-amber-500 dark:bg-neutral-900 dark:text-neutral-100">
+                                            @foreach ($this->getAppointmentCat as $category)
+                                                <option value="{{ $category->id }}">
+                                                    {{ ucwords($category->appoint_cat_name) }}
+                                                </option>
                                             @endforeach
                                         </select>
 
@@ -212,7 +345,7 @@
                                         @enderror
                                     </div>
 
-                                    @if (count($appointment_category_id) > 0)
+                                    @if (! empty($appointment_category_id))
                                         <div
                                             class="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg p-4">
                                             <h3 class="font-medium text-amber-800 dark:text-amber-200 mb-2">Selected
@@ -233,8 +366,211 @@
                                 </div>
                             @endif
 
-                            <!-- Step 3: Payment -->
+                            <!-- Step 3: Schedule -->
                             @if ($currentStep == 3)
+                                <div class="space-y-6">
+                                    <div
+                                        class="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg p-4 mb-6">
+                                        <h3 class="font-medium text-amber-800 dark:text-amber-200 mb-2">
+                                            Select Your Preferred Schedule
+                                        </h3>
+                                        <p class="text-amber-700 dark:text-amber-300 text-sm">
+                                            Choose an available date and time for your appointment.
+                                        </p>
+                                    </div>
+
+                                    <!-- Calendar and Time Selection -->
+                                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                                        <!-- Calendar -->
+                                        <div class="space-y-4">
+                                            <h4 class="text-lg font-semibold text-gray-800 dark:text-neutral-200">
+                                                Select Date
+                                            </h4>
+                                            <div
+                                                class="bg-white dark:bg-neutral-800 border border-gray-200 dark:border-neutral-700 rounded-xl p-4">
+                                                <!-- Calendar navigation -->
+                                                <div class="flex items-center justify-between mb-4">
+                                                    <button type="button" wire:click="previousMonth"
+                                                        class="p-2 hover:bg-gray-100 dark:hover:bg-neutral-700 rounded-lg transition-colors">
+                                                        <svg class="w-5 h-5 text-gray-600 dark:text-neutral-400"
+                                                            fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                                stroke-width="2" d="M15 19l-7-7 7-7"></path>
+                                                        </svg>
+                                                    </button>
+                                                    <h5
+                                                        class="text-lg font-semibold text-gray-800 dark:text-neutral-200">
+                                                        {{ $calendarMonth }}
+                                                    </h5>
+                                                    <button type="button" wire:click="nextMonth"
+                                                        class="p-2 hover:bg-gray-100 dark:hover:bg-neutral-700 rounded-lg transition-colors">
+                                                        <svg class="w-5 h-5 text-gray-600 dark:text-neutral-400"
+                                                            fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                                stroke-width="2" d="M9 5l7 7-7 7"></path>
+                                                        </svg>
+                                                    </button>
+                                                </div>
+
+                                                <!-- Calendar grid -->
+                                                <div class="grid grid-cols-7 gap-1 mb-2">
+                                                    @foreach (['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'] as $day)
+                                                        <div
+                                                            class="text-center text-sm font-medium text-gray-500 dark:text-neutral-400 py-2">
+                                                            {{ $day }}
+                                                        </div>
+                                                    @endforeach
+                                                </div>
+
+                                                <div class="grid grid-cols-7 gap-1">
+                                                    @foreach ($calendarDays as $day)
+                                                        @if ($day['isCurrentMonth'])
+                                                            <button type="button"
+                                                                wire:click="selectDate('{{ $day['date'] }}')"
+                                                                @if (
+                                                                    !$day['isAvailable'] ||
+                                                                        (Carbon\Carbon::parse($day['date'])->isPast() && !Carbon\Carbon::parse($day['date'])->isToday())) disabled @endif
+                                                                class="p-2 text-center rounded-lg transition-all duration-200
+                                                                    {{ $day['isAvailable']
+                                                                        ? ($selectedDate == $day['date']
+                                                                            ? 'bg-amber-500 text-white'
+                                                                            : 'hover:bg-amber-100 dark:hover:bg-amber-900/30 text-gray-900 dark:text-neutral-100')
+                                                                        : 'bg-gray-100 dark:bg-neutral-700 text-gray-400 dark:text-neutral-500 cursor-not-allowed' }}
+                                                                    {{ $day['isToday'] ? 'ring-2 ring-amber-300 dark:ring-amber-600' : '' }}">
+                                                                <div class="text-sm font-medium">{{ $day['day'] }}
+                                                                </div>
+                                                                @if ($day['hasAppointments'])
+                                                                    <div
+                                                                        class="w-1 h-1 bg-amber-400 rounded-full mx-auto mt-1">
+                                                                    </div>
+                                                                @endif
+                                                            </button>
+                                                        @else
+                                                            <div class="p-2"></div>
+                                                        @endif
+                                                    @endforeach
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Time Slots -->
+                                        <div class="space-y-4">
+                                            <h4 class="text-lg font-semibold text-gray-800 dark:text-neutral-200">
+                                                Available Time Slots
+                                            </h4>
+
+                                            @if ($selectedDate)
+                                                <div
+                                                    class="bg-white dark:bg-neutral-800 border border-gray-200 dark:border-neutral-700 rounded-xl p-4">
+                                                    <div class="flex items-center justify-between mb-4">
+                                                        <span class="text-sm text-gray-600 dark:text-neutral-400">
+                                                            {{ \Carbon\Carbon::parse($selectedDate)->format('F j, Y') }}
+                                                        </span>
+                                                        <span
+                                                            class="text-sm font-medium text-amber-600 dark:text-amber-400">
+                                                            {{ $this->countAvailableSlots }} slots available
+                                                        </span>
+                                                    </div>
+
+                                                    @if ($availableSlots->count() > 0)
+                                                        <div
+                                                            class="grid grid-cols-2 sm:grid-cols-3 gap-3 max-h-60 overflow-y-auto">
+                                                            @foreach ($availableSlots as $slot)
+                                                                <button type="button"
+                                                                    @if (
+                                                                        $slot['isBooked'] ||
+                                                                            (\Carbon\Carbon::parse($selectedDate)->isToday() && \Carbon\Carbon::parse($slot['time'])->lt(now()))) disabled @endif
+                                                                    wire:click="selectTimeSlot('{{ $slot['time'] }}')"
+                                                                    class="p-3 text-center border rounded-lg transition-all duration-200
+            {{ $selectedTime == $slot['time']
+                ? 'border-amber-500 bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-300'
+                : 'border-gray-200 dark:border-neutral-600 hover:border-amber-300 dark:hover:border-amber-600 text-gray-700 dark:text-neutral-300' }}
+            {{ $slot['isBooked'] || (\Carbon\Carbon::parse($selectedDate)->isToday() && \Carbon\Carbon::parse($slot['time'])->lt(now())) ? 'opacity-50 cursor-not-allowed' : 'hover:bg-amber-50 dark:hover:bg-amber-900/20' }}">
+                                                                    <div class="text-sm font-medium">
+                                                                        {{ $slot['display_time'] }}</div>
+                                                                    @if ($slot['isBooked'])
+                                                                        <div class="text-xs text-red-500 mt-1">Booked
+                                                                        </div>
+                                                                    @elseif(\Carbon\Carbon::parse($selectedDate)->isToday() && \Carbon\Carbon::parse($slot['time'])->lt(now()))
+                                                                        <div class="text-xs text-gray-500 mt-1">Past
+                                                                        </div>
+                                                                    @else
+                                                                        <div class="text-xs text-green-500 mt-1">
+                                                                            Available</div>
+                                                                    @endif
+                                                                </button>
+                                                            @endforeach
+                                                        </div>
+                                                    @else
+                                                        <div class="text-center py-8">
+                                                            <svg class="w-12 h-12 text-gray-400 dark:text-neutral-600 mx-auto mb-3"
+                                                                fill="none" stroke="currentColor"
+                                                                viewBox="0 0 24 24">
+                                                                <path stroke-linecap="round" stroke-linejoin="round"
+                                                                    stroke-width="2"
+                                                                    d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z">
+                                                                </path>
+                                                            </svg>
+                                                            <p class="text-gray-500 dark:text-neutral-400">No available
+                                                                time slots for this date.</p>
+                                                            <p
+                                                                class="text-sm text-gray-400 dark:text-neutral-500 mt-1">
+                                                                Please select another date.</p>
+                                                        </div>
+                                                    @endif
+                                                </div>
+                                            @else
+                                                <div
+                                                    class="bg-white dark:bg-neutral-800 border border-gray-200 dark:border-neutral-700 rounded-xl p-8 text-center">
+                                                    <svg class="w-16 h-16 text-gray-300 dark:text-neutral-600 mx-auto mb-4"
+                                                        fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                                            stroke-width="2"
+                                                            d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z">
+                                                        </path>
+                                                    </svg>
+                                                    <p class="text-gray-500 dark:text-neutral-400">Please select a date
+                                                        to view available time slots.</p>
+                                                </div>
+                                            @endif
+
+                                            @if ($selectedDate && $selectedTime)
+                                                <div
+                                                    class="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-4">
+                                                    <div class="flex items-center">
+                                                        <svg class="w-5 h-5 text-green-500 dark:text-green-400 mr-2"
+                                                            fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                                stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                                        </svg>
+                                                        <div>
+                                                            <p class="font-medium text-green-800 dark:text-green-200">
+                                                                Appointment Scheduled
+                                                            </p>
+                                                            <p class="text-sm text-green-700 dark:text-green-300">
+                                                                {{ \Carbon\Carbon::parse($selectedDate)->format('F j, Y') }}
+                                                                at
+                                                                {{ \Carbon\Carbon::parse($selectedTime)->format('g:i A') }}
+
+                                                            </p>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            @endif
+                                        </div>
+                                    </div>
+
+                                    @error('selectedDate')
+                                        <p class="text-sm text-red-500">{{ $message }}</p>
+                                    @enderror
+                                    @error('selectedTime')
+                                        <p class="text-sm text-red-500">{{ $message }}</p>
+                                    @enderror
+                                </div>
+                            @endif
+
+                            <!-- Step 4: Payment -->
+                            @if ($currentStep == 4)
                                 <div class="space-y-6">
                                     <div class="space-y-2">
                                         <label for="payment_method"
@@ -418,8 +754,8 @@
                                 </div>
                             @endif
 
-                            <!-- Step 4: Review -->
-                            @if ($currentStep == 4)
+                            <!-- Step 5: Review -->
+                            @if ($currentStep == 5)
                                 <div
                                     class="bg-white dark:bg-neutral-800 rounded-xl shadow-sm overflow-hidden border border-gray-200 dark:border-neutral-700">
                                     <div class="p-6 sm:p-8">
@@ -497,6 +833,17 @@
                                                                 </li>
                                                             @endforeach
                                                         </ul>
+                                                    </div>
+
+                                                    <!-- Schedule Information -->
+                                                    <div class="pt-2 border-t border-gray-200 dark:border-neutral-600">
+                                                        <p class="text-sm text-gray-600 dark:text-neutral-400">
+                                                            Appointment Schedule</p>
+                                                        <p class="font-medium text-gray-800 dark:text-neutral-100">
+                                                            {{ \Carbon\Carbon::parse($selectedDate)->format('F j, Y') }}
+                                                            at
+                                                            {{ \Carbon\Carbon::parse($selectedTime)->format('g:i A') }}
+                                                        </p>
                                                     </div>
 
                                                     <div class="pt-2 border-t border-gray-200 dark:border-neutral-600">
@@ -584,7 +931,7 @@
                                     <div></div> <!-- Empty div for spacing -->
                                 @endif
 
-                                @if ($currentStep < 4)
+                                @if ($currentStep < 5)
                                     <button type="button" wire:click="nextStep"
                                         class="py-2.5 px-5 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-transparent bg-amber-500 text-white hover:bg-amber-600 focus:outline-none focus:bg-amber-600">
                                         Next
@@ -604,7 +951,8 @@
                                                 <circle class="opacity-25" cx="12" cy="12" r="10"
                                                     stroke="currentColor" stroke-width="4"></circle>
                                                 <path class="opacity-75" fill="currentColor"
-                                                    d="M4 12a8 8 0 018-8v8H4z"></path>
+                                                    d="M4 12a8 8 0 018-8v8H4z">
+                                                </path>
                                             </svg>
                                         </span>
                                         Confirm & Book Appointment
@@ -617,12 +965,13 @@
                     <!-- Fully Booked Message -->
                     <div
                         class="max-w-xl mx-auto mt-10 text-center bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-100 p-6 rounded-xl border border-yellow-300 dark:border-yellow-700">
-                        <h2 class="text-2xl font-semibold mb-2">Fully Booked</h2>
-                        <p>Sorry, all appointment slots are currently full. Please try again later.</p>
+                        <h2 class="text-2xl font-semibold mb-2">Closed</h2>
+                        <p>Sorry, the clinic is currently closed.</p>
+
                     </div>
                 @endif
             </div>
         </div>
     @endif
-
+    {{-- Sorry, the clinic is currently closed. Please check our clinic hours and try again during open hours. --}}
 </div>

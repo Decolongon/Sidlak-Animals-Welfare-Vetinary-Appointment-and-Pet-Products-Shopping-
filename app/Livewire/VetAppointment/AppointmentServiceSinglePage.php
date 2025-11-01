@@ -3,12 +3,15 @@
 namespace App\Livewire\VetAppointment;
 
 use App\Models\Appointment\AppointmentCategory;
+use App\Models\Appointment\DoctorSchedule;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Layout;
+use Livewire\Attributes\Locked;
 use Livewire\Component;
 
 class AppointmentServiceSinglePage extends Component
 {
+    #[Locked]
     public $appoint_cat_slug;
 
     public function mount($appoint_cat_slug)
@@ -19,14 +22,19 @@ class AppointmentServiceSinglePage extends Component
     #[Computed()]
     public function getSingleService()
     {
-       return AppointmentCategory::with(['doctor',
-       'doctorschedules' => function($query){
-            $query->where('effective_from', '<=', now())
-            ->where('effective_to', '>=', now());
-       }
-       ])
-        ->where('appoint_cat_slug',$this->appoint_cat_slug)
-        ->get();
+        return AppointmentCategory::query()
+           // ->with(['doctor', 'doctorschedules'])
+            ->where('appoint_cat_slug', $this->appoint_cat_slug)
+            ->get();
+    }
+
+    #[Computed()]
+    public function  getDoctorShedules(){
+        return DoctorSchedule::query()
+            ->with(['doctor'])
+            ->where('effective_from', '<=', now())
+            ->where('effective_to', '>=', now())
+            ->get();
     }
 
     #[Layout('layouts.app')]

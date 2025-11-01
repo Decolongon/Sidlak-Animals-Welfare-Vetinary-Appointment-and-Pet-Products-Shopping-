@@ -49,7 +49,7 @@ class Shop extends Component
 
     public function updatedQuery()
     {
-        $this->getProducts();
+        // $this->getProducts();
 
         // $this->query = trim($this->query);
         $this->resetPage();

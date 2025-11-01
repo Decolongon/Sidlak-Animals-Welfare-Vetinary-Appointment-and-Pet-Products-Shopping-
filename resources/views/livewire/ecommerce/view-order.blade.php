@@ -3,6 +3,17 @@
         <!-- Header -->
         <div class="mb-6">
             <h1 class="text-2xl font-bold text-gray-800 dark:text-white">Your Orders</h1>
+            <!-- Order Status Update Notification -->
+            @if (session()->has('order_status_updated'))
+               <div class="mt-4 p-4 bg-green-100 border border-green-400 text-green-700 rounded-lg dark:bg-green-900/30 dark:border-green-800 dark:text-green-400">
+                    <div class="flex items-center">
+                        <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                        </svg>
+                        <span class="font-medium">{{ session('order_status_updated') }}</span>
+                    </div>
+                </div>
+            @endif
             {{-- <p class="text-gray-600 dark:text-gray-400 mt-1">Review your purchase history</p> --}}
         </div>
 
@@ -138,95 +149,56 @@
                     </span>
                 </div>
 
-                <!-- Order Items -->
-                <div class="divide-y divide-gray-200 dark:divide-neutral-700" x-data="{ showAll: false }">
-                    @foreach ($order->orderItems as $index => $item)
-                        <div class="px-5 py-3 flex justify-between items-center" wire:key="{{ $item->id }}"
-                            x-show="showAll || {{ $index }} < 3" x-transition:enter.duration.500ms
-                            x-transition:leave.duration.400ms>
-                            <div class="flex items-center space-x-3">
-                                <div
-                                    class="flex-shrink-0 bg-gray-100 dark:bg-neutral-700 rounded-md overflow-hidden w-10 h-10 flex items-center justify-center">
-                                    @if (isset($item->variant))
-                                        <img src="{{ asset(Storage::url($item->variant->url)) }}"
-                                            alt="{{ $item->product->prod_name }}" class="object-cover w-full h-full">
-                                    @else
-                                        @if ($item->product->primary_image && $item->product->primary_image->url)
-                                            <img src="{{ asset(Storage::url($item->product->primary_image->url)) }}"
+                <!-- Order Items  scrollable -->
+                <div class="divide-y divide-gray-200 dark:divide-neutral-700">
+                    <div class="max-h-60 overflow-y-auto">
+                        @foreach ($order->orderItems as $index => $item)
+                            <div class="px-5 py-3 flex justify-between items-center" wire:key="{{ $item->id }}">
+                                <div class="flex items-center space-x-3">
+                                    <div
+                                        class="flex-shrink-0 bg-gray-100 dark:bg-neutral-700 rounded-md overflow-hidden w-10 h-10 flex items-center justify-center">
+                                        @if (isset($item->variant))
+                                            <img src="{{ asset(Storage::url($item->variant->url)) }}"
                                                 alt="{{ $item->product->prod_name }}"
                                                 class="object-cover w-full h-full">
-                                        @endif
-                                    @endif
-
-                                </div>
-                                <div>
-                                    <h4 class="text-sm font-medium text-gray-800 dark:text-white">
-                                        @if (isset($item->variant))
-                                            {{ $item->product->prod_name }} -
-                                            {{ ucwords(preg_replace('/[^a-zA-Z0-9\s]/', ' ', $item->variant->sizes)) }}
                                         @else
-                                            {{ $item->product->prod_name }}
+                                            @if ($item->product->primary_image && $item->product->primary_image->url)
+                                                <img src="{{ asset(Storage::url($item->product->primary_image->url)) }}"
+                                                    alt="{{ $item->product->prod_name }}"
+                                                    class="object-cover w-full h-full">
+                                            @endif
                                         @endif
 
-                                    </h4>
-                                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                                        @if ($item->product->prod_unit === 'pcs' || $item->product->prod_unit === 'has_dimensions')
-                                            {{ number_format($item->quantity, 0) }} pcs
-                                        @elseif($item->product->prod_unit === 'diff_size' && isset($item->variant))
-                                            {{ number_format($item->quantity, 0) }} pcs
-                                        @else
-                                            {{ number_format($item->quantity, 0) }} ×
-                                            {{ number_format($item->product->prod_weight, 2) }}
-                                            {{ $item->product->prod_unit }}
-                                        @endif
-                                    </p>
+                                    </div>
+                                    <div>
+                                        <h4 class="text-sm font-medium text-gray-800 dark:text-white">
+                                            @if (isset($item->variant))
+                                                {{ $item->product->prod_name }} -
+                                                {{ ucwords(preg_replace('/[^a-zA-Z0-9\s]/', ' ', $item->variant->sizes)) }}
+                                            @else
+                                                {{ $item->product->prod_name }}
+                                            @endif
+
+                                        </h4>
+                                        <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                                            @if ($item->product->prod_unit === 'pcs' || $item->product->prod_unit === 'has_dimensions')
+                                                {{ number_format($item->quantity, 0) }} pcs
+                                            @elseif($item->product->prod_unit === 'diff_size' && isset($item->variant))
+                                                {{ number_format($item->quantity, 0) }} pcs
+                                            @else
+                                                {{ number_format($item->quantity, 0) }} ×
+                                                {{ number_format($item->product->prod_weight, 2) }}
+                                                {{ $item->product->prod_unit }}
+                                            @endif
+                                        </p>
+                                    </div>
                                 </div>
+                                <span class="text-sm font-medium text-gray-800 dark:text-white">
+                                    Price:₱ {{ number_format($item->price, 2) }}
+                                </span>
                             </div>
-                            <span class="text-sm font-medium text-gray-800 dark:text-white">
-                                {{-- @if ($item->product->discounted_price !== null)
-                                    {{ number_format($item->product->discounted_price,2) }}
-                                @else
-                                    @if (isset($item->variant))
-                                        Price:₱ {{ number_format($item->variant->price,2) }}
-                                    @else
-                                        Price:₱ {{ number_format($item->product->prod_price,2) }}
-                                    @endif
-                                @endif --}}
-                                Price:₱ {{ number_format($item->price, 2) }}
-
-                                <!-- Shipping Cost -->
-                                {{-- @foreach ($order->orderItems as $item) --}}
-                                {{-- @if ($item->product->prod_requires_shipping === true)
-                                    <div class="flex justify-between">
-                                        <span class="text-sm text-gray-500 dark:text-gray-400">Shipping:</span>
-                                        <span
-                                            class="text-sm font-medium dark:text-white">₱{{ number_format($item->product->shipping_price, 2) }}</span>
-                                    </div>
-                                @else
-                                    <div class="flex justify-between">
-                                        <span class="text-sm font-medium text-green-500 dark:text-green-400">Free
-                                            Shipping</span>
-                                    </div>
-                                @endif --}}
-                                {{-- @endforeach --}}
-                            </span>
-                        </div>
-                    @endforeach
-
-                    @if (count($order->orderItems) > 3)
-                        <div class="px-5 py-3 text-center">
-                            <button @click="showAll = !showAll"
-                                class="text-sm font-medium text-blue-600 hover:text-blue-500 dark:text-blue-400 dark:hover:text-blue-300">
-                                <span x-text="showAll ? 'Show Less' : 'Show All'"></span>
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 inline ml-1 transition-transform"
-                                    :class="{ 'rotate-180': showAll }" fill="none" viewBox="0 0 24 24"
-                                    stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M19 9l-7 7-7-7" />
-                                </svg>
-                            </button>
-                        </div>
-                    @endif
+                        @endforeach
+                    </div>
                 </div>
 
                 <!-- Order Footer -->
@@ -257,14 +229,6 @@
                         </div>
                         <div class="text-right">
                             <div class="space-y-1">
-                                <!-- Subtotal -->
-                                {{-- <div class="flex justify-between">
-                                    <span class="text-sm text-gray-500 dark:text-gray-400">Subtotal:</span>
-                                    <span class="text-sm font-medium">₱{{ number_format($order->total, 2) }}</span>
-                                </div> --}}
-
-                                <!-- Shipping Cost -->
-
                                 @if ($order->shipping_price > 0)
                                     <div class="flex justify-between">
                                         <span class="text-sm text-gray-500 dark:text-gray-400">Shipping:</span>
@@ -277,7 +241,6 @@
                                             Shipping</span>
                                     </div>
                                 @endif
-
 
                                 <!-- Divider -->
                                 <div class="border-t border-gray-200 dark:border-gray-600 my-1"></div>
@@ -295,20 +258,6 @@
 
                     <!-- Order Actions -->
                     <div class="mt-3 flex justify-end space-x-2">
-                        {{-- <button type="button"
-                            class="inline-flex items-center px-2.5 py-1.5 border border-gray-300 dark:border-neutral-600 shadow-xs text-xs font-medium rounded text-gray-700 dark:text-gray-200 bg-white dark:bg-neutral-800 hover:bg-gray-50 dark:hover:bg-neutral-700 focus:outline-none"
-                            aria-haspopup="dialog" aria-expanded="false" aria-controls="hs-ai-invoice-modal"
-                            data-hs-overlay="#hs-ai-invoice-modal">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="mr-1 h-3 w-3" width="16" height="16"
-                                fill="currentColor" viewBox="0 0 16 16">
-                                <path
-                                    d="M1.92.506a.5.5 0 0 1 .434.14L3 1.293l.646-.647a.5.5 0 0 1 .708 0L5 1.293l.646-.647a.5.5 0 0 1 .708 0L7 1.293l.646-.647a.5.5 0 0 1 .708 0L9 1.293l.646-.647a.5.5 0 0 1 .708 0l.646.647.646-.647a.5.5 0 0 1 .708 0l.646.647.646-.647a.5.5 0 0 1 .801.13l.5 1A.5.5 0 0 1 15 2v12a.5.5 0 0 1-.053.224l-.5 1a.5.5 0 0 1-.8.13L13 14.707l-.646.647a.5.5 0 0 1-.708 0L11 14.707l-.646.647a.5.5 0 0 1-.708 0L9 14.707l-.646.647a.5.5 0 0 1-.708 0L7 14.707l-.646.647a.5.5 0 0 1-.708 0L5 14.707l-.646.647a.5.5 0 0 1-.708 0L3 14.707l-.646.647a.5.5 0 0 1-.801-.13l-.5-1A.5.5 0 0 1 1 14V2a.5.5 0 0 1 .053-.224l.5-1a.5.5 0 0 1 .367-.27zm.217 1.338L2 2.118v11.764l.137.274.51-.51a.5.5 0 0 1 .707 0l.646.647.646-.646a.5.5 0 0 1 .708 0l.646.646.646-.646a.5.5 0 0 1 .708 0l.646.646.646-.646a.5.5 0 0 1 .708 0l.646.646.646-.646a.5.5 0 0 1 .708 0l.509.509.137-.274V2.118l-.137-.274-.51.51a.5.5 0 0 1-.707 0L12 1.707l-.646.647a.5.5 0 0 1-.708 0L10 1.707l-.646.647a.5.5 0 0 1-.708 0L8 1.707l-.646.647a.5.5 0 0 1-.708 0L6 1.707l-.646.647a.5.5 0 0 1-.708 0L4 1.707l-.646.647a.5.5 0 0 1-.708 0l-.509-.51z" />
-                                <path
-                                    d="M3 4.5a.5.5 0 0 1 .5-.5h6a.5.5 0 1 1 0 1h-6a.5.5 0 0 1-.5-.5zm0 2a.5.5 0 0 1 .5-.5h6a.5.5 0 1 1 0 1h-6a.5.5 0 0 1-.5-.5zm0 2a.5.5 0 0 1 .5-.5h6a.5.5 0 1 1 0 1h-6a.5.5 0 0 1-.5-.5zm0 2a.5.5 0 0 1 .5-.5h6a.5.5 0 0 1 0 1h-6a.5.5 0 0 1-.5-.5zm8-6a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 0 1h-1a.5.5 0 0 1-.5-.5zm0 2a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 0 1h-1a.5.5 0 0 1-.5-.5zm0 2a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 0 1h-1a.5.5 0 0 1-.5-.5zm0 2a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 0 1h-1a.5.5 0 0 1-.5-.5z" />
-                            </svg>
-                            Details
-                        </button> --}}
-
                         @if ($order->order_status == 'pending' && $order->payment_status !== 'completed')
                             <button type="button" wire:confirm="Are you sure you want to cancel this order?"
                                 wire:click="cancelOrder({{ $order->id }})"

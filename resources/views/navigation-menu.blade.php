@@ -51,7 +51,9 @@
                     @endguest
 
                     {{-- add to cart button --}}
+                    
                     @livewire('ecommerce.cart-count')
+
                     {{-- <button type="button" class="inline-flex items-center gap-x-2 text-sm font-medium rounded-lg focus:outline-none disabled:opacity-50 disabled:pointer-events-none" aria-haspopup="dialog" aria-expanded="false" aria-controls="hs-offcanvas-custom-backdrop-color" data-hs-overlay="#hs-offcanvas-custom-backdrop-color">
                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="font-medium text-amber-400 dark:text-neutral-400 dark:hover:text-neutral-500 hover:text-gray-400">
                         <circle cx="8" cy="21" r="1"></circle>
@@ -125,7 +127,7 @@
                                 </div>
                                 <div class="py-2 mt-2 first:pt-0 last:pb-0">
 
-                                    <a wire:navigate.hover
+                                    <a wire:navigate
                                         class="flex items-center gap-x-3.5 py-2 px-3 rounded-lg text-sm text-gray-800 hover:bg-gray-100 focus:ring-2 focus:ring-amber-500 dark:text-neutral-400 dark:hover:bg-neutral-700 dark:hover:text-neutral-300"
                                         href="{{ route('profile.show') }}">
                                         <svg class="flex-shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24"
@@ -139,7 +141,7 @@
                                         {{ __('Profile') }}
                                     </a>
 
-                                    <a wire:navigate.hover
+                                    <a wire:navigate
                                         class="flex items-center gap-x-3.5 py-2 px-3 rounded-lg text-sm text-gray-800 hover:bg-gray-100 focus:ring-2 focus:ring-amber-500 dark:text-neutral-400 dark:hover:bg-neutral-700 dark:hover:text-neutral-300"
                                         href="{{ route('view-order') }}">
                                          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
@@ -151,7 +153,7 @@
                                     </a>
                                   
                                     {{-- Auth::user()->hasAnyRole(['admin', 'super_admin','admin_shop']) --}}
-                                    <a  wire:navigate.hover href="{{ Auth::user()->roles()->exists() ? route('filament.admin.pages.dashboard') : route('dashboard') }}"
+                                    <a  wire:navigate href="{{ Auth::user()->roles()->exists() ? route('filament.admin.pages.dashboard') : route('dashboard') }}"
                                         class="flex items-center gap-x-3.5 py-2 px-3 rounded-lg text-sm text-gray-800 hover:bg-gray-100 focus:ring-2 focus:ring-amber-500 dark:text-neutral-400 dark:hover:bg-neutral-700 dark:hover:text-neutral-300">
                                         <svg class="flex-shrink-0 size-4" width="24" height="24"
                                             xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
@@ -237,21 +239,21 @@
             <div id="navbar-alignment"
                 class="hidden overflow-hidden transition-all duration-300 hs-collapse basis-full grow sm:grow-0 sm:basis-auto sm:block sm:order-2">
                 <div class="flex flex-col gap-5 mt-5 lg:gap-10 sm:flex-row sm:items-center sm:mt-0 sm:ps-5">
-                    <x-nav-link wire:navigate.hover href="{{ route('page.home') }}"
+                    <x-nav-link wire:navigate href="{{ route('page.home') }}"
                         :active="request()->routeIs('page.home')">{{ __('Home') }}</x-nav-link>
-                    <x-nav-link wire:navigate.hover href="{{ route('page.shop') }}"
+                    <x-nav-link wire:navigate href="{{ route('page.shop') }}"
                         :active="request()->routeIs('page.shop')">{{ __('Shop') }}</x-nav-link>
-                    <x-nav-link wire:navigate.hover href="{{ route('appointment') }}"
+                    <x-nav-link wire:navigate href="{{ route('appointment') }}"
                         :active="request()->routeIs('appointment')">{{ __('Appointment') }}</x-nav-link>
-                    <x-nav-link wire:navigate.hover href="{{ route('page.donate') }}"
+                    <x-nav-link wire:navigate href="{{ route('page.donate') }}"
                         :active="request()->routeIs('page.donate')">{{ __('Give Love') }}</x-nav-link>
-                    <x-nav-link wire:navigate.hover href="{{ route('page.volunteer') }}"
+                    <x-nav-link wire:navigate href="{{ route('page.volunteer') }}"
                         :active="request()->routeIs('page.volunteer')">{{ __('Volunteers') }}</x-nav-link>
                     <x-nav-link wire:navigate href="{{ route('page.dogs') }}"
                         :active="request()->routeIs('page.dogs') || request()->routeIs('page.dog.single')">{{ __('Dogs') }}</x-nav-link>
-                    <x-nav-link wire:navigate.hover href="{{ route('page.blogs') }}"
+                    <x-nav-link wire:navigate href="{{ route('page.blogs') }}"
                         :active="request()->routeIs('page.blogs') || request()->routeIs('page.blog.single')">{{ __('Blogs') }}</x-nav-link>
-                    <x-nav-link wire:navigate.hover href="{{ route('page.contact') }}"
+                    <x-nav-link wire:navigate href="{{ route('page.contact') }}"
                         :active="request()->routeIs('page.contact')">{{ __('Contact') }}</x-nav-link>
 
 

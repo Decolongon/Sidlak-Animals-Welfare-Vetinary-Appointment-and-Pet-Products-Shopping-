@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('appointment_id')->constrained()->cascadeOnDelete();
             $table->foreignId('appointment_category_id')->constrained()->cascadeOnDelete();
+           // $table->boolean('is_approved')->default(false)->nullable();
             $table->timestamps();
         });
     }

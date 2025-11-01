@@ -10,5 +10,8 @@ class CreateAppointmentCategory extends CreateRecord
 {
     protected static string $resource = AppointmentCategoryResource::class;
 
-   
+    protected function getRedirectUrl(): string
+    {
+        return $this->getResource()::getUrl('index');
+    }
 }

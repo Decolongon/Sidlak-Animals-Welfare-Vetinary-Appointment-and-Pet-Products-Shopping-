@@ -3,14 +3,24 @@
 namespace App\Http\Controllers\Paymongo;
 
 use Illuminate\Http\Request;
+use App\Helpers\CheckOutHelper;
 use App\Models\Ecommerce\Order;
+use App\Models\Ecommerce\Address;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
-use App\Models\Appointment\Appointment;
+use Illuminate\Support\Facades\Auth;
 use Luigel\Paymongo\Facades\Paymongo;
+use App\Models\Appointment\Appointment;
+use Jantinnerezo\LivewireAlert\LivewireAlert;
 
 class PaymentController extends Controller
 {
+    private CheckOutHelper $helper;
+    public function __construct(private Checkouthelper $helpers)
+    {
+        $this->helper = $helpers;
+    }
     public function handleRedirect(Request $request)
     {
         $redirectUrl = $request->query('url');
@@ -36,6 +46,7 @@ class PaymentController extends Controller
 
                     if ($status === 'succeeded') {
                         $newStatus = 'completed';
+                      
                     } elseif (in_array($status, ['awaiting_payment', 'processing'])) {
                         $newStatus = 'pending';
                     } elseif ($status === 'expired') {
@@ -50,7 +61,8 @@ class PaymentController extends Controller
                         'cart_quantities',
                         'selected_checkout_items'
                     ]);
-                    return redirect()->route('page.shop');
+                
+                    return redirect()->route('page.shop')->with('message', 'Product ordered successfully');
                     // // Show appropriate message to user
                     // if ($newStatus === 'completed') {
                     //     $this->showSuccessAlert('Payment successful!');
@@ -66,6 +78,9 @@ class PaymentController extends Controller
 
         return redirect()->route('page.shop');
     }
+
+
+   
 
     //vetinary appointment webhook
     public function vetWebHook(Request $request)
@@ -90,7 +105,7 @@ class PaymentController extends Controller
                     }
 
                     $appoint->update(['payment_status' => $newStatus]);
-                    return redirect()->route('appointment');
+                    return redirect()->route('appointment')->with('message', 'Successfully Booked Appointment!');
                 }
             } catch (\Exception $e) {
                 // Log error

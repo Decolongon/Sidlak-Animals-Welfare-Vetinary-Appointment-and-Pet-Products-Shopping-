@@ -1,14 +1,14 @@
 <?php
 
-namespace App\Filament\Resources\Ecommerce\ProductReviewsResource\Pages;
+namespace App\Filament\Resources\VetAppointment\DoctorScheduleResource\Pages;
 
-use App\Filament\Resources\Ecommerce\ProductReviewsResource;
+use App\Filament\Resources\VetAppointment\DoctorScheduleResource;
 use Filament\Actions;
 use Filament\Resources\Pages\EditRecord;
 
-class EditProductReviews extends EditRecord
+class EditDoctorSchedule extends EditRecord
 {
-    protected static string $resource = ProductReviewsResource::class;
+    protected static string $resource = DoctorScheduleResource::class;
 
     protected function getHeaderActions(): array
     {
