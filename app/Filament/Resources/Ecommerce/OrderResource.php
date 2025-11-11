@@ -532,7 +532,7 @@ class OrderResource extends Resource
                     ->label('Shipping Method')
                     ->badge()
                     ->toggleable(isToggledHiddenByDefault: true)
-                    ->formatStateUsing(fn(string $state): string => ($state == 'gcash' || $state == 'paymaya' || $state == 'grab_pay' || $state == 'card') ? 'E-Wallet/' . strtoupper($state) : strtoupper($state))
+                    ->formatStateUsing(fn(string $state): string => ($state == 'gcash' || $state == 'paymaya' || $state == 'grab_pay') ? 'E-Wallet/' . strtoupper($state) : strtoupper($state))
                     ->color(fn($state) => $state == 'gcash' || $state == 'paymaya' || $state == 'grab_pay' || $state == 'card' ? 'success' : 'primary'),
 
                 TextColumn::make('created_at')

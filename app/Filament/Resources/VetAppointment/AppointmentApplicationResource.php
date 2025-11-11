@@ -361,28 +361,45 @@ class AppointmentApplicationResource extends Resource
             })
             ->filters([
 
-                // SelectFilter::make('doctor_id')
-                //     ->label('Doctor')
-                //     ->options(User::role('admin_vet')->pluck('name', 'id'))
-                //     ->preload()
-                //     ->searchable()
-                //     ->multiple()
-                //     ->query(function (Builder $query, $state) {
-                //         if (!empty($state) && is_array($state)) {
-                //             $doctorIds = collect($state)
-                //                 ->filter(fn($id) => !empty($id) && is_numeric($id))
-                //                 ->unique()
-                //                 ->values()
-                //                 ->toArray();
+                Tables\Filters\Filter::make('doctor_id')
+                    ->label('Doctor')
+                    ->form([
+                        Select::make('doctor_id')
+                            ->label('Doctor')
+                            ->options(User::role('admin_vet')->pluck('name', 'id'))
+                            ->multiple()
+                            ->preload()
+                    ])
+                    ->visible(auth()->user()->hasAnyRole(['secretary_vet','super_admin','super-admin']))
+                    ->query(function (Builder $query, array $data) {
+                       // \Log::info('Doctor filter data:', $data);
 
-                //             if (!empty($doctorIds)) {
-                //                 return $query->whereHas('categories', function ($q) use ($doctorIds) {
-                //                     $q->whereIn('doctor_id', $doctorIds);
-                //                 });
-                //             }
-                //         }
-                //         return $query;
-                //     }),
+                        if (!empty($data['doctor_id'])) {
+                            $doctorIds = is_array($data['doctor_id']) ? $data['doctor_id'] : [$data['doctor_id']];
+
+                            $doctorIds = collect($doctorIds)
+                                ->filter(fn($id) => !empty($id) && is_numeric($id))
+                                ->values()
+                                ->toArray();
+
+                            if (!empty($doctorIds)) {
+                                return $query->whereHas('categories', function ($q) use ($doctorIds) {
+                                    $q->whereIn('doctor_id', $doctorIds);
+                                });
+                            }
+                        }
+                        return $query;
+                    })
+                    ->indicateUsing(function (array $data): ?string {
+                        if (empty($data['doctor_id'])) {
+                            return null;
+                        }
+
+                        $doctorIds = is_array($data['doctor_id']) ? $data['doctor_id'] : [$data['doctor_id']];
+                        $doctorNames = User::whereIn('id', $doctorIds)->pluck('name')->implode(', ');
+
+                        return "Doctor: " . $doctorNames;
+                    }),
 
 
                 SelectFilter::make('payment_status')

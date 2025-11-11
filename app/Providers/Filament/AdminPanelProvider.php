@@ -54,6 +54,7 @@ class AdminPanelProvider extends PanelProvider
                 NavigationGroup::make()
                     ->label('News & Events')
                     ->collapsed(),
+
             ])
             ->colors([
                 'primary' => Color::Amber,

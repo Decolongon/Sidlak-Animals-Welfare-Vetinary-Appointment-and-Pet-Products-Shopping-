@@ -845,7 +845,7 @@ class ProductResource extends Resource
         ]);
     }
 
-    public static function infolist(Infolist $infolist): Infolist
+ public static function infolist(Infolist $infolist): Infolist
     {
         return $infolist->schema([
             // Product Overview Section
@@ -854,15 +854,16 @@ class ProductResource extends Resource
                     // Image on the left
                     ImageEntry::make('images.url')
                         ->hiddenLabel()
-                        ->limit(function ($record) {
-                            if ($record->prod_unit === 'diff_size') {
-                                return 1;
-                            }
-                            return 4;
-                        })
-                        ->width(200)
-                        ->height(200)
-                        // ->hidden(fn($record) => $record->prod_unit === 'diff_size')
+                        // ->limit(function ($record) {
+                        //     if ($record->prod_unit === 'diff_size') {
+                        //         return 1;
+                        //     }
+                        //     return 4;
+                        // })
+                        ->width(150)
+                        ->height(150)
+                        ->hidden(fn($record) => $record->prod_unit === 'diff_size')
+                        ->stacked()
                         ->extraAttributes(['style' => 'object-fit: cover; border-radius: 0.5rem;']),
 
                     // Product name and SKU on the right
@@ -1095,8 +1096,7 @@ class ProductResource extends Resource
                     ->formatStateUsing(fn($state) => $state ? 'Yes' : 'No'),
             ])->columns(2)->collapsible(),
         ]);
-    }
-
+    } 
 
 
 

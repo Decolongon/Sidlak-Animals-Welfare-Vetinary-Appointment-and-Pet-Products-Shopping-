@@ -62,7 +62,7 @@ class PaymentController extends Controller
                         'selected_checkout_items'
                     ]);
                 
-                    return redirect()->route('page.shop')->with('message', 'Product ordered successfully');
+                    return redirect()->route('view-order')->with('success', 'Product ordered Successfully');
                     // // Show appropriate message to user
                     // if ($newStatus === 'completed') {
                     //     $this->showSuccessAlert('Payment successful!');

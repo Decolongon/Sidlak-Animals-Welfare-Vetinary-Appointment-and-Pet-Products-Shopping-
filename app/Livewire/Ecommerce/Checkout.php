@@ -101,6 +101,8 @@ class Checkout extends Component
 
     public $total_weight = 0;
 
+    public $tax = 0;
+
     // public $originalQuantities = [];
 
     protected $listeners = [
@@ -338,6 +340,7 @@ class Checkout extends Component
     {
         $this->itemsTotal = 0;
         $this->totalDiscount = 0; // Initialize discount total
+        $this->tax = 0;
 
         $this->itemsTotal =  $this->checkoutItems->sum(function ($item) {
             $product = $item->product;
@@ -354,7 +357,10 @@ class Checkout extends Component
             return $finalPrice * $item->quantity;
         });
 
-        $this->subtotal = $this->itemsTotal + $this->totalShipping + 0.12;
+        $this->tax = $this->itemsTotal * 0.12;
+        
+
+        $this->subtotal = $this->itemsTotal + $this->totalShipping + $this->tax;
     }
 
     //calculate total shipping
@@ -710,13 +716,13 @@ class Checkout extends Component
             DB::commit();
 
             $this->reset();
-            $this->alert('success', '', [
-                'position' => 'top-end',
-                'timer' => 3000,
-                'toast' => true,
-                'text' => 'Product ordered!',
-            ]);
-            return redirect()->route('page.shop');
+            // $this->alert('success', '', [
+            //     'position' => 'top-end',
+            //     'timer' => 3000,
+            //     'toast' => true,
+            //     'text' => 'Product ordered!',
+            // ]);
+            return redirect()->route('view-order')->with('success', 'Product ordered Succesfully!');
         } catch (\Exception $e) {
             // Rollback transaction on error
             DB::rollBack();

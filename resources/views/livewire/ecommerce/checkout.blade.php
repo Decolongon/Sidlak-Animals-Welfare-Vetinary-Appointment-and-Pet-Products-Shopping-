@@ -6,7 +6,7 @@
                 <div class="sticky top-4">
                     <h2 class="mb-4 text-xl md:text-2xl font-bold text-gray-800 dark:text-neutral-200">
                         {{ __('Product Summary') }}</h2>
-                    <a wire:navigater href="{{ route('page.shop') }}"
+                    <a wire:navigate href="{{ route('page.shop') }}"
                         class="inline-flex items-center text-amber-600 hover:text-amber-700 font-semibold text-sm tracking-wide hover:underline transition ease-in-out duration-150">
                         back to shop
                     </a>
@@ -145,6 +145,13 @@
                                         <span
                                             class="text-sm {{ $totalShipping > 0 ? 'text-gray-800 dark:text-neutral-200' : 'text-green-500' }}">
                                             {{ $totalShipping > 0 ? '₱' . number_format($totalShipping, 2) : 'Free Shipping' }}
+                                        </span>
+                                    </div>
+
+                                    <div class="flex justify-between">
+                                        <span class="text-sm text-gray-600 dark:text-neutral-400">Tax:</span>
+                                        <span class="text-sm text-gray-800 dark:text-neutral-200">
+                                            ₱{{ number_format($tax, 2) }}
                                         </span>
                                     </div>
 
