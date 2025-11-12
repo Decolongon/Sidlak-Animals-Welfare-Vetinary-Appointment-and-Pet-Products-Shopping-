@@ -23,12 +23,12 @@ class ProductReviewsForm extends Component
 
     #[Locked]
     public $product_id;
-    
+
     public $prod_review;
 
-    
+
     protected $rules = [
-        'review' => 'max:10000',
+        'review' => 'max:255|min:10',
         // 'image_review' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         'image_review.*' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         'rating' => 'required|numeric|min:1|max:5',
@@ -39,7 +39,6 @@ class ProductReviewsForm extends Component
         //$this->submitReview();
         // $this->getProdReviews();
         $this->product_id = $product_id;
-
     }
 
     // #[On('showModal')]
@@ -59,7 +58,7 @@ class ProductReviewsForm extends Component
     //only authenticated user ang maka submit reviews
     public function submitReview()
     {
-       
+
         if (!Auth::check()) {
             $this->alert('warning', '', [
                 'position' => 'top-end',
@@ -91,13 +90,19 @@ class ProductReviewsForm extends Component
         $data = $this->sanitizeInput([
             'review' => $this->review,
             'rating' => $this->rating,
-            'product_id' => $this->product_id,
+            //'product_id' => $this->product_id,
             'image_review' => is_array($img_path) ? $img_path : json_decode($img_path, true),
-            'user_id' => Auth::id(),
+            //'user_id' => Auth::id(),
         ]);
 
 
-        ProductReview::create($data);
+        ProductReview::updateOrCreate(
+            [
+                'user_id' => Auth::id(),
+                'product_id' => $this->product_id,
+            ],
+            $data
+        );
 
         //delete image review sa temporary folder tapos insert sa database and sa public storage 
         if ($this->image_review) {
