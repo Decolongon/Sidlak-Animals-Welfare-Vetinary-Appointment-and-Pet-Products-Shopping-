@@ -28,7 +28,7 @@ class ProductReviewsForm extends Component
 
 
     protected $rules = [
-        'review' => 'max:255|min:10',
+        'review' => 'nullable|max:255|min:10|',
         // 'image_review' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         'image_review.*' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         'rating' => 'required|numeric|min:1|max:5',

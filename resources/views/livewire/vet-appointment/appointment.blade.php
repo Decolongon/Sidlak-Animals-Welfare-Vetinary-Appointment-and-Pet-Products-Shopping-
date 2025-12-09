@@ -22,9 +22,9 @@
                     @endif
                     @if (session()->has('message'))
                         {{-- <div class="flex items-center gap-4 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 mt-6 -mb-6"> --}}
-                            {{-- <div class="bg-green-100 border border-green-400 px-4 py-3 rounded relative" role="alert"> --}}
-                            <p class="text-green-700">{{ session('message') }}</p>
-                            {{-- </div> --}}
+                        {{-- <div class="bg-green-100 border border-green-400 px-4 py-3 rounded relative" role="alert"> --}}
+                        <p class="text-green-700">{{ session('message') }}</p>
+                        {{-- </div> --}}
                         {{-- </div> --}}
                     @endif
                 </h2>
@@ -91,7 +91,7 @@
                                 <!-- Appointment List -->
                                 <div wire:loading.remove class="max-h-48 overflow-y-auto py-1">
                                     @forelse($this->getAllAppointmentsForDropdown as $appointment)
-                                        <div class="px-3 py-2 hover:bg-gray-50 dark:hover:bg-neutral-700 cursor-pointer border-b border-gray-100 dark:border-neutral-600 last:border-b-0 transition-colors {{ $selectedAppointmentId == $appointment['id'] ? 'bg-amber-50 dark:bg-amber-900/20 border-amber-200 dark:border-amber-800' : '' }}"
+                                        <div wire:key="{{ $appointment['id'] }}" class="px-3 py-2 hover:bg-gray-50 dark:hover:bg-neutral-700 cursor-pointer border-b border-gray-100 dark:border-neutral-600 last:border-b-0 transition-colors {{ $selectedAppointmentId == $appointment['id'] ? 'bg-amber-50 dark:bg-amber-900/20 border-amber-200 dark:border-amber-800' : '' }}"
                                             wire:click="autoFillFromAppointment({{ $appointment['id'] }}); open=false">
                                             <div class="flex justify-between items-start">
                                                 <div>
@@ -199,7 +199,7 @@
                                             Type</label>
                                         <select id="pet_type" name="pet_type" wire:model="pet_type"
                                             class="py-2.5 px-4 block w-full border border-gray-200 dark:border-neutral-700 rounded-lg sm:text-sm focus:border-amber-500 focus:ring-amber-500 dark:bg-neutral-900 dark:text-neutral-100">
-                                            <option value="">Select</option>
+                                            <option value="">Select Pet Type</option>
                                             <option value="dog" {{ $pet_type == 'dog' ? 'selected' : '' }}>Dog
                                             </option>
                                             <option value="cat" {{ $pet_type == 'cat' ? 'selected' : '' }}>Cat
@@ -229,7 +229,7 @@
                                             Gender</label>
                                         <select id="pet_gender" name="pet_gender" wire:model="pet_gender"
                                             class="py-2.5 px-4 block w-full border border-gray-200 dark:border-neutral-700 rounded-lg sm:text-sm focus:border-amber-500 focus:ring-amber-500 dark:bg-neutral-900 dark:text-neutral-100">
-                                            <option value="">Select</option>
+                                            <option value="">Select Gender</option>
                                             <option value="male" {{ $pet_gender == 'male' ? 'selected' : '' }}>Male
                                             </option>
                                             <option value="female" {{ $pet_gender == 'female' ? 'selected' : '' }}>
@@ -265,7 +265,7 @@
                                             <select name="pet_age_unit" id="pet_age_unit"
                                                 wire:model.live="pet_age_unit"
                                                 class="py-2.5 px-4 border border-gray-200 dark:border-neutral-700 rounded-lg sm:text-sm focus:border-amber-500 focus:ring-amber-500 dark:bg-neutral-900 dark:text-neutral-100">
-                                                <option value="">Select</option>
+                                                <option value="">Select Years/Months</option>
                                                 <option value="years old"
                                                     {{ $pet_age_unit == 'years old' ? 'selected' : '' }}>Years</option>
                                                 <option value="months"
@@ -284,7 +284,8 @@
                                     <!-- isPetVaccinated -->
                                     <div class="space-y-2">
                                         <label for="isPetVaccinated"
-                                            class="block text-sm font-medium text-gray-700 dark:text-neutral-300">Vaccinated?</label>
+                                            class="block text-sm font-medium text-gray-700 dark:text-neutral-300"> Is
+                                            Pet Vaccinated?</label>
                                         <select id="isPetVaccinated" name="isPetVaccinated"
                                             wire:model="isPetVaccinated"
                                             class="py-2.5 px-4 block w-full border border-gray-200 dark:border-neutral-700 rounded-lg sm:text-sm focus:border-amber-500 focus:ring-amber-500 dark:bg-neutral-900 dark:text-neutral-100">
@@ -329,10 +330,12 @@
                                             @endforeach
                                         </select> --}}
 
-                                        <select name="appointment_category_id"
-                                            id="appointment_category_id"
+                                        <select name="appointment_category_id" id="appointment_category_id"
                                             wire:model.live="appointment_category_id"
                                             class="py-2.5 px-4 block w-full border border-gray-200 dark:border-neutral-700 rounded-lg sm:text-sm focus:border-amber-500 focus:ring-amber-500 dark:bg-neutral-900 dark:text-neutral-100">
+                                            <option value="">
+                                                Select Service
+                                            </option>
                                             @foreach ($this->getAppointmentCat as $category)
                                                 <option value="{{ $category->id }}">
                                                     {{ ucwords($category->appoint_cat_name) }}
@@ -345,7 +348,7 @@
                                         @enderror
                                     </div>
 
-                                    @if (! empty($appointment_category_id))
+                                    @if (!empty($appointment_category_id))
                                         <div
                                             class="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg p-4">
                                             <h3 class="font-medium text-amber-800 dark:text-amber-200 mb-2">Selected
@@ -439,11 +442,11 @@
                                                                     {{ $day['isToday'] ? 'ring-2 ring-amber-300 dark:ring-amber-600' : '' }}">
                                                                 <div class="text-sm font-medium">{{ $day['day'] }}
                                                                 </div>
-                                                                @if ($day['hasAppointments'])
+                                                                {{-- @if ($day['hasAppointments'])
                                                                     <div
                                                                         class="w-1 h-1 bg-amber-400 rounded-full mx-auto mt-1">
                                                                     </div>
-                                                                @endif
+                                                                @endif --}}
                                                             </button>
                                                         @else
                                                             <div class="p-2"></div>

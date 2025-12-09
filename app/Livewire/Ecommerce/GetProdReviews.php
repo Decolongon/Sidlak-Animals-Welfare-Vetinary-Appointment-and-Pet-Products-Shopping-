@@ -19,6 +19,7 @@ class GetProdReviews extends Component
     #[Locked]
     public $product_id;
     public $showAll = false;
+    public $loadReviews = 5;
     // public $count_reviews = 0;
 
     //protected $listeners = ['reviewAdded' => 'getProdReviews'];
@@ -30,14 +31,18 @@ class GetProdReviews extends Component
         //$this->countReviews();
     }
 
+    public function loadMore()
+    {
+        $this->loadReviews += 5;
+    }
+
     //get sg product reviews each product kg dy sinu ng post reviews
     #[Computed()]
     public function getProdReviews()
     {
-
         return ProductReview::with(['user', 'product'])->where('product_id', $this->product_id)
             ->latest()
-            // ->take(5)
+            ->take($this->loadReviews)
             ->get();
     }
     public function placeholder()

@@ -55,6 +55,16 @@ class AdminPanelProvider extends PanelProvider
                     ->label('News & Events')
                     ->collapsed(),
 
+                // NavigationGroup::make()
+                //     ->label('Shop')
+                //     ->icon('heroicon-o-building-storefront')
+                //     ->collapsed(false),
+
+                // NavigationGroup::make()
+                //     ->label('Vetinary Appointment')
+                //     ->icon('heroicon-o-document')
+                //     ->collapsed(false),
+
             ])
             ->colors([
                 'primary' => Color::Amber,
@@ -69,7 +79,7 @@ class AdminPanelProvider extends PanelProvider
 
 
                 [
-                   Pages\Dashboard::class,
+                    Pages\Dashboard::class,
                 ]
 
 
@@ -110,12 +120,12 @@ class AdminPanelProvider extends PanelProvider
                     ]),
             ])
             ->authMiddleware([
-               RoleBaseMiddleware::class,
-              // AdminMiddleware::class
+                RoleBaseMiddleware::class,
+                // AdminMiddleware::class
             ])
-        // ->plugins([
-        //     FilamentShieldPlugin::make(),
-        // ]);
-        ->databaseNotifications();
+            // ->plugins([
+            //     FilamentShieldPlugin::make(),
+            // ]);
+            ->databaseNotifications();
     }
 }

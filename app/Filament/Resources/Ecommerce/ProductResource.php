@@ -67,7 +67,7 @@ use App\Filament\Resources\Ecommerce\ProductResource\RelationManagers;
 class ProductResource extends Resource
 {
     protected static ?string $model = Product::class;
-    protected static ?string $navigationGroup = 'Ecommerce';
+    protected static ?string $navigationGroup = 'Shop';
 
     protected static ?string $navigationIcon = 'heroicon-o-squares-plus';
     // 'heroicon-o-rectangle-stack';
@@ -364,6 +364,12 @@ class ProductResource extends Resource
                                                     ->visibility('public')
                                                     ->imageEditorAspectRatios([null, '16:9', '4:3'])
                                                     ->maxSize(2048)
+                                                    // ->rules([
+                                                    //     'required',
+                                                    //     'image',
+                                                    //     'mimes:jpeg,png,jpg,gif,webp',
+                                                    //     'max:2048',
+                                                    // ])
                                                     ->required(),
 
                                                 Select::make('sizes')
@@ -845,7 +851,7 @@ class ProductResource extends Resource
         ]);
     }
 
- public static function infolist(Infolist $infolist): Infolist
+    public static function infolist(Infolist $infolist): Infolist
     {
         return $infolist->schema([
             // Product Overview Section
@@ -1056,6 +1062,42 @@ class ProductResource extends Resource
                         })
                         ->badge()
                         ->color('gray'),
+
+                    TextEntry::make('prod_length')
+                        ->label('Length')
+                        ->badge()
+                        ->formatStateUsing(fn($state) => $state . ' cm')
+                        ->visible(function ($record) {
+                            if ($record->prod_unit === 'has_dimensions') {
+                                return true;
+                            }
+                            return false;
+                        })
+                        ->color('info'),
+
+                    TextEntry::make('prod_width')
+                        ->label('Width')
+                        ->badge()
+                        ->formatStateUsing(fn($state) => $state . ' cm')
+                        ->visible(function ($record) {
+                            if ($record->prod_unit === 'has_dimensions') {
+                                return true;
+                            }
+                            return false;
+                        })
+                        ->color('info'),
+
+                    TextEntry::make('prod_height')
+                        ->label('Height')
+                        ->badge()
+                        ->formatStateUsing(fn($state) => $state . ' cm')
+                        ->visible(function ($record) {
+                            if ($record->prod_unit === 'has_dimensions') {
+                                return true;
+                            }
+                            return false;
+                        })
+                        ->color('info'),
                 ])->columns(2)->collapsible()->hidden(fn($record) => $record->prod_unit === 'diff_size'),
 
             // Shipping Section
@@ -1073,7 +1115,7 @@ class ProductResource extends Resource
                         ->badge()
                         ->color('gray')
                         ->formatStateUsing(fn($component, $state) => $state . ' ' . ($component->getRecord()->prod_unit === 'g' ? 'g' : 'kg'))
-                        ->hidden(fn($component) => in_array($component->getRecord()->prod_unit, ['pcs', 'diff_size'])),
+                        ->hidden(fn($component) => in_array($component->getRecord()->prod_unit, ['pcs', 'diff_size', 'has_dimensions'])),
 
                     TextEntry::make('shipping_cost')
                         ->label('Shipping Cost')
@@ -1096,7 +1138,7 @@ class ProductResource extends Resource
                     ->formatStateUsing(fn($state) => $state ? 'Yes' : 'No'),
             ])->columns(2)->collapsible(),
         ]);
-    } 
+    }
 
 
 

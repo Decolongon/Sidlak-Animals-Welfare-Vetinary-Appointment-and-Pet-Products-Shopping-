@@ -53,38 +53,23 @@
                 @endif
             </div>
         @empty
-
             <p class="text-gray-500">No reviews yet.</p>
         @endforelse
+
+        <!-- Infinite scroll trigger -->
+        @if($this->getProdReviews->count() >= $loadReviews)
+            <div 
+                x-intersect.full="
+                    $wire.loadMore()
+                "
+                class="h-10 flex justify-center items-center"
+            >
+                <div class="inline-block h-6 w-6 animate-spin rounded-full border-4 border-solid border-current border-r-transparent align-[-0.125em] motion-reduce:animate-[spin_1.5s_linear_infinite]"
+                     role="status">
+                    <span class="!absolute !-m-px !h-px !w-px !overflow-hidden !whitespace-nowrap !border-0 !p-0 ![clip:rect(0,0,0,0)]">Loading...</span>
+                </div>
+            </div>
+        @endif
     </div>
-
-   {{-- @if($prod_reviews->count() > 0)
-        <div class="flex justify-center mt-6">
-            @if ($showAll == false)
-                <button 
-                    wire:click="showAllReviews"
-                    class="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition duration-200 flex items-center gap-2"
-                >
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                        <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
-                    </svg>
-                    Show All Reviews
-                </button>
-            @else
-                <button 
-                    wire:click="getProdReviews"
-                    class="px-6 py-2 bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium rounded-lg transition duration-200 flex items-center gap-2 dark:bg-neutral-700 dark:hover:bg-neutral-600 dark:text-white"
-                >
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                        <path fill-rule="evenodd" d="M14.707 12.707a1 1 0 01-1.414 0L10 9.414l-3.293 3.293a1 1 0 01-1.414-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 010 1.414z" clip-rule="evenodd" />
-                    </svg>
-                    Show Less
-                </button>
-            @endif
-        </div>
-    @endif --}}
-
-
-
 
 </div> {{-- close --}}

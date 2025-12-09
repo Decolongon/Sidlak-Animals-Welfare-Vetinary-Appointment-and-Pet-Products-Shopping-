@@ -340,24 +340,24 @@
                             {{-- Billing Address (if different) --}}
                             @if (!$same_as_billing)
                                 <div
-                                    class="bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-800 rounded-2xl p-6">
-                                    <h3 class="text-lg font-semibold text-orange-800 dark:text-orange-200 mb-4">
+                                    class="bg-orange-50 dark:bg-yellow-50/10 border border-orange-200 dark:border-yellow-200/30 rounded-2xl p-6">
+                                    <h3 class="text-lg font-semibold text-orange-800 dark:text-yellow-600 mb-4">
                                         Billing Address
                                     </h3>
                                     <div class="space-y-4">
                                         {{-- Billing City Selection --}}
                                         <div class="relative" x-data="{ open: false }">
                                             <label
-                                                class="block text-sm font-medium text-orange-700 dark:text-orange-300 mb-2">
+                                                class="block text-sm font-medium text-orange-700 dark:text-yellow-500 mb-2">
                                                 City *
                                             </label>
                                             <div @click="open = !open"
-                                                class="w-full px-4 py-3 border border-orange-300 dark:border-orange-600 rounded-xl bg-white dark:bg-neutral-800 text-gray-900 dark:text-neutral-200 cursor-pointer flex justify-between items-center hover:border-orange-400 dark:hover:border-orange-500 transition-colors">
+                                                class="w-full px-4 py-3 border border-orange-300 dark:border-yellow-400/50 rounded-xl bg-white dark:bg-yellow-50/5 text-gray-900 dark:text-yellow-100 cursor-pointer flex justify-between items-center hover:border-orange-400 dark:hover:border-yellow-400 transition-colors">
                                                 <span
-                                                    class="{{ !$billing_city ? 'text-gray-500 dark:text-neutral-400' : '' }}">
+                                                    class="{{ !$billing_city ? 'text-gray-500 dark:text-yellow-200/60' : 'dark:text-yellow-100' }}">
                                                     {{ $this->selectedBillingCityName ?? 'Select City' }}
                                                 </span>
-                                                <svg class="w-5 h-5 text-orange-400 transition-transform duration-200"
+                                                <svg class="w-5 h-5 text-orange-400 dark:text-yellow-500 transition-transform duration-200"
                                                     :class="{ 'rotate-180': open }" fill="none"
                                                     stroke="currentColor" viewBox="0 0 24 24">
                                                     <path stroke-linecap="round" stroke-linejoin="round"
@@ -366,13 +366,13 @@
                                             </div>
 
                                             <div x-show="open" @click.outside="open = false" x-transition x-cloak
-                                                class="absolute z-20 w-full mt-2 bg-white dark:bg-neutral-800 border border-orange-200 dark:border-orange-700 rounded-xl shadow-lg max-h-80 overflow-hidden">
-                                                <div class="p-3 border-b border-orange-200 dark:border-orange-700">
+                                                class="absolute z-20 w-full mt-2 bg-white dark:bg-yellow-50/10 border border-orange-200 dark:border-yellow-400/40 rounded-xl shadow-lg max-h-80 overflow-hidden backdrop-blur-sm">
+                                                <div class="p-3 border-b border-orange-200 dark:border-yellow-400/30">
                                                     <div class="relative">
                                                         <input type="text" wire:model.live="billingSearchCity"
                                                             placeholder="Search city..."
-                                                            class="w-full pl-10 pr-4 py-2 border border-orange-300 dark:border-orange-600 rounded-lg bg-white dark:bg-neutral-700 text-gray-900 dark:text-neutral-200 focus:outline-none focus:ring-2 focus:ring-orange-500">
-                                                        <svg class="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-orange-400"
+                                                            class="w-full pl-10 pr-4 py-2 border border-orange-300 dark:border-yellow-400/50 rounded-lg bg-white dark:bg-yellow-50/5 text-gray-900 dark:text-yellow-100 focus:outline-none focus:ring-2 focus:ring-orange-500 dark:focus:ring-yellow-500">
+                                                        <svg class="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-orange-400 dark:text-yellow-500"
                                                             fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                             <path stroke-linecap="round" stroke-linejoin="round"
                                                                 stroke-width="2"
@@ -382,22 +382,24 @@
                                                 </div>
                                                 <div class="max-h-60 overflow-y-auto py-1">
                                                     @forelse ($this->bil_cities as $city)
-                                                        <div class="px-4 py-3 hover:bg-orange-50 dark:hover:bg-orange-900/30 cursor-pointer border-b border-orange-100 dark:border-orange-800 last:border-b-0 transition-colors"
+                                                        <div class="px-4 py-3 hover:bg-orange-50 dark:hover:bg-yellow-500/20 cursor-pointer border-b border-orange-100 dark:border-yellow-400/20 last:border-b-0 transition-colors"
                                                             wire:click="bilSelectCity('{{ $city->code }}'); open=false">
                                                             <div
-                                                                class="text-gray-900 dark:text-neutral-200 font-medium">
-                                                                {{ $city->name }}</div>
+                                                                class="text-gray-900 dark:text-yellow-100 font-medium">
+                                                                {{ $city->name }}
+                                                            </div>
                                                         </div>
                                                     @empty
                                                         <div
-                                                            class="px-4 py-3 text-gray-500 dark:text-neutral-400 text-center">
+                                                            class="px-4 py-3 text-gray-500 dark:text-yellow-200/60 text-center">
                                                             No cities found
                                                         </div>
                                                     @endforelse
                                                 </div>
                                             </div>
                                             @error('billing_city')
-                                                <span class="text-sm text-red-500 mt-2 block">{{ $message }}</span>
+                                                <span
+                                                    class="text-sm text-red-500 dark:text-red-400 mt-2 block">{{ $message }}</span>
                                             @enderror
                                         </div>
 
@@ -405,16 +407,16 @@
                                         @if ($billing_city)
                                             <div class="relative" x-data="{ open: false }">
                                                 <label
-                                                    class="block text-sm font-medium text-orange-700 dark:text-orange-300 mb-2">
+                                                    class="block text-sm font-medium text-orange-700 dark:text-yellow-500 mb-2">
                                                     Barangay *
                                                 </label>
                                                 <div @click="open = !open"
-                                                    class="w-full px-4 py-3 border border-orange-300 dark:border-orange-600 rounded-xl bg-white dark:bg-neutral-800 text-gray-900 dark:text-neutral-200 cursor-pointer flex justify-between items-center hover:border-orange-400 dark:hover:border-orange-500 transition-colors">
+                                                    class="w-full px-4 py-3 border border-orange-300 dark:border-yellow-400/50 rounded-xl bg-white dark:bg-yellow-50/5 text-gray-900 dark:text-yellow-100 cursor-pointer flex justify-between items-center hover:border-orange-400 dark:hover:border-yellow-400 transition-colors">
                                                     <span
-                                                        class="{{ !$billing_brgy ? 'text-gray-500 dark:text-neutral-400' : '' }}">
+                                                        class="{{ !$billing_brgy ? 'text-gray-500 dark:text-yellow-200/60' : 'dark:text-yellow-100' }}">
                                                         {{ $this->selectedBillingBrgyName ?? 'Select Barangay' }}
                                                     </span>
-                                                    <svg class="w-5 h-5 text-orange-400 transition-transform duration-200"
+                                                    <svg class="w-5 h-5 text-orange-400 dark:text-yellow-500 transition-transform duration-200"
                                                         :class="{ 'rotate-180': open }" fill="none"
                                                         stroke="currentColor" viewBox="0 0 24 24">
                                                         <path stroke-linecap="round" stroke-linejoin="round"
@@ -423,13 +425,14 @@
                                                 </div>
 
                                                 <div x-show="open" @click.outside="open = false" x-transition x-cloak
-                                                    class="absolute z-20 w-full mt-2 bg-white dark:bg-neutral-800 border border-orange-200 dark:border-orange-700 rounded-xl shadow-lg max-h-80 overflow-hidden">
-                                                    <div class="p-3 border-b border-orange-200 dark:border-orange-700">
+                                                    class="absolute z-20 w-full mt-2 bg-white dark:bg-yellow-50/10 border border-orange-200 dark:border-yellow-400/40 rounded-xl shadow-lg max-h-80 overflow-hidden backdrop-blur-sm">
+                                                    <div
+                                                        class="p-3 border-b border-orange-200 dark:border-yellow-400/30">
                                                         <div class="relative">
                                                             <input type="text" wire:model.live="billingSearchBrgy"
                                                                 placeholder="Search barangay..."
-                                                                class="w-full pl-10 pr-4 py-2 border border-orange-300 dark:border-orange-600 rounded-lg bg-white dark:bg-neutral-700 text-gray-900 dark:text-neutral-200 focus:outline-none focus:ring-2 focus:ring-orange-500">
-                                                            <svg class="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-orange-400"
+                                                                class="w-full pl-10 pr-4 py-2 border border-orange-300 dark:border-yellow-400/50 rounded-lg bg-white dark:bg-yellow-50/5 text-gray-900 dark:text-yellow-100 focus:outline-none focus:ring-2 focus:ring-orange-500 dark:focus:ring-yellow-500">
+                                                            <svg class="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-orange-400 dark:text-yellow-500"
                                                                 fill="none" stroke="currentColor"
                                                                 viewBox="0 0 24 24">
                                                                 <path stroke-linecap="round" stroke-linejoin="round"
@@ -441,15 +444,16 @@
                                                     </div>
                                                     <div class="max-h-60 overflow-y-auto py-1">
                                                         @forelse ($this->bil_barangays as $brgy)
-                                                            <div class="px-4 py-3 hover:bg-orange-50 dark:hover:bg-orange-900/30 cursor-pointer border-b border-orange-100 dark:border-orange-800 last:border-b-0 transition-colors"
+                                                            <div class="px-4 py-3 hover:bg-orange-50 dark:hover:bg-yellow-500/20 cursor-pointer border-b border-orange-100 dark:border-yellow-400/20 last:border-b-0 transition-colors"
                                                                 wire:click="bilSelectBrgy('{{ $brgy->name }}'); open=false">
                                                                 <div
-                                                                    class="text-gray-900 dark:text-neutral-200 font-medium">
-                                                                    {{ $brgy->name }}</div>
+                                                                    class="text-gray-900 dark:text-yellow-100 font-medium">
+                                                                    {{ $brgy->name }}
+                                                                </div>
                                                             </div>
                                                         @empty
                                                             <div
-                                                                class="px-4 py-3 text-gray-500 dark:text-neutral-400 text-center">
+                                                                class="px-4 py-3 text-gray-500 dark:text-yellow-200/60 text-center">
                                                                 No barangays found
                                                             </div>
                                                         @endforelse
@@ -457,22 +461,22 @@
                                                 </div>
                                                 @error('billing_brgy')
                                                     <span
-                                                        class="text-sm text-red-500 mt-2 block">{{ $message }}</span>
+                                                        class="text-sm text-red-500 dark:text-red-400 mt-2 block">{{ $message }}</span>
                                                 @enderror
                                             </div>
 
                                             {{-- Billing Street Address --}}
                                             <div>
                                                 <label
-                                                    class="block text-sm font-medium text-orange-700 dark:text-orange-300 mb-2">
+                                                    class="block text-sm font-medium text-orange-700 dark:text-yellow-500 mb-2">
                                                     Street Address *
                                                 </label>
                                                 <input type="text" wire:model="bil_street" id="bil_street"
-                                                    class="w-full px-4 py-3 border border-orange-300 dark:border-orange-600 rounded-xl bg-white dark:bg-neutral-800 text-gray-900 dark:text-neutral-200 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-colors"
+                                                    class="w-full px-4 py-3 border border-orange-300 dark:border-yellow-400/50 rounded-xl bg-white dark:bg-yellow-50/5 text-gray-900 dark:text-yellow-100 focus:outline-none focus:ring-2 focus:ring-orange-500 dark:focus:ring-yellow-500 focus:border-transparent transition-colors"
                                                     placeholder="Enter your billing street address">
                                                 @error('bil_street')
                                                     <span
-                                                        class="text-sm text-red-500 mt-2 block">{{ $message }}</span>
+                                                        class="text-sm text-red-500 dark:text-red-400 mt-2 block">{{ $message }}</span>
                                                 @enderror
                                             </div>
                                         @endif
@@ -668,9 +672,9 @@
                                                 :disabled="paymentMethod !== 'ewallet'">
                                             <label for="{{ $payment['id'] }}"
                                                 class="ml-2 flex items-center cursor-pointer">
-                                                <img src="{{ asset($payment['img']) }}" class="w-6 h-6 mr-1">
-                                                <span
-                                                    class="text-xs text-gray-700 dark:text-neutral-300">{{ $payment['label'] }}</span>
+                                                <img src="{{ asset($payment['img']) }}" class="w-23 h-6 mr-1">
+                                                <span class="text-xs text-gray-700 dark:text-neutral-300">
+                                                    &nbsp;{{ $payment['label'] }}</span>
                                             </label>
                                         </div>
                                     @endforeach

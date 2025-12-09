@@ -522,7 +522,7 @@ class Checkout extends Component
                 'position' => 'top-end',
                 'timer' => 3000,
                 'toast' => true,
-                'text' => 'Order weight must be less than or equal to 50kg. Total weight: ' . $totalWeight . 'kg',
+                'text' => 'Order weight must be less than or equal to 50kg. Total weight: ' . number_format($totalWeight, 2) . 'kg',
             ]);
             return;
         }

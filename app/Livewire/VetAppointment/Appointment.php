@@ -81,15 +81,19 @@ class Appointment extends Component
     // Calendar Methods
     protected function initializeCalendar()
     {
-        // Set current month to the first month with available schedules
-        $firstSchedule = $this->getDoctorShedules()->first();
-        if ($firstSchedule) {
-            $this->currentMonth = $firstSchedule->effective_from->month;
-            $this->currentYear = $firstSchedule->effective_from->year;
-        } else {
-            $this->currentMonth = now()->month;
-            $this->currentYear = now()->year;
-        }
+        // // Set current month to the first month with available schedules
+        //     $firstSchedule = $this->getDoctorShedules()->first();
+
+        //     if ($firstSchedule) {
+        //         $this->currentMonth = $firstSchedule->effective_from->month;
+        //        // dd($this->currentMonth);
+        //         $this->currentYear = $firstSchedule->effective_from->year;
+        //     } else {
+        //         $this->currentMonth = now()->month;
+        //         $this->currentYear = now()->year;
+        //     }
+        $this->currentMonth = now()->month;
+        $this->currentYear = now()->year;
         $this->calendarMonth = Carbon::create($this->currentYear, $this->currentMonth, 1)->format('F Y');
         $this->generateCalendarDays();
     }
@@ -473,10 +477,10 @@ class Appointment extends Component
     {
         // Only regenerate if we're on step 3 or beyond
         // if ($this->currentStep >= 3) {
-            $this->generateCalendarDays();
-            $this->reset(['selectedDate', 'selectedTime', 'availableSlots']);
-            $this->selectedDate = null;
-            $this->selectedTime = null;
+        $this->generateCalendarDays();
+        $this->reset(['selectedDate', 'selectedTime', 'availableSlots']);
+        $this->selectedDate = null;
+        $this->selectedTime = null;
         //}
     }
 

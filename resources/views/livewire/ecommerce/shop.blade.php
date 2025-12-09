@@ -23,7 +23,7 @@
     @if (session()->has('message'))
         <div class="flex items-center gap-4 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 mt-6 -mb-6">
             {{-- <div class="bg-green-100 border border-green-400 px-4 py-3 rounded relative" role="alert"> --}}
-                <p class="text-green-700">{{ session('message') }}</p>
+            <p class="text-green-700">{{ session('message') }}</p>
             {{-- </div> --}}
         </div>
     @endif
@@ -284,14 +284,19 @@
             @endforelse
 
 
+         
+
 
         </div>
+           <div class="mt-2 flex justify-start ml-6">
+                {{ $this->getProducts->links('vendor.pagination.shop-pagination') }}
+            </div>
 
     </div>
 
-    <div class="mt-2 flex justify-start ml-6">
+    {{-- <div class="mt-2 flex justify-start ml-6">
         {{ $this->getProducts->links('vendor.pagination.shop-pagination') }}
-    </div>
+    </div> --}}
 
 
 

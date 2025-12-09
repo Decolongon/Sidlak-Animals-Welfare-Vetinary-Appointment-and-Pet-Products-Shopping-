@@ -37,7 +37,7 @@ use App\Filament\Resources\Ecommerce\ProductCategoryResource\RelationManagers;
 class ProductCategoryResource extends Resource
 {
     protected static ?string $model = ProductCategory::class;
-    protected static ?string $navigationGroup = 'Ecommerce';
+    protected static ?string $navigationGroup = 'Shop';
     protected static ?string $navigationIcon = 'heroicon-o-folder';
     protected static SubNavigationPosition $subNavigationPosition = SubNavigationPosition::Top;
 

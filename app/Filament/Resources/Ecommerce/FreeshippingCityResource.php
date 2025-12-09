@@ -21,7 +21,7 @@ class FreeshippingCityResource extends Resource
     protected static ?string $model = FreeshippingCity::class;
 
     protected static ?string $navigationIcon = 'heroicon-m-truck';
-    protected static ?string $navigationGroup = 'Ecommerce';
+    protected static ?string $navigationGroup = 'Shop';
     protected static ?int $navigationSort = 4;
 
     public static function form(Form $form): Form

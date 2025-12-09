@@ -8,11 +8,12 @@ use Livewire\Attributes\Title;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Locked;
 use App\Models\Ecommerce\Product;
+use Livewire\Attributes\Computed;
 use App\Livewire\Ecommerce\GetCart;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Session;
+use Illuminate\Support\Facades\RateLimiter;
 use Jantinnerezo\LivewireAlert\LivewireAlert;
-use Livewire\Attributes\Computed;
 
 class AddToCartForm extends Component
 {
@@ -36,7 +37,7 @@ class AddToCartForm extends Component
         $this->initializeSession();
         $this->user_id = Auth::id();
         //$this->migrateGuestCartToUser();
-       // $this->getCartItems();
+        // $this->getCartItems();
     }
 
     protected function initializeSession(): void
@@ -62,6 +63,10 @@ class AddToCartForm extends Component
 
     public function addToCart(): void
     {
+        // if ($this->checkRateLimit()) {
+        //     return;
+        // }
+
         $product = Product::find($this->product_id);
 
         if (!$product) {
@@ -79,7 +84,7 @@ class AddToCartForm extends Component
 
         $this->dispatch('cartUpdated');
         //$this->showSuccessAlert();
-       // $this->getCartItems();
+        // $this->getCartItems();
     }
 
     //get existing cart kng my ara
@@ -166,5 +171,21 @@ class AddToCartForm extends Component
         return view('livewire.ecommerce.add-to-cart-form', [
             // 'cartItems' => $this->cartItems
         ]);
+    }
+
+
+    // Rate limiter method
+    private function checkRateLimit(): bool
+    {
+        $key = 'add-to-cart:' . ($this->user_id ?: $this->session_id);
+
+        if (RateLimiter::tooManyAttempts($key, 10)) { // 10 attempts per minute
+            $seconds = RateLimiter::availableIn($key);
+            $this->showAlert('error', "Too many attempts. Please try again in {$seconds} seconds.");
+            return true;
+        }
+
+        RateLimiter::hit($key, 60); // 60 seconds = 1 minute
+        return false;
     }
 }

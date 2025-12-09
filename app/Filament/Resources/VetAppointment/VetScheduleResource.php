@@ -27,7 +27,7 @@ class VetScheduleResource extends Resource
 {
     protected static ?string $model = VetSchedule::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-calendar-date-range';
+    protected static ?string $navigationIcon = 'heroicon-o-clock';
     protected static ?string $navigationLabel = 'Clinic Hours';
     protected static ?string $modelLabel = 'Clinic Hours'; // Singular name para sa form
     protected static ?string $pluralModelLabel = 'Clinic Hours'; // Plural name para sa table

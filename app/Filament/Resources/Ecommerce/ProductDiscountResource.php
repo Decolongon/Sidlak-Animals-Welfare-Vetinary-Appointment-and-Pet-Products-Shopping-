@@ -30,7 +30,7 @@ class ProductDiscountResource extends Resource
     protected static ?string $model = ProductDiscount::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-currency-pound';
-    protected static ?string $navigationGroup = 'Ecommerce';
+    protected static ?string $navigationGroup = 'Shop';
     protected static ?int $navigationSort = 2;
     public static function form(Form $form): Form
     {

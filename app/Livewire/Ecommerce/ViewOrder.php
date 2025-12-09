@@ -113,7 +113,7 @@ class ViewOrder extends Component
                 // Store the updated status message
                 session()->flash(
                     'order_status_updated',
-                    "Order #{$order->order_num} status has been updated to: " .
+                    "Tracking #{$order->order_num} status has been updated to: " .
                         ucfirst($order->order_status)
                 );
             }
@@ -142,6 +142,12 @@ class ViewOrder extends Component
     public function updatedStatusFilter()
     {
         $this->getOrders();
+    }
+
+    public function toDelivered($id)
+    {
+        $order = $order = Order::find($id);
+        $order->update(['order_status' => 'delivered']);
     }
 
     public function cancelOrder($id)

@@ -172,6 +172,8 @@ class AppointmentApplicationResource extends Resource
                             ->seconds(false)
                             ->default(fn($record) => $record?->appoint_sched ?? now()->addDays(1))
                             ->minDate(now()->startOfDay())
+                            ->disabled()
+                            ->dehydrated()
                             ->hidden(fn($get) => $get('appointment_status') !== 'approved')
                             ->label('Schedule Date'),
 
@@ -333,7 +335,12 @@ class AppointmentApplicationResource extends Resource
                     ->badge()
                     ->toggleable(isToggledHiddenByDefault: true)
                     ->color(fn($state) => (strtolower(trim($state)) !== 'over the counter' ? 'success' : 'info'))
-                    ->formatStateUsing(fn($state) => (strtolower(trim($state)) === 'over the counter' ? ucwords($state) : 'E-wallets/' . ucfirst($state))),
+                    ->formatStateUsing(fn($state) => match (strtolower(trim($state))) {
+                        'over the counter' => ucwords($state),
+                        'card' => 'Card',
+                        default => 'E-wallets/' . ucfirst($state)
+                    }),
+                //->formatStateUsing(fn($state) => (strtolower(trim($state)) === 'over the counter' ? ucwords($state) : 'E-wallets/' . ucfirst($state))),
 
                 TextColumn::make('total_amount')
                     ->label('Total Amount')
@@ -370,9 +377,9 @@ class AppointmentApplicationResource extends Resource
                             ->multiple()
                             ->preload()
                     ])
-                    ->visible(auth()->user()->hasAnyRole(['secretary_vet','super_admin','super-admin']))
+                    ->visible(auth()->user()->hasAnyRole(['secretary_vet', 'super_admin', 'super-admin']))
                     ->query(function (Builder $query, array $data) {
-                       // \Log::info('Doctor filter data:', $data);
+                        // \Log::info('Doctor filter data:', $data);
 
                         if (!empty($data['doctor_id'])) {
                             $doctorIds = is_array($data['doctor_id']) ? $data['doctor_id'] : [$data['doctor_id']];
@@ -494,16 +501,16 @@ class AppointmentApplicationResource extends Resource
 
 
 
-                                    DateTimePicker::make('appoint_sched')
-                                        ->required()
-                                        ->seconds(false)
-                                        ->default(fn($record) => $record->appoint_sched ?? now()->startOfDay())
-                                        ->minDate(now()->startOfDay())
-                                        ->maxDate(now()->addWeek()->endOfDay())
-                                        ->hidden(fn(Get $get) => $get('appointment_status') !== 'approved')
-                                        ->dehydrated()
-                                        ->label('Schedule Date')
-                                        ->columnSpan(1),
+                                    // DateTimePicker::make('appoint_sched')
+                                    //     ->required()
+                                    //     ->seconds(false)
+                                    //     ->default(fn($record) => $record->appoint_sched ?? now()->startOfDay())
+                                    //     ->minDate(now()->startOfDay())
+                                    //     ->maxDate(now()->addWeek()->endOfDay())
+                                    //     ->hidden(fn(Get $get) => $get('appointment_status') !== 'approved')
+                                    //     ->dehydrated()
+                                    //     ->label('Schedule Date')
+                                    //     ->columnSpan(1),
 
                                     ToggleButtons::make('payment_status')
                                         ->options(PaymentStatusEnum::class)
@@ -762,7 +769,12 @@ class AppointmentApplicationResource extends Resource
 
                         TextEntry::make('payment_method')
                             ->label('Payment Method')
-                            ->formatStateUsing(fn($state) => (strtolower(trim($state)) === 'over the counter' ? ucwords($state) : 'E-wallets/' . ucfirst($state)))
+                            //->formatStateUsing(fn($state) => (strtolower(trim($state)) === 'over the counter' ? ucwords($state) : 'E-wallets/' . ucfirst($state)))
+                            ->formatStateUsing(fn($state) => match (strtolower(trim($state))) {
+                                'over the counter' => ucwords($state),
+                                'card' => 'Card',
+                                default => 'E-wallets/' . ucfirst($state)
+                            })
                             ->size(TextEntry\TextEntrySize::Medium)
                             ->badge()
                             ->color(fn($state) => (strtolower(trim($state)) === 'over the counter' ? 'info' : 'success'))

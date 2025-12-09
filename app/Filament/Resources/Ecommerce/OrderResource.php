@@ -51,11 +51,12 @@ use Filament\Infolists\Components\Section as InfoSection;
 use App\Filament\Resources\Ecommerce\OrderResource\RelationManagers;
 use App\Filament\Resources\Ecommerce\OrderResource\Widgets\OrderStatsOverview;
 use Filament\Tables\Actions\Action as TableAction;
+use Filament\Infolists\Components\Tabs as TabInfolist;
 
 class OrderResource extends Resource
 {
     protected static ?string $model = Order::class;
-    protected static ?string $navigationGroup = 'Ecommerce';
+    protected static ?string $navigationGroup = 'Shop';
     protected static ?string $navigationIcon = 'heroicon-o-shopping-cart';
     protected static ?int $navigationSort = 3;
 
@@ -617,7 +618,25 @@ class OrderResource extends Resource
                         ->modalWidth('2xl')
                         ->form([
                             ToggleButtons::make('order_status')
-                                ->options(OrderStatusEnum::class)
+                                //->options(OrderStatusEnum::class)
+                                ->options(fn() => [
+                                    OrderStatusEnum::Pending->value => OrderStatusEnum::Pending->getLabel(),
+                                    OrderStatusEnum::Processing->value => OrderStatusEnum::Processing->getLabel(),
+                                    OrderStatusEnum::Shipped->value => OrderStatusEnum::Shipped->getLabel(),
+                                    OrderStatusEnum::Cancelled->value => OrderStatusEnum::Cancelled->getLabel(),
+                                ])
+                                ->colors([
+                                    OrderStatusEnum::Pending->value => OrderStatusEnum::Pending->getColor(),
+                                    OrderStatusEnum::Processing->value => OrderStatusEnum::Processing->getColor(),
+                                    OrderStatusEnum::Shipped->value => OrderStatusEnum::Shipped->getColor(),
+                                    OrderStatusEnum::Cancelled->value => OrderStatusEnum::Cancelled->getColor(),
+                                ])
+                                ->icons([
+                                    OrderStatusEnum::Pending->value => OrderStatusEnum::Pending->getIcon(),
+                                    OrderStatusEnum::Processing->value => OrderStatusEnum::Processing->getIcon(),
+                                    OrderStatusEnum::Shipped->value => OrderStatusEnum::Shipped->getIcon(),
+                                    OrderStatusEnum::Cancelled->value => OrderStatusEnum::Cancelled->getIcon(),
+                                ])
                                 ->default(fn($record) => $record->order_status)
                                 ->dehydrated()
                                 ->inline()
@@ -639,8 +658,8 @@ class OrderResource extends Resource
                             ]);
 
                             $newOrderStatusLabel = OrderStatusEnum::tryFrom($data['order_status'])?->getLabel() ?? $data['order_status'];
-                           
-                           
+
+
 
                             Notification::make()
                                 ->title('Status Updated Successfully')
@@ -755,7 +774,6 @@ class OrderResource extends Resource
     // }
 
 
-
     public static function infolist(Infolist $infolist): Infolist
     {
         return $infolist
@@ -788,7 +806,14 @@ class OrderResource extends Resource
                             ->icon(fn($state) => PaymentStatusEnum::tryFrom($state)?->getIcon())
                             ->formatStateUsing(fn($state) => PaymentStatusEnum::tryFrom($state)?->getLabel()),
 
-                        TextEntry::make('shipping_method')->label('Shipping Method')
+                        TextEntry::make('shipping_method')
+                            ->formatStateUsing(function ($state) {
+                                if ($state !== 'cod') {
+                                    return 'E-wallet/' . $state;
+                                }
+                                return $state;
+                            })
+                            ->label('Shipping Method')
                             ->badge(),
                         TextEntry::make('notes')->label('Notes')->html()->columnSpanFull(),
                     ])
@@ -920,4 +945,176 @@ class OrderResource extends Resource
                     ->columns(2)->collapsible(),
             ]);
     }
+
+
+
+    //     public static function infolist(Infolist $infolist): Infolist
+    // {
+    //     return $infolist
+    //         ->schema([
+    //            TabInfolist::make('Order Information')
+    //                 ->tabs([
+    //                     TabInfolist::make('Customer Details')
+    //                         // ->icon('heroicon-o-user')
+    //                         // ->iconColor('primary')
+    //                         ->schema([
+    //                             InfoSection::make()
+    //                                 ->schema([
+    //                                     TextEntry::make('user.name')->label('Name'),
+    //                                     TextEntry::make('user.email')->label('Email'),
+    //                                     TextEntry::make('shippingAddresses.complete_address')->label('Shipping Address')
+    //                                         ->formatStateUsing(fn(string $state): string => strtoupper(strtolower($state))),
+    //                                     TextEntry::make('billingAddress.bil_complete_address')->label('Billing Address')
+    //                                         ->formatStateUsing(fn(string $state): string => strtoupper(strtolower($state))),
+    //                                 ])
+    //                                 ->columns(3),
+    //                         ]),
+
+    //                    TabInfolist::make('Order Details')
+    //                         // ->icon('heroicon-o-shopping-cart')
+    //                         // ->iconColor('primary')
+    //                         ->schema([
+    //                             InfoSection::make()
+    //                                 ->schema([
+    //                                     TextEntry::make('order_status')->label('Order Status')
+    //                                         ->color(fn($state) => OrderStatusEnum::tryFrom($state)?->getColor())
+    //                                         ->icon(fn($state) => OrderStatusEnum::tryFrom($state)?->getIcon())
+    //                                         ->formatStateUsing(fn($state) => OrderStatusEnum::tryFrom($state)?->getLabel()),
+
+    //                                     TextEntry::make('payment_status')->label('Payment Status')
+    //                                         ->color(fn($state) => PaymentStatusEnum::tryFrom($state)?->getColor())
+    //                                         ->icon(fn($state) => PaymentStatusEnum::tryFrom($state)?->getIcon())
+    //                                         ->formatStateUsing(fn($state) => PaymentStatusEnum::tryFrom($state)?->getLabel()),
+
+    //                                     TextEntry::make('shipping_method')
+    //                                         ->formatStateUsing(function($state){
+    //                                             if($state !== 'cod'){
+    //                                                 return 'E-wallet/'.$state;
+    //                                             }
+    //                                             return $state;
+    //                                         })
+    //                                         ->label('Shipping Method')
+    //                                         ->badge(),
+    //                                     TextEntry::make('notes')->label('Notes')->html()->columnSpanFull(),
+    //                                 ])
+    //                                 ->columns(2),
+    //                         ]),
+
+    //                     TabInfolist::make('Order Items')
+    //                         // ->icon('heroicon-o-shopping-bag')
+    //                         // ->iconColor('primary')
+    //                         ->schema([
+    //                             InfoSection::make()
+    //                                 ->schema([
+    //                                     RepeatableEntry::make('orderItems')
+    //                                         ->label('Items')
+    //                                         ->schema([
+    //                                             TextEntry::make('product.prod_name')->label('Product Name')
+    //                                                 ->formatStateUsing(function ($state, $record) {
+    //                                                     $product = $record->product;
+
+    //                                                     // If product has dimensions, append them to the product name
+    //                                                     if ($product && $product->prod_unit === 'has_dimensions') {
+    //                                                         $length = $product->prod_length ?? 'N/A';
+    //                                                         $width = $product->prod_width ?? 'N/A';
+    //                                                         $height = $product->prod_height ?? 'N/A';
+    //                                                         return "{$state} ({$length} × {$width} × {$height} cm)";
+    //                                                     }
+
+    //                                                     return $state;
+    //                                                 }),
+
+    //                                             ImageEntry::make('product_image')
+    //                                                 ->label('Product Image')
+    //                                                 ->width(50)
+    //                                                 ->height(50)
+    //                                                 ->extraAttributes(['style' => 'object-fit: cover; border-radius: 0.5rem;'])
+    //                                                 ->getStateUsing(function ($record) {
+    //                                                     $product = $record->product;
+
+    //                                                     if (!$product || !$product->images) {
+    //                                                         return null;
+    //                                                     }
+    //                                                     // For diff_size products, find the image that matches the ordered size
+    //                                                     if ($product->prod_unit === 'diff_size' && $record->size) {
+    //                                                         $sizeImage = $product->images->first(function ($image) use ($record) {
+    //                                                             // Check if the image has the matching size
+    //                                                             // Adjust this based on how sizes are stored in your images
+    //                                                             return isset($image->sizes) && $image->sizes === $record->size;
+    //                                                         });
+
+    //                                                         // Return the size-specific image if found
+    //                                                         if ($sizeImage) {
+    //                                                             return $sizeImage->url;
+    //                                                         }
+    //                                                     }
+
+    //                                                     // For all other cases, return the first product image
+    //                                                     return $product->images->first()->url ?? null;
+    //                                                 }),
+    //                                             TextEntry::make('price')->label('Price')->money('PHP')
+    //                                                 ->badge()
+    //                                                 ->formatStateUsing(function ($state, $record) {
+    //                                                     $product = $record->product;
+
+    //                                                     if (!$product) {
+    //                                                         return number_format($state, 2);
+    //                                                     }
+
+    //                                                     // For diff_size products with size-specific pricing
+    //                                                     if ($product->prod_unit === 'diff_size' && $record->size && $product->images) {
+    //                                                         // Find the image that has both the matching size and price
+    //                                                         $sizeImage = $product->images->first(function ($image) use ($record) {
+    //                                                             return isset($image->sizes) &&
+    //                                                                 $image->sizes === $record->size &&
+    //                                                                 isset($image->price);
+    //                                                         });
+
+    //                                                         // Use the size-specific price if found
+    //                                                         if ($sizeImage) {
+    //                                                             return '₱ ' . number_format($state, 2);
+    //                                                         }
+    //                                                     }
+
+    //                                                     // Fallback to the original price
+    //                                                     return '₱ ' . number_format($state, 2);
+    //                                                 }),
+    //                                             TextEntry::make('quantity')->label('Quantity')
+    //                                                 ->formatStateUsing(function ($state, $record) {
+    //                                                     $qty = number_format($state, 0);
+    //                                                     $unit = $record->product->prod_unit ?? '';
+    //                                                     $weight = $record->product->prod_weight ?? 0;
+
+    //                                                     if ($unit === 'pcs' || $unit === 'has_dimensions') {
+    //                                                         return "{$qty}";
+    //                                                     }
+    //                                                     if ($unit === 'diff_size') {
+
+    //                                                         return "{$qty} - " . (ucwords(preg_replace('/[^a-zA-Z0-9\s]/', ' ', $record->size)) ?? 'N/A');
+    //                                                     }
+
+    //                                                     return "{$qty} × " . number_format($weight, 2) . $unit;
+    //                                                 })
+    //                                                 ->badge(),
+
+    //                                         ])
+    //                                         ->columns(2)
+    //                                         ->columnSpanFull(),
+
+    //                                     TextEntry::make('shipping_price')->label('Total Shipping Cost')->money('PHP')
+    //                                         ->badge()
+    //                                         ->color(fn($state) => $state == 0 ? 'success' : 'primary')
+    //                                         ->formatStateUsing(fn($state) => $state == 0 ? 'Free Shipping' : number_format($state, 2)),
+    //                                     TextEntry::make('total')->label('Grand Total')->money('PHP')
+    //                                         ->badge()
+    //                                         ->formatStateUsing(fn($state) => number_format($state, 2)),
+    //                                 ])
+    //                                 ->columns(2),
+    //                         ]),
+    //                 ])
+    //                 //->activeTab(1)
+    //                 ->columnSpanFull(),
+    //         ]);
+    // }
+
 }

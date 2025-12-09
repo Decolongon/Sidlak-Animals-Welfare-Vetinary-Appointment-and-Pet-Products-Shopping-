@@ -154,16 +154,47 @@
 
 
                     </div>
-                    <span
-                        class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium 
+                    <div class="text-right">
+                        <span
+                            class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium 
         @if ($order->order_status == 'pending') bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400
         @elseif($order->order_status == 'processing') bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400
         @elseif($order->order_status == 'shipped') bg-green-100 text-green-800 dark:bg-purple-900/30 dark:text-green-400
         @elseif($order->order_status == 'delivered') bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400
         @elseif($order->order_status == 'cancelled') bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400 @endif">
-                        {{ ucfirst($order->order_status) }}
+                            {{ ucfirst($order->order_status) }}
+                        </span>
 
-                    </span>
+                        <!-- Shipping Method moved here -->
+                        <h3 class="text-xs font-medium text-gray-800 dark:text-white mt-2">
+                            @if ($order->shipping_method === 'COD')
+                                <span
+                                    class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-amber-100 text-amber-800 border border-amber-200">
+                                    💵 Cash on Delivery
+                                </span>
+                            @elseif($order->shipping_method === 'gcash')
+                                <span
+                                    class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800 border border-blue-200">
+                                    📱 GCash
+                                </span>
+                            @elseif($order->shipping_method === 'paymaya')
+                                <span
+                                    class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-800 border border-purple-200">
+                                    💳 Maya
+                                </span>
+                            @elseif($order->shipping_method === 'grabpay')
+                                <span
+                                    class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800 border border-green-200">
+                                    🚗 GrabPay
+                                </span>
+                            @else
+                                <span
+                                    class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800 border border-gray-200">
+                                    {{ ucfirst($order->shipping_method) }}
+                                </span>
+                            @endif
+                        </h3>
+                    </div>
                 </div>
 
                 <!-- Order Items  scrollable -->
@@ -285,6 +316,19 @@
                                         d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                                 </svg>
                                 Cancel
+                            </button>
+                        @endif
+
+                        @if ($order->order_status == 'shipped')
+                            <button type="button" wire:confirm="Are you sure that this package has been delivered?"
+                                wire:click="toDelivered({{ $order->id }})"
+                                class="inline-flex items-center px-2.5 py-1.5 border border-transparent text-xs font-medium rounded text-green-700 dark:text-green-400 bg-green-100 dark:bg-green-900/30 hover:bg-green-200 dark:hover:bg-green-900/50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="mr-1 h-3 w-3" fill="none"
+                                    viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M5 13l4 4L19 7" />
+                                </svg>
+                                Mark as Delivered
                             </button>
                         @endif
                         @if ($order->order_status == 'delivered')
