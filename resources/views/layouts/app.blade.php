@@ -39,6 +39,9 @@
     <script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <x-livewire-alert::scripts />
     <script src="https://cdn.jsdelivr.net/npm/tom-select/dist/js/tom-select.complete.min.js"></script>
+    
+
+    
     <script>
         if (typeof attrs === 'undefined') {
             let attrs = [

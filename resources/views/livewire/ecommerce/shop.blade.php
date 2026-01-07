@@ -67,7 +67,7 @@
                 <div class="p-1 space-y-0.5">
                     <div class="relative">
                         <div x-on:click.stop>
-                            <input type="text" name="searchCat" id="searchCat" wire:model.live="searchCat"
+                            <input type="text" name="searchCat" id="searchCat" wire:model.live.debounce.250ms="searchCat"
                                 placeholder="Search category..."
                                 class="w-full px-3 py-2 text-sm border rounded-md focus:ring focus:ring-gray-300 dark:bg-neutral-700 dark:border-neutral-600 dark:text-white pr-10">
                         </div>
@@ -123,7 +123,7 @@
                         <path d="m21 21-4.3-4.3"></path>
                     </svg>
                 </div>
-                <input name="query" id="query" wire:model.live="query"
+                <input name="query" id="query" wire:model.live.debounce.250ms="query"
                     class="py-3 ps-10 pe-4 block w-full border-gray-200 rounded-lg text-sm focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-900 dark:border-neutral-700 dark:text-neutral-400 dark:placeholder-neutral-500 dark:focus:ring-neutral-600"
                     type="text" placeholder="Search Products">
                 @if ($query)

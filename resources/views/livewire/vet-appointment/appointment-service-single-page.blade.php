@@ -25,7 +25,7 @@
                     <!-- Service Description -->
                     <div
                         class="text-gray-700 dark:text-gray-300 text-base lg:text-lg leading-relaxed whitespace-pre-wrap bg-white dark:bg-neutral-800 p-4 rounded-lg border border-gray-200 dark:border-neutral-600 prose prose-sm max-w-none">
-                        {!! nl2br(e($single_service->appoint_cat_description)) !!}
+                        {!! str($single_service->appoint_cat_description)->markdown()->sanitizeHtml() !!}
                     </div>
                 </div>
             </div>

@@ -53,12 +53,13 @@
             <div>
                 <h1 class="text-2xl text-black dark:text-white">
                     {{ ucwords($product->prod_name) }}
-                    @if($product->prod_unit == 'has_dimensions')
-                       <br>Dimensions: {{$product->prod_length}} x {{$product->prod_width}} x {{$product->prod_height}} cm
+                    @if ($product->prod_unit == 'has_dimensions')
+                        <br>Dimensions: {{ $product->prod_length }} x {{ $product->prod_width }} x
+                        {{ $product->prod_height }} cm
                     @endif
                 </h1>
                 <p class="text-black dark:text-white mt-2">
-                    {{ ucfirst($product->prod_short_description) }}
+                    {!! ucfirst($product->prod_short_description) !!}
                 </p>
 
                 <p class="text-sm font-semibold text-gray-800 dark:text-neutral-300">
@@ -181,11 +182,11 @@
             <!-- Description Tab Content -->
             @if ($activeTab == 'description')
                 <div>
-                    <div x-data="{
+                    {{-- <div x-data="{
                         expanded: true,
                         fullText: @js($product->prod_description ?? ''),
                         shortText: @js(Str::limit($product->prod_description ?? '', 300, '...'))
-                    }" x-init class="mt-2 prose prose-sm prose-gray max-w-none dark:prose-invert">
+                    }" x-init class="mt-2 prose prose-sm prose-gray max-w-none dark:prose-invert" >
                         <div :class="expanded ? '' : 'line-clamp-4'" class="text-gray-800 dark:text-white"
                             x-html="expanded ? fullText : shortText"></div>
                         <template x-if="fullText && shortText && fullText.length > shortText.length">
@@ -195,6 +196,22 @@
                                 </button>
                             </div>
                         </template>
+                    </div> --}}
+
+                    <div x-data="{ expanded: false }">
+                        <button class="text-blue-500 underline" @click="expanded = ! expanded">
+                            <span x-text="expanded ? 'Show Less' : 'Show All'"></span>
+                        </button>
+
+                        <div x-show="expanded"
+                            class="mt-2 prose prose-sm prose-gray max-w-none dark:prose-invert text-gray-800 dark:text-white"
+                            x-collapse.min.70px.duration.1000ms
+                            >
+
+                            {{-- {!! $product->prod_description !!} --}}
+                            {!! str($product->prod_description)->sanitizeHtml() !!}
+
+                        </div>
                     </div>
 
                     @if (isset($this->getRelatedProduct) && $this->getRelatedProduct->isNotEmpty())

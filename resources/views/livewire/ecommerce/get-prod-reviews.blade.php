@@ -27,13 +27,14 @@
                     </div>
                 </div>
                 {{-- <p class="mt-2 text-gray-800 dark:text-white">{{ $review->review }}</p> --}}
+
                 <div x-data="{
                     expanded: false,
                     fullText: @js($review->review),
                     shortText: @js(Str::limit($review->review, 100, ''))
                 }" class="mt-2 text-gray-800 dark:text-white">
 
-                    <p>
+                    <p class="mt-2 prose prose-sm prose-gray max-w-none dark:prose-invert text-gray-800 dark:text-white">
                         <span x-text="expanded ? fullText : shortText"></span>
                         <template x-if="fullText.length > 100">
                             <button class="text-blue-500 underline ml-2" @click="expanded = !expanded">
@@ -42,6 +43,7 @@
                         </template>
                     </p>
                 </div>
+
 
                 @if (!empty($review->image_review))
                     <div class="flex flex-wrap gap-2">
@@ -57,16 +59,15 @@
         @endforelse
 
         <!-- Infinite scroll trigger -->
-        @if($this->getProdReviews->count() >= $loadReviews)
-            <div 
-                x-intersect.full="
+        @if ($this->getProdReviews->count() >= $loadReviews)
+            <div x-intersect.full="
                     $wire.loadMore()
                 "
-                class="h-10 flex justify-center items-center"
-            >
+                class="h-10 flex justify-center items-center">
                 <div class="inline-block h-6 w-6 animate-spin rounded-full border-4 border-solid border-current border-r-transparent align-[-0.125em] motion-reduce:animate-[spin_1.5s_linear_infinite]"
-                     role="status">
-                    <span class="!absolute !-m-px !h-px !w-px !overflow-hidden !whitespace-nowrap !border-0 !p-0 ![clip:rect(0,0,0,0)]">Loading...</span>
+                    role="status">
+                    <span
+                        class="!absolute !-m-px !h-px !w-px !overflow-hidden !whitespace-nowrap !border-0 !p-0 ![clip:rect(0,0,0,0)]">Loading...</span>
                 </div>
             </div>
         @endif

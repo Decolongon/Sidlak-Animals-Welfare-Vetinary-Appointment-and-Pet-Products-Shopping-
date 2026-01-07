@@ -10,6 +10,7 @@ use Livewire\Attributes\Locked;
 use App\Models\Ecommerce\Product;
 use Livewire\Attributes\Computed;
 use App\Livewire\Ecommerce\GetCart;
+use App\Traits\AddToCartTrait;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\RateLimiter;
@@ -17,7 +18,7 @@ use Jantinnerezo\LivewireAlert\LivewireAlert;
 
 class AddToCartForm extends Component
 {
-    use LivewireAlert;
+    use LivewireAlert, AddToCartTrait;
 
     #[Locked]
     public $product_id;
@@ -63,9 +64,9 @@ class AddToCartForm extends Component
 
     public function addToCart(): void
     {
-        // if ($this->checkRateLimit()) {
-        //     return;
-        // }
+        if ($this->checkRateLimit($this->user_id, $this->session_id)) {
+            return;
+        }
 
         $product = Product::find($this->product_id);
 
@@ -175,17 +176,17 @@ class AddToCartForm extends Component
 
 
     // Rate limiter method
-    private function checkRateLimit(): bool
-    {
-        $key = 'add-to-cart:' . ($this->user_id ?: $this->session_id);
+    // private function checkRateLimit(): bool
+    // {
+    //     $key = 'add-to-cart:' . ($this->user_id ?: $this->session_id);
 
-        if (RateLimiter::tooManyAttempts($key, 10)) { // 10 attempts per minute
-            $seconds = RateLimiter::availableIn($key);
-            $this->showAlert('error', "Too many attempts. Please try again in {$seconds} seconds.");
-            return true;
-        }
+    //     if (RateLimiter::tooManyAttempts($key, 3)) { // 10 attempts per minute
+    //         $seconds = RateLimiter::availableIn($key);
+    //         $this->showAlert('error', "Too many attempts. Please try again in {$seconds} seconds.");
+    //         return true;
+    //     }
 
-        RateLimiter::hit($key, 60); // 60 seconds = 1 minute
-        return false;
-    }
+    //     RateLimiter::hit($key, 60); // 60 seconds = 1 minute
+    //     return false;
+    // }
 }

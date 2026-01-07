@@ -10,10 +10,11 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Session;
 use Jantinnerezo\LivewireAlert\LivewireAlert;
 use App\Models\Ecommerce\ProductImage as ProductVariantSize;
+use App\Traits\AddToCartTrait;
 
 class ProductVariant extends Component
 {
-    use LivewireAlert;
+    use LivewireAlert, AddToCartTrait;
 
 
     #[Locked]
@@ -64,7 +65,9 @@ class ProductVariant extends Component
         $this->isLoggedIn = auth()->check() ? auth()->user()->id : null;
         $this->sessionId = auth()->check() ? null : Session::getId();
 
-
+        if($this->checkRateLimit($this->isLoggedIn, $this->sessionId)){
+            return;
+        }
         $existingCartItem = $this->getExistingCartItem($this->product);
 
         if ($existingCartItem) {
