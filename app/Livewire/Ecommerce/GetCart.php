@@ -16,6 +16,7 @@ use Illuminate\Support\Facades\Session;
 use Jantinnerezo\LivewireAlert\LivewireAlert;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Locked;
+use Livewire\Attributes\Renderless;
 
 class GetCart extends Component
 {
@@ -28,25 +29,13 @@ class GetCart extends Component
     public $selectedItems = [];
     public $selectAll = false;
 
-
-    // protected $listeners = ['refreshCartItem' => 'refreshCartItem', 'cartUpdated' => 'getCarts'];
-    // protected $listeners = ['cartUpdated' => 'getCarts'];
     protected $listeners = [
         'cartUpdated' => 'getCarts',
-        // 'carts-refreshed' => '$refresh',
         'removeOutOfStockConfirmed' => 'handleRemoveOutOfStock',
         'confirmedRemoveItem', // for button click minus button
         'confirmedRemoveSelectedItems', // multiple selected items confirmation
 
     ];
-
-    public function mount()
-    {
-
-        // $this->getCarts();
-        // $this->product = new Product(); 
-        // $this->getDiscountedPrice($this->product);
-    }
 
 
     public function updatedSelectedItems()
@@ -104,7 +93,7 @@ class GetCart extends Component
             }
         }
     }
-
+    
     public function increaseQuantity($cart_id)
     {
         $cart = $this->carts->where('id', $cart_id)->first();
@@ -125,7 +114,6 @@ class GetCart extends Component
 
         if ($cart->quantity < $availableQuantity) {
             $cart->increment('quantity', 1);
-            $this->dispatch('cartUpdated');
         } else {
             $this->alert('warning', '', [
                 'position' => 'top-end',
@@ -137,7 +125,7 @@ class GetCart extends Component
             ]);
         }
 
-        $this->getCarts();
+        unset($this->getCarts);
     }
 
 
@@ -162,14 +150,13 @@ class GetCart extends Component
         return $availableQuantity;
     }
 
+
     public function decreaseQuantity($cart_id)
     {
-        // $cart = Cart::find($cart_id);
         $cart = $this->carts->where('id', $cart_id)->first();
         if ($cart) {
             if ($cart->quantity > 1) {
                 $cart->decrement('quantity', 1);
-                $this->dispatch('cartUpdated');
             } else {
                 // Show confirmation dialog before removing
                 $this->alert('question', 'Are you sure you want to remove this product from your cart?', [
@@ -186,11 +173,11 @@ class GetCart extends Component
             }
         }
 
-        $this->getCarts();
-        //$this->dispatch('cartUpdated');
+        unset($this->getCarts);
     }
 
 
+    #[Renderless]
     public function confirmedRemoveItem($data)
     {
         $this->removeItem($data);
@@ -243,9 +230,9 @@ class GetCart extends Component
     }
 
 
+    #[Renderless]
     public function toggleSelectAll()
     {
-        //$this->getCarts();
         $this->selectedItems = $this->selectAll
             ? $this->carts->pluck('id')->all()
             : [];
@@ -253,7 +240,7 @@ class GetCart extends Component
         $this->updatedSelectedItems();
     }
 
-
+    #[Renderless]
     public function removeSelected()
     {
         if (empty($this->selectedItems)) {
@@ -276,7 +263,7 @@ class GetCart extends Component
         ]);
     }
 
-
+    #[Renderless]
     public function confirmedRemoveSelectedItems()
     {
         $this->removingSelectedItems();
@@ -319,6 +306,7 @@ class GetCart extends Component
     }
 
     //checkout btn
+    #[Renderless]
     public function checkout()
     {
 
@@ -364,9 +352,7 @@ class GetCart extends Component
         if ($outOfStockItems->isNotEmpty()) {
             // Store them temporarily in session 
             session()->put('out_of_stock_items', $outOfStockItems->pluck('id')->toArray());
-            // $this->dispatch('outOfStockDetected');
-            // return;
-
+          
             if (count($this->selectedItems) == 1 && count($outOfStockItems) == 1) {
                 $this->dispatch('outOfStockDetected1'); // Single item out of stock
             } else {
@@ -375,20 +361,6 @@ class GetCart extends Component
             return;
         }
 
-
-
-        // $isBuyNowMode = session()->get('buy_now_mode', false);
-        // if($isBuyNowMode)
-        // {
-        //      $this->alert('warning', '', [
-        //         'position' => 'top-end',
-        //         'timer' => 5000,
-        //         'toast' => true,
-        //         'showCloseButton' => true,
-        //         'text' => 'You have pending checkout items.',
-        //     ]);
-        //     return;
-        // }
 
         $existingCheckoutItems = session()->get('selected_checkout_items', []);
 
@@ -400,9 +372,6 @@ class GetCart extends Component
         
         session()->forget(['buy_now_product','buy_now_quantity']);
 
-        //session()->put('selected_checkout_items', $this->selectedItems);
-
-        //return redirect()->route('checkout');
         return $this->redirect(route('checkout'));
     }
 
@@ -434,18 +403,16 @@ class GetCart extends Component
         session()->forget('out_of_stock_items');
 
         session()->put('selected_checkout_items', $this->selectedItems);
-       // return redirect()->route('checkout');
+      
        return $this->redirect(route('checkout'));
     }
 
 
-    // #[Layout('layouts.app')]
-    // #[Title('Cart')]
+    #[Layout('layouts.app')]
+    #[Title('Cart')]
     public function render()
     {
         return view('livewire.ecommerce.get-cart', [
-            // 'carts' => $this->carts,
-            //'getDiscountedPrice' => $this->getDiscountedPrice($this->product),
 
         ]);
     }

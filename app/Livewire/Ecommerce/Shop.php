@@ -49,9 +49,6 @@ class Shop extends Component
 
     public function updatedQuery()
     {
-        // $this->getProducts();
-
-        // $this->query = trim($this->query);
         $this->resetPage();
     }
 
@@ -66,13 +63,6 @@ class Shop extends Component
 
         return $query->get(['id', 'prod_cat_name']);
     }
-
-
-    // public function updatedSearchCat()
-    // {
-    //     $this->categories = ProductCategory::where('prod_cat_name', 'LIKE', '%' . $this->searchCat . '%')
-    //         ->get(['id', 'prod_cat_name']);
-    // }
 
     //get the products para categories and for search bar
     #[Computed()]
@@ -157,7 +147,7 @@ class Shop extends Component
 
         // Update selected category name
         $this->selectedCatName = $id ? optional(ProductCategory::find($id))->prod_cat_name : null;
-        $this->getProducts();
+        unset($this->getProducts);
     }
 
     //arrange by trigger lng ang filter by category kng gstu ni user eh change ang order

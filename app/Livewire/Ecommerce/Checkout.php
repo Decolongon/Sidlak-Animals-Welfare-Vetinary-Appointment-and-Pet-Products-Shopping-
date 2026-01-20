@@ -22,6 +22,7 @@ use App\Helpers\ProductDiscountHelper;
 use Illuminate\Support\Facades\Session;
 use Woenel\Prpcmblmts\Models\PhilippineCity;
 use Jantinnerezo\LivewireAlert\LivewireAlert;
+use Livewire\Attributes\Renderless;
 use Woenel\Prpcmblmts\Models\PhilippineRegion;
 use Woenel\Prpcmblmts\Models\PhilippineBarangay;
 use Woenel\Prpcmblmts\Models\PhilippineProvince;
@@ -495,7 +496,7 @@ class Checkout extends Component
         return $totalWeight;
     }
 
-
+    #[Renderless]
     public function placeOrder()
     {
         $validatedData = $this->validate();
@@ -852,6 +853,7 @@ class Checkout extends Component
             ->getOrderItems($orders, $this->checkoutItems, $this->isDiscounted);
     }
 
+   
     public function increaseQuantity($id = null)
     {
 
@@ -879,6 +881,7 @@ class Checkout extends Component
         }
     }
 
+    #[Renderless]
     public function cancelOrder()
     {
         $this->confirmedCancelOrder();

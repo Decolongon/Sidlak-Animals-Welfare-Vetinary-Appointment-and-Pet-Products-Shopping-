@@ -15,6 +15,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\RateLimiter;
 use Jantinnerezo\LivewireAlert\LivewireAlert;
+use Livewire\Attributes\Renderless;
 
 class AddToCartForm extends Component
 {
@@ -62,6 +63,7 @@ class AddToCartForm extends Component
     //     }
     // }
 
+    #[Renderless]
     public function addToCart(): void
     {
         if ($this->checkRateLimit($this->user_id, $this->session_id)) {

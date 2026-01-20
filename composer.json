@@ -21,6 +21,7 @@
         "laravel/tinker": "^2.9",
         "livewire/livewire": "^3.6",
         "luigel/laravel-paymongo": "^2.5",
+        "watheqalshowaiter/filament-sticky-table-header": "^1.4",
         "woenel/prpcmblmts": "2.x-dev"
     },
     "require-dev": {
