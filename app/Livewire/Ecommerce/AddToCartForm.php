@@ -63,7 +63,7 @@ class AddToCartForm extends Component
     //     }
     // }
 
-    #[Renderless]
+    // #[Renderless]
     public function addToCart(): void
     {
         if ($this->checkRateLimit($this->user_id, $this->session_id)) {
