@@ -35,7 +35,6 @@ class GetProdReviews extends Component
     {
         $this->loadReviews += 5;
     }
-
     //get sg product reviews each product kg dy sinu ng post reviews
     #[Computed()]
     public function getProdReviews()
