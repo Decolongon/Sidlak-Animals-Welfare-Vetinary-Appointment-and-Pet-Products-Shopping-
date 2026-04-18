@@ -34,7 +34,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
-class User extends Authenticatable 
+class User extends Authenticatable
 {
     // implements FilamentUser
     use HasApiTokens;

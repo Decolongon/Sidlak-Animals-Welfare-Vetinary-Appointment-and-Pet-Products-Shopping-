@@ -2,8 +2,8 @@
 
 namespace App\Livewire\Ecommerce;
 
-use Livewire\Component;
 use App\Models\Ecommerce\Cart;
+use Livewire\Component;
 use Livewire\Attributes\Title;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Locked;

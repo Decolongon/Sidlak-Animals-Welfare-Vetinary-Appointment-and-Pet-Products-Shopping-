@@ -3,65 +3,39 @@
         class="z-50 flex flex-wrap w-full py-4 text-sm sm:justify-start sm:flex-nowrap bg-slate-50 dark:bg-neutral-800 lg:static">
         <nav class="flex flex-wrap items-center justify-between w-full px-4 mx-auto max-w-7xl basis-full"
             aria-label="Global">
-            <a class="flex-none text-xl font-semibold sm:order-1 dark:text-white" wire:navigate.hover href="{{ route('page.home') }}">
+            <a class="flex-none text-xl font-semibold sm:order-1 dark:text-white" wire:navigate.hover
+                href="{{ route('page.home') }}">
                 <img src="{{ asset('imgs/sdas-logo.png') }}" class="h-auto w-14" alt="" srcset="">
             </a>
             <div class="flex items-center sm:order-3 gap-x-2">
 
                 <!-- Button Group -->
                 <div class="flex items-center py-1 gap-x-2 ms-auto md:ps-6 md:order-3 md:col-span-3">
-                    {{-- <button type="button" class="flex items-center block font-medium text-gray-600 hs-dark-mode-active:hidden hs-dark-mode group hover:text-amber-600 dark:text-neutral-400 dark:hover:text-neutral-500" data-hs-theme-click-value="dark">
-                <svg class="flex-shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"></path>
-                </svg>
-                </button>
-                <button type="button" class="flex items-center hidden font-medium text-gray-600 hs-dark-mode-active:block hs-dark-mode group hover:text-amber-600 dark:text-neutral-400 dark:hover:text-neutral-500" data-hs-theme-click-value="light">
-                <svg class="flex-shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <circle cx="12" cy="12" r="4"></circle>
-                    <path d="M12 2v2"></path>
-                    <path d="M12 20v2"></path>
-                    <path d="m4.93 4.93 1.41 1.41"></path>
-                    <path d="m17.66 17.66 1.41 1.41"></path>
-                    <path d="M2 12h2"></path>
-                    <path d="M20 12h2"></path>
-                    <path d="m6.34 17.66-1.41 1.41"></path>
-                    <path d="m19.07 4.93-1.41 1.41"></path>
-                </svg>
-                </button> --}}
                     @auth
 
                         @livewire('adoption.adoption-cart-counter')
 
                     @endauth
-                {{-- route('filament.auth.auth.login') --}}
+                    {{-- route('filament.auth.auth.login') --}}
                     @guest
-                        <a  href="{{ route('login') }}"
+                        <a href="{{ route('login') }}"
                             class="inline-flex items-center px-3 py-2 text-sm font-medium text-black border border-gray-200 gap-x-2 rounded-xl hover:bg-gray-100 disabled:opacity-50 disabled:pointer-events-none dark:border-neutral-700 dark:hover:bg-white/10 dark:text-white dark:hover:text-white">
                             {{ __('Sign in') }}
                         </a>
 
                         {{-- @if (Route::has('register')) --}}
                         {{-- href="{{ route('filament.auth.auth.register') --}}
-                            <a  href="{{ route('register') }}"
-                                class="inline-flex items-center px-3 py-2 text-sm font-medium text-black transition border border-transparent gap-x-2 rounded-xl bg-amber-400 hover:bg-amber-500 disabled:opacity-50 disabled:pointer-events-none focus:outline-none focus:bg-amber-500">
-                                {{ __('Sign Up') }}
-                            </a>
+                        <a href="{{ route('register') }}"
+                            class="inline-flex items-center px-3 py-2 text-sm font-medium text-black transition border border-transparent gap-x-2 rounded-xl bg-amber-400 hover:bg-amber-500 disabled:opacity-50 disabled:pointer-events-none focus:outline-none focus:bg-amber-500">
+                            {{ __('Sign Up') }}
+                        </a>
                         {{-- @endif --}}
 
                     @endguest
 
                     {{-- add to cart button --}}
-                    
+
                     @livewire('ecommerce.cart-count')
-
-                    {{-- <button type="button" class="inline-flex items-center gap-x-2 text-sm font-medium rounded-lg focus:outline-none disabled:opacity-50 disabled:pointer-events-none" aria-haspopup="dialog" aria-expanded="false" aria-controls="hs-offcanvas-custom-backdrop-color" data-hs-overlay="#hs-offcanvas-custom-backdrop-color">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="font-medium text-amber-400 dark:text-neutral-400 dark:hover:text-neutral-500 hover:text-gray-400">
-                        <circle cx="8" cy="21" r="1"></circle>
-                        <circle cx="19" cy="21" r="1"></circle>
-                        <path d="M2.5 2.5h2.9l3.8 11.4a2 2 0 0 0 1.9 1.4h7.5a2 2 0 0 0 1.9-1.4L22 6.5H6"></path>
-                    </svg>
-                </button> --}}
-
 
                     <button type="button"
                         class="block font-medium text-gray-800 rounded-full hs-dark-mode-active:hidden hs-dark-mode hover:bg-gray-200 focus:outline-none focus:bg-gray-200 dark:text-neutral-200 dark:hover:bg-neutral-800 dark:focus:bg-neutral-800"
@@ -144,16 +118,17 @@
                                     <a wire:navigate
                                         class="flex items-center gap-x-3.5 py-2 px-3 rounded-lg text-sm text-gray-800 hover:bg-gray-100 focus:ring-2 focus:ring-amber-500 dark:text-neutral-400 dark:hover:bg-neutral-700 dark:hover:text-neutral-300"
                                         href="{{ route('view-order') }}">
-                                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                                             stroke-width="1.5" stroke="currentColor" class="size-6">
                                             <path stroke-linecap="round" stroke-linejoin="round"
                                                 d="M20.25 6.375c0 2.278-3.694 4.125-8.25 4.125S3.75 8.653 3.75 6.375m16.5 0c0-2.278-3.694-4.125-8.25-4.125S3.75 4.097 3.75 6.375m16.5 0v11.25c0 2.278-3.694 4.125-8.25 4.125s-8.25-1.847-8.25-4.125V6.375m16.5 0v3.75m-16.5-3.75v3.75m16.5 0v3.75C20.25 16.153 16.556 18 12 18s-8.25-1.847-8.25-4.125v-3.75m16.5 0c0 2.278-3.694 4.125-8.25 4.125s-8.25-1.847-8.25-4.125" />
                                         </svg>
                                         {{ __('View Orders') }}
                                     </a>
-                                  
+
                                     {{-- Auth::user()->hasAnyRole(['admin', 'super_admin','admin_shop']) --}}
-                                    <a  wire:navigate href="{{ Auth::user()->roles()->exists() ? route('filament.admin.pages.dashboard') : route('dashboard') }}"
+                                    <a wire:navigate
+                                        href="{{ Auth::user()->roles()->exists() ? route('filament.admin.pages.dashboard') : route('dashboard') }}"
                                         class="flex items-center gap-x-3.5 py-2 px-3 rounded-lg text-sm text-gray-800 hover:bg-gray-100 focus:ring-2 focus:ring-amber-500 dark:text-neutral-400 dark:hover:bg-neutral-700 dark:hover:text-neutral-300">
                                         <svg class="flex-shrink-0 size-4" width="24" height="24"
                                             xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
@@ -182,11 +157,8 @@
                                         </a>
                                     @endif
 
-
-
                                     <div>
                                         <!-- Authentication -->
-
 
                                         <form method="POST" action="{{ route('logout') }}" x-data>
                                             @csrf
@@ -206,13 +178,10 @@
                                 </div>
                             </div>
                         </div>
-
                     @endauth
-
 
                 </div>
                 <!-- End Button Group -->
-
 
                 <button type="button"
                     class="sm:hidden hs-collapse-toggle p-2.5 inline-flex justify-center items-center gap-x-2 rounded-lg border border-gray-200 bg-white text-gray-800 shadow-sm hover:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none dark:bg-transparent dark:border-neutral-700 dark:text-white dark:hover:bg-white/10"
@@ -232,7 +201,6 @@
                         <path d="m6 6 12 12" />
                     </svg>
                 </button>
-
 
             </div>
 
@@ -255,29 +223,8 @@
                         :active="request()->routeIs('page.blogs') || request()->routeIs('page.blog.single')">{{ __('Blogs') }}</x-nav-link>
                     <x-nav-link wire:navigate href="{{ route('page.contact') }}"
                         :active="request()->routeIs('page.contact')">{{ __('Contact') }}</x-nav-link>
-
-
-
                 </div>
             </div>
-
-
-
-
-
         </nav>
-
-
-
-
-
-
-
-
-
-
-
-
-
     </header>
 </div>
