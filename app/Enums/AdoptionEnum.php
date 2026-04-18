@@ -11,9 +11,6 @@ enum AdoptionEnum: string implements HasIcon, HasColor
     case APPROVED = 'approved';
     case REJECTED = 'rejected';
 
-
-
-    
     public function getIcon(): ?string
     {
         return match ($this) {
