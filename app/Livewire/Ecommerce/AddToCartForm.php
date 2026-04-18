@@ -33,7 +33,6 @@ class AddToCartForm extends Component
     public $quantity;
     public $cartItems;
 
-
     public function mount(): void
     {
         $this->initializeSession();
@@ -140,7 +139,6 @@ class AddToCartForm extends Component
     //     )->orderBy('created_at', 'desc')->get();
     // }
 
-
     protected function showAlert(string $type, string $message): void
     {
         $this->alert($type, '', [
@@ -175,7 +173,6 @@ class AddToCartForm extends Component
             // 'cartItems' => $this->cartItems
         ]);
     }
-
 
     // Rate limiter method
     // private function checkRateLimit(): bool
