@@ -2,30 +2,34 @@
 
 namespace App\Livewire\Ecommerce;
 
-use Livewire\Component;
-use Livewire\WithPagination;
-use Livewire\Attributes\Lazy;
-use App\Models\Ecommerce\Cart;
-use Livewire\Attributes\Title;
-use Livewire\Attributes\Layout;
-use App\Models\Ecommerce\Product;
-use Livewire\Attributes\Computed;
-use Illuminate\Support\Facades\DB;
-use Livewire\WithoutUrlPagination;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Auth;
 use App\Helpers\ProductDiscountHelper;
-use Illuminate\Support\Facades\Session;
+use App\Models\Ecommerce\Cart;
+use App\Models\Ecommerce\Product;
 use App\Models\Ecommerce\ProductCategory;
 use App\Models\Ecommerce\ProductDiscount;
 use App\Models\Ecommerce\ProductImage as ProductVariant;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Session;
+use Livewire\Attributes\Computed;
+use Livewire\Attributes\Layout;
+use Livewire\Attributes\Lazy;
+use Livewire\Attributes\Title;
+use Livewire\Attributes\Url;
+use Livewire\Component;
+use Livewire\WithoutUrlPagination;
+use Livewire\WithPagination;
 
 
 class Shop extends Component
 {
     use WithPagination, WithoutUrlPagination;
 
+    #[Url(as: 'search-products')]
     public $query = ''; // search for products
+
+    #[Url(as: 'search-categories')] 
     public $searchCat = ''; // search for prod categories
 
     public $selectedCat = null; // hold the selected category id

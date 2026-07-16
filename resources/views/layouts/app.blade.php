@@ -13,11 +13,11 @@
     <link href="https://cdn.jsdelivr.net/npm/tom-select/dist/css/tom-select.css" rel="stylesheet">
     <!-- Fonts -->
     {{-- <link rel="preconnect" href="https://fonts.bunny.net"> --}}
-    <style>
-        [x-cloak] {
-            display: none !important;
-        }
-    </style>
+        <style>
+            [x-cloak] {
+                display: none !important;
+            }
+        </style>
 
     @vite(['resources/css/app.css'])
     @livewireStyles
