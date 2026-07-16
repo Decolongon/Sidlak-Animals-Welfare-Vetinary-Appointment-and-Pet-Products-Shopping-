@@ -40,14 +40,14 @@ This system is built in collaboration with the following establishments, who ser
 
 **Screenshots:**
 
-![Welcome Page](screenshots/welcome.png)
+![Welcome Page](public/imgs/screenshots/welcome.png)
 *Figure 1: Welcome / Homepage*
 
-![Shop Page](screenshots/shop.png)
+![Shop Page](public/imgs/screenshots/shop.png)
 *Figure 2: Pet Product Shopping Page with Cart and Filters*
 
-![Admin Dashboard](screenshots/dashboard.png)
+![Admin Dashboard](public/imgs/screenshots/dashboard.png)
 *Figure 3: Admin Dashboard – Sales Tracking and Order Management*
 
-![Appointment Booking](screenshots/appointment.png)
+![Appointment Booking](public/imgs/screenshots/appointment.png)
 *Figure 4: Veterinary Appointment Booking Form*
