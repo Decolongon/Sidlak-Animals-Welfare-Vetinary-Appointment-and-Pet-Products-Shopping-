@@ -37,3 +37,17 @@ This system is built in collaboration with the following establishments, who ser
 | **Payments**   | Gcash, Maya, and other services handled by Paymonggo – Secure online payment processing |
 | **Notifications** | Laravel Notifications + Mailgun/SMTP – Email alerts and confirmations |
 | **Dev Tools**  | Composer, NPM, Vite, Git, Artisan Tinker |
+
+**Screenshots:**
+
+![Welcome Page](screenshots/welcome.png)
+*Figure 1: Welcome / Homepage*
+
+![Shop Page](screenshots/shop.png)
+*Figure 2: Pet Product Shopping Page with Cart and Filters*
+
+![Admin Dashboard](screenshots/dashboard.png)
+*Figure 3: Admin Dashboard – Sales Tracking and Order Management*
+
+![Appointment Booking](screenshots/appointment.png)
+*Figure 4: Veterinary Appointment Booking Form*
